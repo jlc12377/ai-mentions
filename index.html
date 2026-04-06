@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Mentions — Check Your AI Visibility Score | Free Tool</title>
+<meta name="description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. Free AI visibility checker for businesses.">
+<link rel="canonical" href="https://ai-mentions.com/">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#09090b;--bg-2:#18181b;--bg-3:#27272a;
+  --surface:#fafafa;--surface-2:#f4f4f5;--surface-3:#e4e4e7;
+  --violet:#7c3aed;--violet-soft:#a78bfa;--violet-glow:rgba(124,58,237,.15);
+  --cyan:#06b6d4;--cyan-soft:#67e8f9;--cyan-glow:rgba(6,182,212,.12);
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --ink:#09090b;--ink-2:#3f3f46;--ink-3:#71717a;--ink-4:#a1a1aa;
+  --white:#ffffff;
+  --border:#e4e4e7;--border-dark:#3f3f46;
+  --radius:8px;--radius-lg:12px;--radius-xl:20px;
+  --font-display:'Newsreader',Georgia,serif;
+  --font-body:'Space Grotesk',-apple-system,sans-serif;
+  --max-w:1100px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webkit-font-smoothing:antialiased;line-height:1.6;min-height:100vh}
+
+.nav{padding:20px 28px;display:flex;align-items:center;justify-content:space-between;max-width:var(--max-w);margin:0 auto}
+.nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;letter-spacing:-1px}
+.nav-name{font-size:17px;font-weight:600;color:var(--white);letter-spacing:-.3px}
+.nav-name span{color:var(--violet-soft)}
+.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links a{font-size:13px;font-weight:500;color:var(--ink-4);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+
+.hero{max-width:var(--max-w);margin:0 auto;padding:60px 28px 40px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse,var(--violet-glow) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg-2);border:1px solid var(--border-dark);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;color:var(--violet-soft);margin-bottom:20px;position:relative}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-family:var(--font-display);font-size:52px;font-weight:400;letter-spacing:-1.5px;line-height:1.1;margin-bottom:18px;position:relative}
+.hero h1 em{font-style:italic;background:linear-gradient(135deg,var(--violet-soft),var(--cyan-soft));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:17px;color:var(--ink-4);max-width:520px;margin:0 auto 40px;line-height:1.65;position:relative}
+
+.tool-container{max-width:640px;margin:0 auto;padding:0 28px;position:relative}
+.tool-card{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px;color:var(--ink);box-shadow:0 0 80px rgba(124,58,237,.08),0 20px 60px rgba(0,0,0,.3)}
+.tool-card h2{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:4px;color:var(--ink)}
+.tool-card-sub{font-size:14px;color:var(--ink-3);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--white);transition:border-color .2s;outline:none}
+.form-input:focus{border-color:var(--violet)}
+.form-input::placeholder{color:var(--ink-4)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.check-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:-.2px}
+.check-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
+.check-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.check-btn.loading{background:var(--bg-3);color:var(--ink-4)}
+
+.results{display:none;margin-top:28px;padding-top:24px;border-top:1.5px solid var(--border)}
+.results.visible{display:block}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.results-company{font-family:var(--font-display);font-size:22px;font-weight:600}
+.results-score{display:flex;align-items:center;gap:8px}
+.score-badge{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:.02em}
+.score-high{background:#dcfce7;color:#166534}
+.score-mid{background:#fef3c7;color:#92400e}
+.score-low{background:#fee2e2;color:#991b1b}
+.results-body{font-size:14px;color:var(--ink-2);line-height:1.75;white-space:pre-wrap}
+.results-section{margin-bottom:20px}
+.results-section h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:8px}
+.results-loading{text-align:center;padding:40px 0}
+.results-loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.results-loading p{font-size:14px;color:var(--ink-3)}
+
+.cta-box{background:linear-gradient(135deg,#f5f3ff,#ecfeff);border:1px solid #ddd6fe;border-radius:var(--radius-lg);padding:24px;margin-top:24px;text-align:center;display:none}
+.cta-box.visible{display:block}
+.cta-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:6px;color:var(--ink)}
+.cta-box p{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+.cta-box a{display:inline-block;padding:10px 24px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px;transition:background .2s}
+.cta-box a:hover{background:#6d28d9}
+
+.features{max-width:var(--max-w);margin:0 auto;padding:80px 28px}
+.features-header{text-align:center;margin-bottom:48px}
+.features-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
+.features-header p{font-size:15px;color:var(--ink-4);max-width:460px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feature-card{background:var(--bg-2);border:1px solid var(--border-dark);border-radius:var(--radius-lg);padding:28px 24px}
+.feature-icon{font-size:24px;margin-bottom:14px}
+.feature-name{font-size:15px;font-weight:600;margin-bottom:6px}
+.feature-desc{font-size:13px;color:var(--ink-4);line-height:1.6}
+
+.how{max-width:var(--max-w);margin:0 auto;padding:40px 28px 80px}
+.how-header{text-align:center;margin-bottom:48px}
+.how-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
+.how-header p{font-size:15px;color:var(--ink-4)}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.how-card{text-align:center;padding:20px}
+.how-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin:0 auto 14px}
+.how-label{font-size:15px;font-weight:600;margin-bottom:6px}
+.how-desc{font-size:13px;color:var(--ink-4);line-height:1.55}
+
+.bottom-cta{text-align:center;padding:60px 28px 80px;position:relative}
+.bottom-cta::before{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,var(--cyan-glow) 0%,transparent 70%);pointer-events:none}
+.bottom-cta h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:10px;position:relative}
+.bottom-cta p{font-size:15px;color:var(--ink-4);margin-bottom:24px;max-width:440px;margin-left:auto;margin-right:auto;position:relative}
+.bottom-cta a{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:15px;position:relative;transition:all .2s}
+.bottom-cta a:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
+
+.footer{border-top:1px solid var(--border-dark);padding:48px 28px 32px}
+.footer-inner{max-width:var(--max-w);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
+.footer-brand{font-size:15px;font-weight:600;margin-bottom:10px}.footer-brand span{color:var(--violet-soft)}
+.footer-desc{font-size:13px;color:var(--ink-4);line-height:1.6;max-width:260px}
+.footer-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4);margin-bottom:14px}
+.footer-col a{display:block;font-size:13px;color:var(--ink-4);text-decoration:none;margin-bottom:8px;transition:color .2s}
+.footer-col a:hover{color:var(--violet-soft)}
+.footer-bottom{max-width:var(--max-w);margin:32px auto 0;padding:16px 0 0;border-top:1px solid var(--border-dark);display:flex;justify-content:space-between;font-size:12px;color:var(--ink-4)}
+.footer-bottom a{color:var(--ink-4);text-decoration:none;margin-left:16px}
+
+@media(max-width:768px){
+  .hero h1{font-size:34px}
+  .features-grid,.how-grid{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr}
+  .tool-card{padding:28px 20px}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <div class="nav-icon">ai</div>
+    <div class="nav-name">AI <span>Mentions</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="#tool">Check Visibility</a>
+    <a href="#how">How It Works</a>
+    <a href="https://listicleliaison.com">Listicle Liaison</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge"><span class="hero-badge-dot"></span> Free AI Visibility Tool</div>
+  <h1>Does AI know <em>your company?</em></h1>
+  <p class="hero-sub">When someone asks ChatGPT or Claude about your industry, does your company come up? Check your AI visibility score in 30 seconds — free.</p>
+</section>
+
+<div class="tool-container" id="tool">
+  <div class="tool-card">
+    <h2>Check your AI visibility</h2>
+    <p class="tool-card-sub">Enter your company name and industry. We'll check if AI assistants recommend you.</p>
+
+    <div class="form-group">
+      <label class="form-label">Company Name</label>
+      <input type="text" class="form-input" id="companyName" placeholder="e.g. HubSpot, Rippling, Aave">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Industry / Category</label>
+        <select class="form-input" id="category">
+          <option value="">Select category...</option>
+          <optgroup label="Software">
+            <option value="CRM software">CRM Software</option>
+            <option value="project management software">Project Management</option>
+            <option value="cybersecurity platforms">Cybersecurity</option>
+            <option value="ERP software">ERP Software</option>
+            <option value="email marketing software">Email Marketing</option>
+            <option value="HR and payroll software">HR & Payroll</option>
+            <option value="accounting software">Accounting</option>
+            <option value="analytics and BI software">Analytics & BI</option>
+          </optgroup>
+          <optgroup label="AI Tools">
+            <option value="AI chatbots and assistants">AI Chatbots</option>
+            <option value="AI coding tools">AI Coding Tools</option>
+            <option value="AI image generators">AI Image Generators</option>
+            <option value="AI writing tools">AI Writing Tools</option>
+          </optgroup>
+          <optgroup label="Crypto & Web3">
+            <option value="cryptocurrency exchanges">Crypto Exchanges</option>
+            <option value="DeFi platforms">DeFi Platforms</option>
+            <option value="crypto wallets">Crypto Wallets</option>
+          </optgroup>
+          <optgroup label="Casino & Gaming">
+            <option value="online casino platforms">Online Casinos</option>
+            <option value="sports betting platforms">Sportsbooks</option>
+            <option value="casino software providers">Casino Software</option>
+          </optgroup>
+          <option value="other">Other (specify in company name)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Email (optional)</label>
+        <input type="email" class="form-input" id="userEmail" placeholder="For your full report">
+      </div>
+    </div>
+
+    <button class="check-btn" id="checkBtn" onclick="runCheck()">Check My AI Visibility &rarr;</button>
+
+    <div class="results" id="results">
+      <div class="results-loading" id="resultsLoading">
+        <div class="spinner"></div>
+        <p>Checking AI visibility for your company...</p>
+      </div>
+      <div id="resultsContent" style="display:none"></div>
+    </div>
+
+    <div class="cta-box" id="ctaBox">
+      <h3>Want to improve your score?</h3>
+      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network.</p>
+      <a href="https://listicleliaison.com">Learn How We Can Help &rarr;</a>
+    </div>
+  </div>
+</div>
+
+<section class="features">
+  <div class="features-header">
+    <h2>Why AI visibility matters</h2>
+    <p>AI assistants are becoming the new search engine. If they don't mention your company, you're invisible to a growing audience.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#128269;</div>
+      <div class="feature-name">AI is the new search</div>
+      <div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn't know you, those customers never find you.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128200;</div>
+      <div class="feature-name">First-mover advantage</div>
+      <div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you — more citations lead to more recommendations.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127919;</div>
+      <div class="feature-name">Your competitors are already there</div>
+      <div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don't, they're capturing demand you'll never see in your analytics.</div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="how-header">
+    <h2>How it works</h2>
+    <p>Three steps to understanding your AI visibility.</p>
+  </div>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-num">1</div>
+      <div class="how-label">Enter your company</div>
+      <div class="how-desc">Tell us your company name and category. We'll run a real-time check using AI to see how visible you are.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">2</div>
+      <div class="how-label">Get your report</div>
+      <div class="how-desc">See whether AI recommends you, what context you appear in, which competitors get mentioned instead, and your overall visibility score.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">3</div>
+      <div class="how-label">Take action</div>
+      <div class="how-desc">Use your report to identify visibility gaps. We offer services to help you get ranked, featured, and cited by AI across our publishing network.</div>
+    </div>
+  </div>
+</section>
+
+<section class="bottom-cta">
+  <h2>Ready to be seen by AI?</h2>
+  <p>Check your visibility for free, or talk to us about improving your AI presence across our network of industry publications.</p>
+  <a href="#tool">Check Your Visibility &rarr;</a>
+</section>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">AI <span>Mentions</span></div>
+      <p class="footer-desc">Free AI visibility checker. See if AI assistants recommend your company. Part of the Listicle Liaison network.</p>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Our Network</div>
+      <a href="https://softwareindustryreviews.com">Software Reviews</a>
+      <a href="https://aiindustryreviews.com">AI Reviews</a>
+      <a href="https://casinoindustryreviews.com">Casino Reviews</a>
+      <a href="https://cryptoindustryreviews.com">Crypto Reviews</a>
+      <a href="https://smbnewsroom.com">SMB Newsroom</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="https://listicleliaison.com">Listicle Liaison</a>
+      <a href="https://listicleliaison.com/pages/about.html">About</a>
+      <a href="mailto:partnerships@listicleliaison.com">Contact</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Get Visible</div>
+      <a href="https://softwareindustryreviews.com/pages/pricing.html">Listing Plans</a>
+      <a href="https://smbnewsroom.com/pages/advertise.html">Sponsored Content</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 AI Mentions. Part of the Listicle Liaison network.</span>
+    <span><a href="https://listicleliaison.com/pages/privacy.html">Privacy</a><a href="https://listicleliaison.com/pages/terms.html">Terms</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a></span>
+  </div>
+</footer>
+
+<script>
+async function runCheck() {
+  var company = document.getElementById('companyName').value.trim();
+  var category = document.getElementById('category').value;
+  var email = document.getElementById('userEmail').value.trim();
+
+  if (!company) { alert('Please enter a company name'); return; }
+  if (!category) { alert('Please select a category'); return; }
+
+  var btn = document.getElementById('checkBtn');
+  var results = document.getElementById('results');
+  var loading = document.getElementById('resultsLoading');
+  var content = document.getElementById('resultsContent');
+  var ctaBox = document.getElementById('ctaBox');
+
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  btn.classList.add('loading');
+  results.classList.add('visible');
+  loading.style.display = 'block';
+  content.style.display = 'none';
+  ctaBox.classList.remove('visible');
+
+  try {
+    var response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: "You are an AI visibility analyst. A user wants to know if the company \"" + company + "\" is well-known and would likely be recommended by AI assistants when someone asks about the best " + category + ".\n\nProvide a brief AI Visibility Report with these exact sections:\n\n1. AI VISIBILITY SCORE: Rate 1-10 (10 = highly likely to be recommended by AI). Just the number and a one-word label (e.g., '8/10 — Strong')\n\n2. LIKELIHOOD OF AI MENTION: In 2-3 sentences, would this company likely appear when someone asks an AI assistant 'What are the best " + category + "?' Explain why or why not.\n\n3. COMPETITIVE LANDSCAPE: Name 3-5 competitors that ARE most likely to be mentioned by AI in this category, and briefly note why.\n\n4. VISIBILITY GAPS: In 2-3 sentences, what could this company do to improve their chances of being recommended by AI assistants?\n\nKeep the entire response under 250 words. Be direct and honest. Do not use markdown formatting — use plain text only."
+        }]
+      })
+    });
+
+    var data = await response.json();
+    var text = data.content && data.content[0] && data.content[0].text ? data.content[0].text : 'Unable to generate report. Please try again.';
+
+    // Parse score for badge
+    var scoreMatch = text.match(/(\d+)\/10/);
+    var score = scoreMatch ? parseInt(scoreMatch[1]) : 5;
+    var scoreClass = score >= 7 ? 'score-high' : (score >= 4 ? 'score-mid' : 'score-low');
+    var scoreLabel = score >= 7 ? 'Strong' : (score >= 4 ? 'Moderate' : 'Low');
+
+    loading.style.display = 'none';
+    content.style.display = 'block';
+    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="results-score"><div class="score-badge ' + scoreClass + '">' + score + '/10 — ' + scoreLabel + ' AI Visibility</div></div></div><div class="results-body">' + text.replace(/\n/g, '<br>') + '</div>';
+
+    ctaBox.classList.add('visible');
+
+  } catch(err) {
+    loading.style.display = 'none';
+    content.style.display = 'block';
+    content.innerHTML = '<p style="color:#991b1b;padding:20px 0">Unable to run the check right now. Please try again in a moment.</p>';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Check Again';
+  btn.classList.remove('loading');
+}
+</script>
+
+</body>
+</html>
