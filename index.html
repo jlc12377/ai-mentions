@@ -174,6 +174,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
             <option value="sports">Sportsbooks</option>
             <option value="casino_sw">Casino Software</option>
           </optgroup>
+          <optgroup label="Other Industries">
+            <option value="pr">PR & Newswire Software</option>
+            <option value="other">Other / Not Listed</option>
+          </optgroup>
         </select>
       </div>
       <div class="form-group">
@@ -343,6 +347,18 @@ var db = {
     link: 'https://casinoindustryreviews.com/pages/software-rankings.html',
     top: ['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],
     factors: 'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'
+  },
+  pr: {
+    name: 'PR & Newswire Software',
+    link: 'https://softwareindustryreviews.com/pages/pr-rankings.html',
+    top: ['Cision PR Newswire','ACCESS Newswire','Meltwater','Business Wire','Muck Rack','GlobeNewswire','Prowly','Newswire','PressRelease.com','eReleases'],
+    factors: 'distribution network reach, media database quality, analytics depth, journalist relationship tools, and pricing transparency'
+  },
+  other: {
+    name: 'your industry',
+    link: 'https://listicleliaison.com',
+    top: [],
+    factors: 'brand recognition, review platform presence, media coverage, industry analyst mentions, and structured data availability'
   }
 };
 
@@ -419,17 +435,25 @@ function runCheck() {
 
     var topCompetitors = cat.top.slice(0, 5);
     compList = '';
-    for (var j = 0; j < topCompetitors.length; j++) {
-      var compScore = 9 - j;
-      var isYou = topCompetitors[j].toLowerCase() === companyLower ? ' (You)' : '';
-      compList += '<li><span>' + topCompetitors[j] + isYou + '</span><span class="comp-score">' + compScore + '/10</span></li>';
+    if (topCompetitors.length > 0) {
+      for (var j = 0; j < topCompetitors.length; j++) {
+        var compScore = 9 - j;
+        var isYou = topCompetitors[j].toLowerCase() === companyLower ? ' (You)' : '';
+        compList += '<li><span>' + topCompetitors[j] + isYou + '</span><span class="comp-score">' + compScore + '/10</span></li>';
+      }
     }
+
+    var competitorSection = topCompetitors.length > 0 ?
+      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category, ranked by visibility:</p><ul class="competitor-list">' + compList + '</ul></div>' :
+      '<div class="report-section"><h3>&#127942; Competitive Landscape</h3><p>We don\'t yet have detailed competitive data for your specific category. Contact us for a custom AI visibility analysis tailored to your industry.</p></div>';
+
+    var factorsSection = '<div class="report-section"><h3>&#128202; Visibility Factors</h3><p style="font-size:13px;color:#71717a">AI visibility in ' + cat.name + ' is primarily driven by: ' + cat.factors + '.</p></div>';
 
     content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="score-badge ' + scoreClass + '">' + score + '/10 — ' + scoreLabel + ' AI Visibility</div></div>' +
       '<div class="report-section"><h3>&#128270; AI Mention Likelihood</h3><p>' + likelihood + '</p></div>' +
-      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category, ranked by visibility:</p><ul class="competitor-list">' + compList + '</ul></div>' +
+      competitorSection +
       '<div class="report-section"><h3>&#128161; How to Improve</h3><p>' + gaps + '</p></div>' +
-      '<div class="report-section"><h3>&#128202; Visibility Factors</h3><p style="font-size:13px;color:#71717a">AI visibility in ' + cat.name + ' is primarily driven by: ' + cat.factors + '.</p></div>';
+      factorsSection;
 
     document.getElementById('categoryLink').href = cat.link;
     ctaBox.classList.add('visible');
