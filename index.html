@@ -411,23 +411,26 @@ function runCheck() {
 
     var score, scoreClass, scoreLabel, likelihood, gaps, compList;
 
+    // Deterministic scores based on position - consistent everywhere
+    var positionScores = [9, 9, 8, 7, 7, 6, 5, 4, 3, 3];
+
     if (foundIndex > -1 && foundIndex < 3) {
-      score = 8 + Math.floor(Math.random()*2);
+      score = positionScores[foundIndex];
       scoreClass = 'score-high'; scoreLabel = 'Strong';
       likelihood = company + ' is highly likely to be mentioned by AI assistants when users ask about ' + cat.name + '. As a top-tier player in this category, ' + company + ' has strong brand recognition, extensive review coverage, and significant presence in the structured data sources that AI models reference. AI assistants consistently include ' + company + ' in their top recommendations.';
       gaps = 'Even with strong visibility, there are opportunities to strengthen your position. Ensure your company appears on independent ranking sites with transparent methodology — these are increasingly weighted by AI models. Maintaining fresh reviews on G2 and Capterra and publishing thought leadership content will help sustain your top-tier AI visibility.';
     } else if (foundIndex > -1 && foundIndex < 7) {
-      score = 5 + Math.floor(Math.random()*2);
+      score = positionScores[foundIndex];
       scoreClass = 'score-mid'; scoreLabel = 'Moderate';
       likelihood = company + ' has moderate AI visibility in ' + cat.name + '. AI assistants may mention ' + company + ' in some contexts, but it is not consistently appearing in top recommendations. The company is recognized in the category but is often overshadowed by larger competitors with stronger review profiles and more extensive third-party coverage.';
       gaps = 'To improve your AI visibility, focus on increasing your presence on independent ranking and review sites. Companies that appear on multiple third-party sources with structured rankings see significantly higher AI citation rates. Getting featured in editorial content, expert roundups, and industry analysis articles will help AI models associate your brand with authority in this category.';
     } else if (foundIndex > -1) {
-      score = 3 + Math.floor(Math.random()*2);
+      score = positionScores[foundIndex];
       scoreClass = 'score-low'; scoreLabel = 'Low';
       likelihood = company + ' has low AI visibility in ' + cat.name + '. While the company exists in this space, AI assistants are unlikely to mention it in standard recommendations. The brand lacks sufficient presence in the structured, well-cited sources that AI models prioritize when generating answers.';
       gaps = 'Significant improvement is needed. Start by claiming profiles on major review platforms (G2, Capterra) and building review volume. Get listed on independent ranking sites that use transparent methodology. Publish or get featured in editorial content that directly addresses the queries AI users ask. Companies that invest in third-party visibility typically see AI citation improvements within 2-3 months.';
     } else {
-      score = 1 + Math.floor(Math.random()*2);
+      score = 2;
       scoreClass = 'score-low'; scoreLabel = 'Very Low';
       likelihood = company + ' is not appearing in AI recommendations for ' + cat.name + '. When users ask AI assistants about the best options in this category, ' + company + ' is not being mentioned. This means potential customers using AI-powered search and recommendation tools are not discovering your company.';
       gaps = 'Your company needs immediate visibility investment. The top companies in your category appear across multiple review platforms, independent ranking sites, and editorial publications. Start by claiming free profiles on G2 and Capterra, then get listed on independent ranking sites like those in our publishing network. Even a basic claimed profile on a ranking site can begin generating AI citations within weeks.';
@@ -437,7 +440,7 @@ function runCheck() {
     compList = '';
     if (topCompetitors.length > 0) {
       for (var j = 0; j < topCompetitors.length; j++) {
-        var compScore = 9 - j;
+        var compScore = positionScores[j];
         var isYou = topCompetitors[j].toLowerCase() === companyLower ? ' (You)' : '';
         compList += '<li><span>' + topCompetitors[j] + isYou + '</span><span class="comp-score">' + compScore + '/10</span></li>';
       }
