@@ -181,8 +181,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Your Email (optional)</label>
-        <input type="email" class="form-input" id="userEmail" placeholder="For your full report">
+        <label class="form-label">Your Email (required)</label>
+        <input type="email" class="form-input" id="userEmail" placeholder="We'll send your full report here" required>
       </div>
     </div>
     <button class="check-btn" id="checkBtn" onclick="runCheck()">Check My AI Visibility &rarr;</button>
@@ -367,6 +367,21 @@ function runCheck() {
   var catKey = document.getElementById('category').value;
   if (!company) { alert('Please enter a company name'); return; }
   if (!catKey) { alert('Please select a category'); return; }
+  var email = document.getElementById('userEmail').value.trim();
+  if (!email || email.indexOf('@') === -1) { alert('Please enter your email to receive your visibility report'); return; }
+
+  // Send lead data to Formspree
+  fetch('https://formspree.io/f/maqlbbzd', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      _subject: 'AI Visibility Check: ' + company,
+      company: company,
+      category: catKey,
+      email: email,
+      source: 'ai-mentions.com'
+    })
+  });
 
   var btn = document.getElementById('checkBtn');
   var results = document.getElementById('results');
