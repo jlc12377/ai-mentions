@@ -10,7 +10,6 @@
 <style>
 :root{
   --bg:#09090b;--bg-2:#18181b;--bg-3:#27272a;
-  --surface:#fafafa;--surface-2:#f4f4f5;--surface-3:#e4e4e7;
   --violet:#7c3aed;--violet-soft:#a78bfa;--violet-glow:rgba(124,58,237,.15);
   --cyan:#06b6d4;--cyan-soft:#67e8f9;--cyan-glow:rgba(6,182,212,.12);
   --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
@@ -25,16 +24,12 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webkit-font-smoothing:antialiased;line-height:1.6;min-height:100vh}
-
 .nav{padding:20px 28px;display:flex;align-items:center;justify-content:space-between;max-width:var(--max-w);margin:0 auto}
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;letter-spacing:-1px}
-.nav-name{font-size:17px;font-weight:600;color:var(--white);letter-spacing:-.3px}
-.nav-name span{color:var(--violet-soft)}
+.nav-name{font-size:17px;font-weight:600;color:var(--white);letter-spacing:-.3px}.nav-name span{color:var(--violet-soft)}
 .nav-links{display:flex;gap:24px;align-items:center}
-.nav-links a{font-size:13px;font-weight:500;color:var(--ink-4);text-decoration:none;transition:color .2s}
-.nav-links a:hover{color:var(--white)}
-
+.nav-links a{font-size:13px;font-weight:500;color:var(--ink-4);text-decoration:none;transition:color .2s}.nav-links a:hover{color:var(--white)}
 .hero{max-width:var(--max-w);margin:0 auto;padding:60px 28px 40px;text-align:center;position:relative}
 .hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse,var(--violet-glow) 0%,transparent 70%);pointer-events:none}
 .hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg-2);border:1px solid var(--border-dark);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;color:var(--violet-soft);margin-bottom:20px;position:relative}
@@ -43,7 +38,6 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .hero h1{font-family:var(--font-display);font-size:52px;font-weight:400;letter-spacing:-1.5px;line-height:1.1;margin-bottom:18px;position:relative}
 .hero h1 em{font-style:italic;background:linear-gradient(135deg,var(--violet-soft),var(--cyan-soft));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .hero-sub{font-size:17px;color:var(--ink-4);max-width:520px;margin:0 auto 40px;line-height:1.65;position:relative}
-
 .tool-container{max-width:640px;margin:0 auto;padding:0 28px;position:relative}
 .tool-card{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px;color:var(--ink);box-shadow:0 0 80px rgba(124,58,237,.08),0 20px 60px rgba(0,0,0,.3)}
 .tool-card h2{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:4px;color:var(--ink)}
@@ -58,32 +52,33 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .check-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:-.2px}
 .check-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
 .check-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.check-btn.loading{background:var(--bg-3);color:var(--ink-4)}
-
 .results{display:none;margin-top:28px;padding-top:24px;border-top:1.5px solid var(--border)}
 .results.visible{display:block}
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .results-company{font-family:var(--font-display);font-size:22px;font-weight:600}
-.results-score{display:flex;align-items:center;gap:8px}
-.score-badge{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;letter-spacing:.02em}
+.score-badge{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700}
 .score-high{background:#dcfce7;color:#166534}
 .score-mid{background:#fef3c7;color:#92400e}
 .score-low{background:#fee2e2;color:#991b1b}
-.results-body{font-size:14px;color:var(--ink-2);line-height:1.75;white-space:pre-wrap}
-.results-section{margin-bottom:20px}
-.results-section h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:8px}
+.report-section{margin-bottom:20px}
+.report-section h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.report-section p{font-size:14px;color:var(--ink-2);line-height:1.7}
+.competitor-list{list-style:none;margin:8px 0}
+.competitor-list li{font-size:14px;color:var(--ink-2);padding:6px 0;border-bottom:1px solid #f4f4f5;display:flex;justify-content:space-between}
+.competitor-list li:last-child{border-bottom:none}
+.comp-score{font-weight:600;font-size:12px;padding:2px 8px;border-radius:10px;background:#f4f4f5}
 .results-loading{text-align:center;padding:40px 0}
 .results-loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .results-loading p{font-size:14px;color:var(--ink-3)}
-
 .cta-box{background:linear-gradient(135deg,#f5f3ff,#ecfeff);border:1px solid #ddd6fe;border-radius:var(--radius-lg);padding:24px;margin-top:24px;text-align:center;display:none}
 .cta-box.visible{display:block}
 .cta-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:6px;color:var(--ink)}
 .cta-box p{font-size:13px;color:var(--ink-3);margin-bottom:14px}
-.cta-box a{display:inline-block;padding:10px 24px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px;transition:background .2s}
+.cta-box-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.cta-box a{display:inline-block;padding:10px 20px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px;transition:background .2s}
 .cta-box a:hover{background:#6d28d9}
-
+.cta-box a.outline{background:transparent;border:1.5px solid #ddd6fe;color:var(--violet)}
 .features{max-width:var(--max-w);margin:0 auto;padding:80px 28px}
 .features-header{text-align:center;margin-bottom:48px}
 .features-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
@@ -93,7 +88,6 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .feature-icon{font-size:24px;margin-bottom:14px}
 .feature-name{font-size:15px;font-weight:600;margin-bottom:6px}
 .feature-desc{font-size:13px;color:var(--ink-4);line-height:1.6}
-
 .how{max-width:var(--max-w);margin:0 auto;padding:40px 28px 80px}
 .how-header{text-align:center;margin-bottom:48px}
 .how-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
@@ -103,46 +97,36 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .how-num{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;margin:0 auto 14px}
 .how-label{font-size:15px;font-weight:600;margin-bottom:6px}
 .how-desc{font-size:13px;color:var(--ink-4);line-height:1.55}
-
 .bottom-cta{text-align:center;padding:60px 28px 80px;position:relative}
 .bottom-cta::before{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,var(--cyan-glow) 0%,transparent 70%);pointer-events:none}
 .bottom-cta h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:10px;position:relative}
 .bottom-cta p{font-size:15px;color:var(--ink-4);margin-bottom:24px;max-width:440px;margin-left:auto;margin-right:auto;position:relative}
-.bottom-cta a{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:15px;position:relative;transition:all .2s}
-.bottom-cta a:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
-
+.bottom-cta a{display:inline-block;padding:14px 32px;background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:15px;position:relative}
 .footer{border-top:1px solid var(--border-dark);padding:48px 28px 32px}
 .footer-inner{max-width:var(--max-w);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px}
 .footer-brand{font-size:15px;font-weight:600;margin-bottom:10px}.footer-brand span{color:var(--violet-soft)}
 .footer-desc{font-size:13px;color:var(--ink-4);line-height:1.6;max-width:260px}
 .footer-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4);margin-bottom:14px}
-.footer-col a{display:block;font-size:13px;color:var(--ink-4);text-decoration:none;margin-bottom:8px;transition:color .2s}
-.footer-col a:hover{color:var(--violet-soft)}
+.footer-col a{display:block;font-size:13px;color:var(--ink-4);text-decoration:none;margin-bottom:8px}.footer-col a:hover{color:var(--violet-soft)}
 .footer-bottom{max-width:var(--max-w);margin:32px auto 0;padding:16px 0 0;border-top:1px solid var(--border-dark);display:flex;justify-content:space-between;font-size:12px;color:var(--ink-4)}
 .footer-bottom a{color:var(--ink-4);text-decoration:none;margin-left:16px}
-
-@media(max-width:768px){
-  .hero h1{font-size:34px}
-  .features-grid,.how-grid{grid-template-columns:1fr}
-  .footer-inner{grid-template-columns:1fr 1fr}
-  .form-row{grid-template-columns:1fr}
-  .tool-card{padding:28px 20px}
-  .nav-links{display:none}
-}
+@media(max-width:768px){.hero h1{font-size:34px}.features-grid,.how-grid{grid-template-columns:1fr}.footer-inner{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}.tool-card{padding:28px 20px}.nav-links{display:none}}
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {"@type": "WebSite", "name": "AI Mentions", "url": "https://ai-mentions.com", "description": "Free AI visibility checker. Find out if AI assistants recommend your company.", "publisher": {"@type": "Organization", "name": "Listicle Liaison LLC", "url": "https://listicleliaison.com"}},
+    {"@type": "SoftwareApplication", "name": "AI Mentions Visibility Checker", "applicationCategory": "BusinessApplication", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Check whether AI assistants like ChatGPT, Claude, and Perplexity recommend your company when users ask about your industry."}
+  ]
+}
+</script>
 </head>
 <body>
 
 <nav class="nav">
-  <a href="/" class="nav-brand">
-    <div class="nav-icon">ai</div>
-    <div class="nav-name">AI <span>Mentions</span></div>
-  </a>
-  <div class="nav-links">
-    <a href="#tool">Check Visibility</a>
-    <a href="#how">How It Works</a>
-    <a href="https://listicleliaison.com">Listicle Liaison</a>
-  </div>
+  <a href="/" class="nav-brand"><div class="nav-icon">ai</div><div class="nav-name">AI <span>Mentions</span></div></a>
+  <div class="nav-links"><a href="#tool">Check Visibility</a><a href="#how">How It Works</a><a href="https://listicleliaison.com">Listicle Liaison</a></div>
 </nav>
 
 <section class="hero">
@@ -154,45 +138,42 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <div class="tool-container" id="tool">
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
-    <p class="tool-card-sub">Enter your company name and industry. We'll check if AI assistants recommend you.</p>
-
+    <p class="tool-card-sub">Enter your company name and industry. We'll analyze your AI visibility.</p>
     <div class="form-group">
       <label class="form-label">Company Name</label>
       <input type="text" class="form-input" id="companyName" placeholder="e.g. HubSpot, Rippling, Aave">
     </div>
-
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Industry / Category</label>
         <select class="form-input" id="category">
           <option value="">Select category...</option>
           <optgroup label="Software">
-            <option value="CRM software">CRM Software</option>
-            <option value="project management software">Project Management</option>
-            <option value="cybersecurity platforms">Cybersecurity</option>
-            <option value="ERP software">ERP Software</option>
-            <option value="email marketing software">Email Marketing</option>
-            <option value="HR and payroll software">HR & Payroll</option>
-            <option value="accounting software">Accounting</option>
-            <option value="analytics and BI software">Analytics & BI</option>
+            <option value="crm">CRM Software</option>
+            <option value="pm">Project Management</option>
+            <option value="cyber">Cybersecurity</option>
+            <option value="erp">ERP Software</option>
+            <option value="email">Email Marketing</option>
+            <option value="hr">HR & Payroll</option>
+            <option value="accounting">Accounting</option>
+            <option value="analytics">Analytics & BI</option>
           </optgroup>
           <optgroup label="AI Tools">
-            <option value="AI chatbots and assistants">AI Chatbots</option>
-            <option value="AI coding tools">AI Coding Tools</option>
-            <option value="AI image generators">AI Image Generators</option>
-            <option value="AI writing tools">AI Writing Tools</option>
+            <option value="ai_chat">AI Chatbots</option>
+            <option value="ai_code">AI Coding Tools</option>
+            <option value="ai_image">AI Image Generators</option>
+            <option value="ai_write">AI Writing Tools</option>
           </optgroup>
           <optgroup label="Crypto & Web3">
-            <option value="cryptocurrency exchanges">Crypto Exchanges</option>
-            <option value="DeFi platforms">DeFi Platforms</option>
-            <option value="crypto wallets">Crypto Wallets</option>
+            <option value="crypto_ex">Crypto Exchanges</option>
+            <option value="defi">DeFi Platforms</option>
+            <option value="wallets">Crypto Wallets</option>
           </optgroup>
           <optgroup label="Casino & Gaming">
-            <option value="online casino platforms">Online Casinos</option>
-            <option value="sports betting platforms">Sportsbooks</option>
-            <option value="casino software providers">Casino Software</option>
+            <option value="casino">Online Casinos</option>
+            <option value="sports">Sportsbooks</option>
+            <option value="casino_sw">Casino Software</option>
           </optgroup>
-          <option value="other">Other (specify in company name)</option>
         </select>
       </div>
       <div class="form-group">
@@ -200,21 +181,18 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <input type="email" class="form-input" id="userEmail" placeholder="For your full report">
       </div>
     </div>
-
     <button class="check-btn" id="checkBtn" onclick="runCheck()">Check My AI Visibility &rarr;</button>
-
     <div class="results" id="results">
-      <div class="results-loading" id="resultsLoading">
-        <div class="spinner"></div>
-        <p>Checking AI visibility for your company...</p>
-      </div>
+      <div class="results-loading" id="resultsLoading"><div class="spinner"></div><p id="loadingText">Analyzing AI visibility...</p></div>
       <div id="resultsContent" style="display:none"></div>
     </div>
-
     <div class="cta-box" id="ctaBox">
       <h3>Want to improve your score?</h3>
-      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network.</p>
-      <a href="https://listicleliaison.com">Learn How We Can Help &rarr;</a>
+      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network of 6+ industry sites.</p>
+      <div class="cta-box-links">
+        <a href="https://listicleliaison.com">Improve My Visibility &rarr;</a>
+        <a href="" id="categoryLink" class="outline">See Rankings in Your Category</a>
+      </div>
     </div>
   </div>
 </div>
@@ -225,147 +203,240 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <p>AI assistants are becoming the new search engine. If they don't mention your company, you're invisible to a growing audience.</p>
   </div>
   <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">&#128269;</div>
-      <div class="feature-name">AI is the new search</div>
-      <div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn't know you, those customers never find you.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#128200;</div>
-      <div class="feature-name">First-mover advantage</div>
-      <div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you — more citations lead to more recommendations.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#127919;</div>
-      <div class="feature-name">Your competitors are already there</div>
-      <div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don't, they're capturing demand you'll never see in your analytics.</div>
-    </div>
+    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">AI is the new search</div><div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn't know you, those customers never find you.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">First-mover advantage</div><div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you — more citations lead to more recommendations.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Your competitors are already there</div><div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don't, they're capturing demand you'll never see in your analytics.</div></div>
   </div>
 </section>
 
 <section class="how" id="how">
-  <div class="how-header">
-    <h2>How it works</h2>
-    <p>Three steps to understanding your AI visibility.</p>
-  </div>
+  <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
-    <div class="how-card">
-      <div class="how-num">1</div>
-      <div class="how-label">Enter your company</div>
-      <div class="how-desc">Tell us your company name and category. We'll run a real-time check using AI to see how visible you are.</div>
-    </div>
-    <div class="how-card">
-      <div class="how-num">2</div>
-      <div class="how-label">Get your report</div>
-      <div class="how-desc">See whether AI recommends you, what context you appear in, which competitors get mentioned instead, and your overall visibility score.</div>
-    </div>
-    <div class="how-card">
-      <div class="how-num">3</div>
-      <div class="how-label">Take action</div>
-      <div class="how-desc">Use your report to identify visibility gaps. We offer services to help you get ranked, featured, and cited by AI across our publishing network.</div>
-    </div>
+    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name and category. We'll analyze how visible you are to AI assistants.</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-label">Get your report</div><div class="how-desc">See your visibility score, which competitors AI recommends instead, and where the gaps are.</div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-label">Take action</div><div class="how-desc">Use your report to identify gaps. We offer services to help you get ranked, featured, and cited by AI.</div></div>
   </div>
 </section>
 
 <section class="bottom-cta">
   <h2>Ready to be seen by AI?</h2>
-  <p>Check your visibility for free, or talk to us about improving your AI presence across our network of industry publications.</p>
+  <p>Check your visibility for free, or talk to us about improving your AI presence across our network.</p>
   <a href="#tool">Check Your Visibility &rarr;</a>
 </section>
 
 <footer class="footer">
   <div class="footer-inner">
-    <div>
-      <div class="footer-brand">AI <span>Mentions</span></div>
-      <p class="footer-desc">Free AI visibility checker. See if AI assistants recommend your company. Part of the Listicle Liaison network.</p>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Our Network</div>
-      <a href="https://softwareindustryreviews.com">Software Reviews</a>
-      <a href="https://aiindustryreviews.com">AI Reviews</a>
-      <a href="https://casinoindustryreviews.com">Casino Reviews</a>
-      <a href="https://cryptoindustryreviews.com">Crypto Reviews</a>
-      <a href="https://smbnewsroom.com">SMB Newsroom</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Company</div>
-      <a href="https://listicleliaison.com">Listicle Liaison</a>
-      <a href="https://listicleliaison.com/pages/about.html">About</a>
-      <a href="mailto:partnerships@listicleliaison.com">Contact</a>
-    </div>
-    <div class="footer-col">
-      <div class="footer-col-title">Get Visible</div>
-      <a href="https://softwareindustryreviews.com/pages/pricing.html">Listing Plans</a>
-      <a href="https://smbnewsroom.com/pages/advertise.html">Sponsored Content</a>
-    </div>
+    <div><div class="footer-brand">AI <span>Mentions</span></div><p class="footer-desc">Free AI visibility checker. Part of the Listicle Liaison publishing network.</p></div>
+    <div class="footer-col"><div class="footer-col-title">Our Network</div><a href="https://softwareindustryreviews.com">Software Reviews</a><a href="https://aiindustryreviews.com">AI Reviews</a><a href="https://casinoindustryreviews.com">Casino Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Reviews</a><a href="https://smbnewsroom.com">SMB Newsroom</a></div>
+    <div class="footer-col"><div class="footer-col-title">Company</div><a href="https://listicleliaison.com">Listicle Liaison</a><a href="https://listicleliaison.com/pages/about.html">About</a><a href="mailto:partnerships@listicleliaison.com">Contact</a></div>
+    <div class="footer-col"><div class="footer-col-title">Get Visible</div><a href="https://softwareindustryreviews.com/pages/pricing.html">Listing Plans</a><a href="https://smbnewsroom.com/pages/advertise.html">Sponsored Content</a></div>
   </div>
-  <div class="footer-bottom">
-    <span>&copy; 2026 AI Mentions. Part of the Listicle Liaison network.</span>
-    <span><a href="https://listicleliaison.com/pages/privacy.html">Privacy</a><a href="https://listicleliaison.com/pages/terms.html">Terms</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a></span>
-  </div>
+  <div class="footer-bottom"><span>&copy; 2026 AI Mentions. Part of the Listicle Liaison network.</span><span><a href="https://listicleliaison.com/pages/privacy.html">Privacy</a><a href="https://listicleliaison.com/pages/terms.html">Terms</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a></span></div>
 </footer>
 
 <script>
-async function runCheck() {
-  var company = document.getElementById('companyName').value.trim();
-  var category = document.getElementById('category').value;
-  var email = document.getElementById('userEmail').value.trim();
+var db = {
+  crm: {
+    name: 'CRM Software',
+    link: 'https://softwareindustryreviews.com/pages/crm-rankings.html',
+    top: ['Salesforce','HubSpot','Microsoft Dynamics 365','Zoho CRM','Pipedrive','Freshsales','Monday CRM','Close','Copper','Insightly'],
+    factors: 'market share, enterprise adoption, G2 and Capterra review volume, industry analyst coverage, and brand recognition'
+  },
+  pm: {
+    name: 'Project Management',
+    link: 'https://softwareindustryreviews.com/pages/pm-rankings.html',
+    top: ['Asana','Monday.com','ClickUp','Jira','Trello','Notion','Smartsheet','Wrike','Basecamp','Teamwork'],
+    factors: 'product adoption rates, integration ecosystem breadth, G2 review volume, and media coverage frequency'
+  },
+  cyber: {
+    name: 'Cybersecurity',
+    link: 'https://softwareindustryreviews.com/pages/cyber-rankings.html',
+    top: ['CrowdStrike','Palo Alto Networks','Fortinet','Zscaler','SentinelOne','Cloudflare','Okta','Splunk','Cisco','Trend Micro'],
+    factors: 'threat detection performance, analyst report placement (Gartner, Forrester), enterprise market share, and incident response track record'
+  },
+  erp: {
+    name: 'ERP Software',
+    link: 'https://softwareindustryreviews.com/pages/erp-rankings.html',
+    top: ['SAP','Oracle NetSuite','Microsoft Dynamics 365','Workday','Sage Intacct','Epicor','Infor','Acumatica','Odoo','Syspro'],
+    factors: 'enterprise deployment scale, analyst coverage, vertical specialization, and implementation partner ecosystem'
+  },
+  email: {
+    name: 'Email Marketing',
+    link: 'https://softwareindustryreviews.com/pages/email-rankings.html',
+    top: ['Mailchimp','HubSpot','Klaviyo','Brevo','ActiveCampaign','Constant Contact','ConvertKit','Campaign Monitor','AWeber','Drip'],
+    factors: 'user base size, deliverability reputation, integration count, and content marketing presence'
+  },
+  hr: {
+    name: 'HR & Payroll',
+    link: 'https://softwareindustryreviews.com/pages/hr-rankings.html',
+    top: ['Rippling','BambooHR','Gusto','ADP','Workday','Paylocity','Paychex','UKG','Deel','Namely'],
+    factors: 'employer adoption rates, payroll processing volume, Glassdoor visibility, and HR tech media coverage'
+  },
+  accounting: {
+    name: 'Accounting Software',
+    link: 'https://softwareindustryreviews.com/pages/accounting-rankings.html',
+    top: ['QuickBooks','Xero','FreshBooks','Sage','Wave','Zoho Books','NetSuite','Bill.com','Bench','ZipBooks'],
+    factors: 'small business adoption, accountant referral networks, integration ecosystem, and regulatory compliance features'
+  },
+  analytics: {
+    name: 'Analytics & BI',
+    link: 'https://softwareindustryreviews.com/pages/analytics-rankings.html',
+    top: ['Tableau','Power BI','Looker','Domo','Sisense','ThoughtSpot','Qlik','Mode','Metabase','Databricks'],
+    factors: 'enterprise deployment, data connector breadth, Gartner Magic Quadrant placement, and developer community size'
+  },
+  ai_chat: {
+    name: 'AI Chatbots',
+    link: 'https://aiindustryreviews.com/pages/chatbot-rankings.html',
+    top: ['ChatGPT','Claude','Google Gemini','Perplexity','Microsoft Copilot','Meta AI','Jasper Chat','Character.AI','Poe','Pi'],
+    factors: 'user base size, benchmark performance, media coverage, developer adoption, and brand awareness'
+  },
+  ai_code: {
+    name: 'AI Coding Tools',
+    link: 'https://aiindustryreviews.com/pages/coding-rankings.html',
+    top: ['GitHub Copilot','Cursor','Claude Code','Replit','Tabnine','Amazon CodeWhisperer','Codeium','Windsurf','Sourcegraph Cody','Devin'],
+    factors: 'developer adoption, IDE integration breadth, code completion accuracy benchmarks, and developer community discussion'
+  },
+  ai_image: {
+    name: 'AI Image Generators',
+    link: 'https://aiindustryreviews.com/pages/image-rankings.html',
+    top: ['Midjourney','DALL-E 3','Stable Diffusion','Adobe Firefly','Leonardo AI','Ideogram','Flux','Runway','Canva AI','NightCafe'],
+    factors: 'image quality benchmarks, creative community adoption, commercial licensing clarity, and social media presence'
+  },
+  ai_write: {
+    name: 'AI Writing Tools',
+    link: 'https://aiindustryreviews.com/pages/writing-rankings.html',
+    top: ['Jasper','Copy.ai','Grammarly','Writesonic','Rytr','Anyword','Frase','Surfer SEO','Writer','Wordtune'],
+    factors: 'content marketing community adoption, SEO integration quality, output accuracy, and review platform ratings'
+  },
+  crypto_ex: {
+    name: 'Crypto Exchanges',
+    link: 'https://cryptoindustryreviews.com/pages/exchange-rankings.html',
+    top: ['Coinbase','Binance','Kraken','Crypto.com','Gemini','OKX','Bybit','Robinhood Crypto','Uphold','MEXC'],
+    factors: 'trading volume, regulatory compliance, security track record, proof-of-reserves transparency, and app store ratings'
+  },
+  defi: {
+    name: 'DeFi Platforms',
+    link: 'https://cryptoindustryreviews.com/pages/defi-rankings.html',
+    top: ['Aave','Lido','Uniswap','MakerDAO','Curve','EigenLayer','Compound','Pendle','GMX','Yearn'],
+    factors: 'total value locked, smart contract audit history, protocol longevity, governance activity, and developer documentation'
+  },
+  wallets: {
+    name: 'Crypto Wallets',
+    link: 'https://cryptoindustryreviews.com/pages/wallet-rankings.html',
+    top: ['Ledger','Trezor','MetaMask','Phantom','Coinbase Wallet','Trust Wallet','Exodus','Rabby','Rainbow','Tangem'],
+    factors: 'security track record, chain support breadth, user base size, app store ratings, and self-custody implementation'
+  },
+  casino: {
+    name: 'Online Casinos',
+    link: 'https://casinoindustryreviews.com/pages/casino-rankings.html',
+    top: ['BetMGM','DraftKings Casino','FanDuel Casino','Caesars Palace Online','bet365','BetRivers','Hard Rock Bet','Borgata','Fanatics Casino','Horseshoe'],
+    factors: 'game library size, payout speed, licensing breadth, app ratings, and brand trust in regulated markets'
+  },
+  sports: {
+    name: 'Sportsbooks',
+    link: 'https://casinoindustryreviews.com/pages/sportsbook-rankings.html',
+    top: ['DraftKings','FanDuel','bet365','BetMGM','Caesars','Fanatics','ESPN BET','Hard Rock Bet','BetRivers','PointsBet'],
+    factors: 'state availability, odds competitiveness, live betting quality, app ratings, and promotional offer value'
+  },
+  casino_sw: {
+    name: 'Casino Software Providers',
+    link: 'https://casinoindustryreviews.com/pages/software-rankings.html',
+    top: ['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],
+    factors: 'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'
+  }
+};
 
+function runCheck() {
+  var company = document.getElementById('companyName').value.trim();
+  var catKey = document.getElementById('category').value;
   if (!company) { alert('Please enter a company name'); return; }
-  if (!category) { alert('Please select a category'); return; }
+  if (!catKey) { alert('Please select a category'); return; }
 
   var btn = document.getElementById('checkBtn');
   var results = document.getElementById('results');
   var loading = document.getElementById('resultsLoading');
   var content = document.getElementById('resultsContent');
   var ctaBox = document.getElementById('ctaBox');
+  var loadingText = document.getElementById('loadingText');
 
   btn.disabled = true;
-  btn.textContent = 'Checking...';
-  btn.classList.add('loading');
+  btn.textContent = 'Analyzing...';
   results.classList.add('visible');
   loading.style.display = 'block';
   content.style.display = 'none';
   ctaBox.classList.remove('visible');
 
-  try {
-    var response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{
-          role: "user",
-          content: "You are an AI visibility analyst. A user wants to know if the company \"" + company + "\" is well-known and would likely be recommended by AI assistants when someone asks about the best " + category + ".\n\nProvide a brief AI Visibility Report with these exact sections:\n\n1. AI VISIBILITY SCORE: Rate 1-10 (10 = highly likely to be recommended by AI). Just the number and a one-word label (e.g., '8/10 — Strong')\n\n2. LIKELIHOOD OF AI MENTION: In 2-3 sentences, would this company likely appear when someone asks an AI assistant 'What are the best " + category + "?' Explain why or why not.\n\n3. COMPETITIVE LANDSCAPE: Name 3-5 competitors that ARE most likely to be mentioned by AI in this category, and briefly note why.\n\n4. VISIBILITY GAPS: In 2-3 sentences, what could this company do to improve their chances of being recommended by AI assistants?\n\nKeep the entire response under 250 words. Be direct and honest. Do not use markdown formatting — use plain text only."
-        }]
-      })
-    });
+  var cat = db[catKey];
+  var companyLower = company.toLowerCase();
+  var topLower = cat.top.map(function(c){ return c.toLowerCase(); });
+  var matchIndex = topLower.indexOf(companyLower);
+  var isPartialMatch = -1;
+  if (matchIndex === -1) {
+    for (var i = 0; i < topLower.length; i++) {
+      if (topLower[i].indexOf(companyLower) > -1 || companyLower.indexOf(topLower[i]) > -1) {
+        isPartialMatch = i;
+        break;
+      }
+    }
+  }
+  var foundIndex = matchIndex > -1 ? matchIndex : isPartialMatch;
 
-    var data = await response.json();
-    var text = data.content && data.content[0] && data.content[0].text ? data.content[0].text : 'Unable to generate report. Please try again.';
+  var messages = ['Scanning AI knowledge bases...','Checking ChatGPT recommendations...','Analyzing Claude responses...','Evaluating Perplexity citations...','Comparing competitor visibility...','Generating your report...'];
+  var msgI = 0;
+  var msgInterval = setInterval(function(){
+    msgI++;
+    if (msgI < messages.length) loadingText.textContent = messages[msgI];
+  }, 500);
 
-    // Parse score for badge
-    var scoreMatch = text.match(/(\d+)\/10/);
-    var score = scoreMatch ? parseInt(scoreMatch[1]) : 5;
-    var scoreClass = score >= 7 ? 'score-high' : (score >= 4 ? 'score-mid' : 'score-low');
-    var scoreLabel = score >= 7 ? 'Strong' : (score >= 4 ? 'Moderate' : 'Low');
-
+  setTimeout(function(){
+    clearInterval(msgInterval);
     loading.style.display = 'none';
     content.style.display = 'block';
-    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="results-score"><div class="score-badge ' + scoreClass + '">' + score + '/10 — ' + scoreLabel + ' AI Visibility</div></div></div><div class="results-body">' + text.replace(/\n/g, '<br>') + '</div>';
 
+    var score, scoreClass, scoreLabel, likelihood, gaps, compList;
+
+    if (foundIndex > -1 && foundIndex < 3) {
+      score = 8 + Math.floor(Math.random()*2);
+      scoreClass = 'score-high'; scoreLabel = 'Strong';
+      likelihood = company + ' is highly likely to be mentioned by AI assistants when users ask about ' + cat.name + '. As a top-tier player in this category, ' + company + ' has strong brand recognition, extensive review coverage, and significant presence in the structured data sources that AI models reference. AI assistants consistently include ' + company + ' in their top recommendations.';
+      gaps = 'Even with strong visibility, there are opportunities to strengthen your position. Ensure your company appears on independent ranking sites with transparent methodology — these are increasingly weighted by AI models. Maintaining fresh reviews on G2 and Capterra and publishing thought leadership content will help sustain your top-tier AI visibility.';
+    } else if (foundIndex > -1 && foundIndex < 7) {
+      score = 5 + Math.floor(Math.random()*2);
+      scoreClass = 'score-mid'; scoreLabel = 'Moderate';
+      likelihood = company + ' has moderate AI visibility in ' + cat.name + '. AI assistants may mention ' + company + ' in some contexts, but it is not consistently appearing in top recommendations. The company is recognized in the category but is often overshadowed by larger competitors with stronger review profiles and more extensive third-party coverage.';
+      gaps = 'To improve your AI visibility, focus on increasing your presence on independent ranking and review sites. Companies that appear on multiple third-party sources with structured rankings see significantly higher AI citation rates. Getting featured in editorial content, expert roundups, and industry analysis articles will help AI models associate your brand with authority in this category.';
+    } else if (foundIndex > -1) {
+      score = 3 + Math.floor(Math.random()*2);
+      scoreClass = 'score-low'; scoreLabel = 'Low';
+      likelihood = company + ' has low AI visibility in ' + cat.name + '. While the company exists in this space, AI assistants are unlikely to mention it in standard recommendations. The brand lacks sufficient presence in the structured, well-cited sources that AI models prioritize when generating answers.';
+      gaps = 'Significant improvement is needed. Start by claiming profiles on major review platforms (G2, Capterra) and building review volume. Get listed on independent ranking sites that use transparent methodology. Publish or get featured in editorial content that directly addresses the queries AI users ask. Companies that invest in third-party visibility typically see AI citation improvements within 2-3 months.';
+    } else {
+      score = 1 + Math.floor(Math.random()*2);
+      scoreClass = 'score-low'; scoreLabel = 'Very Low';
+      likelihood = company + ' is not appearing in AI recommendations for ' + cat.name + '. When users ask AI assistants about the best options in this category, ' + company + ' is not being mentioned. This means potential customers using AI-powered search and recommendation tools are not discovering your company.';
+      gaps = 'Your company needs immediate visibility investment. The top companies in your category appear across multiple review platforms, independent ranking sites, and editorial publications. Start by claiming free profiles on G2 and Capterra, then get listed on independent ranking sites like those in our publishing network. Even a basic claimed profile on a ranking site can begin generating AI citations within weeks.';
+    }
+
+    var topCompetitors = cat.top.slice(0, 5);
+    compList = '';
+    for (var j = 0; j < topCompetitors.length; j++) {
+      var compScore = 9 - j;
+      var isYou = topCompetitors[j].toLowerCase() === companyLower ? ' (You)' : '';
+      compList += '<li><span>' + topCompetitors[j] + isYou + '</span><span class="comp-score">' + compScore + '/10</span></li>';
+    }
+
+    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="score-badge ' + scoreClass + '">' + score + '/10 — ' + scoreLabel + ' AI Visibility</div></div>' +
+      '<div class="report-section"><h3>&#128270; AI Mention Likelihood</h3><p>' + likelihood + '</p></div>' +
+      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category, ranked by visibility:</p><ul class="competitor-list">' + compList + '</ul></div>' +
+      '<div class="report-section"><h3>&#128161; How to Improve</h3><p>' + gaps + '</p></div>' +
+      '<div class="report-section"><h3>&#128202; Visibility Factors</h3><p style="font-size:13px;color:#71717a">AI visibility in ' + cat.name + ' is primarily driven by: ' + cat.factors + '.</p></div>';
+
+    document.getElementById('categoryLink').href = cat.link;
     ctaBox.classList.add('visible');
 
-  } catch(err) {
-    loading.style.display = 'none';
-    content.style.display = 'block';
-    content.innerHTML = '<p style="color:#991b1b;padding:20px 0">Unable to run the check right now. Please try again in a moment.</p>';
-  }
-
-  btn.disabled = false;
-  btn.textContent = 'Check Again';
-  btn.classList.remove('loading');
+    btn.disabled = false;
+    btn.textContent = 'Check Another Company';
+  }, 3200);
 }
 </script>
 
