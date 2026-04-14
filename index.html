@@ -174,6 +174,22 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
             <option value="sports">Sportsbooks</option>
             <option value="casino_sw">Casino Software</option>
           </optgroup>
+          <optgroup label="Healthcare">
+            <option value="ehr">EHR & Medical Records</option>
+            <option value="telehealth">Telehealth Platforms</option>
+            <option value="medbilling">Medical Billing & RCM</option>
+            <option value="clinical">Clinical Trial Software</option>
+            <option value="wellness">Health & Wellness Apps</option>
+            <option value="pharma">Pharma & Biotech Tools</option>
+          </optgroup>
+          <optgroup label="Financial Services">
+            <option value="banking">Banking & Core Systems</option>
+            <option value="wealth">Wealth Management</option>
+            <option value="insurtech">Insurance Technology</option>
+            <option value="payments">Payment Platforms</option>
+            <option value="lending">Lending & Mortgage Tech</option>
+            <option value="regtech">Compliance & RegTech</option>
+          </optgroup>
           <optgroup label="Other Industries">
             <option value="pr">PR & Newswire Software</option>
             <option value="other">Other / Not Listed</option>
@@ -192,7 +208,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     </div>
     <div class="cta-box" id="ctaBox">
       <h3>Want to improve your score?</h3>
-      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network of 6+ industry sites.</p>
+      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network of 9+ industry sites.</p>
       <div class="cta-box-links">
         <a href="https://listicleliaison.com">Improve My Visibility &rarr;</a>
         <a href="" id="categoryLink" class="outline">See Rankings in Your Category</a>
@@ -231,7 +247,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <footer class="footer">
   <div class="footer-inner">
     <div><div class="footer-brand">AI <span>Mentions</span></div><p class="footer-desc">Free AI visibility checker. Part of the Listicle Liaison publishing network.</p></div>
-    <div class="footer-col"><div class="footer-col-title">Our Network</div><a href="https://softwareindustryreviews.com">Software Reviews</a><a href="https://aiindustryreviews.com">AI Reviews</a><a href="https://casinoindustryreviews.com">Casino Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Reviews</a><a href="https://smbnewsroom.com">SMB Newsroom</a></div>
+    <div class="footer-col"><div class="footer-col-title">Our Network</div><a href="https://softwareindustryreviews.com">Software Reviews</a><a href="https://aiindustryreviews.com">AI Reviews</a><a href="https://casinoindustryreviews.com">Casino Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Reviews</a><a href="https://healthcareindustryreviews.com">Healthcare Reviews</a><a href="https://financialindustryreviews.com">Financial Reviews</a><a href="https://smbnewsroom.com">SMB Newsroom</a></div>
     <div class="footer-col"><div class="footer-col-title">Company</div><a href="https://listicleliaison.com">Listicle Liaison</a><a href="https://listicleliaison.com/pages/about.html">About</a><a href="mailto:partnerships@listicleliaison.com">Contact</a></div>
     <div class="footer-col"><div class="footer-col-title">Get Visible</div><a href="https://softwareindustryreviews.com/pages/pricing.html">Listing Plans</a><a href="https://smbnewsroom.com/pages/advertise.html">Sponsored Content</a></div>
   </div>
@@ -348,6 +364,78 @@ var db = {
     top: ['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],
     factors: 'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'
   },
+  ehr: {
+    name: 'EHR & Medical Records',
+    link: 'https://healthcareindustryreviews.com/pages/ehr-rankings.html',
+    top: ['Epic Systems','Oracle Health','MEDITECH','athenahealth','eClinicalWorks','NextGen Healthcare','DrChrono','Allscripts','Greenway Health','CureMD'],
+    factors: 'clinical functionality, interoperability, user experience, compliance, and pricing'
+  },
+  telehealth: {
+    name: 'Telehealth Platforms',
+    link: 'https://healthcareindustryreviews.com/pages/telehealth-rankings.html',
+    top: ['Teladoc Health','Amwell','Doxy.me','Doximity','Zoom for Healthcare','MDLIVE','SimplePractice Telehealth','Vsee','Mend','Chiron Health'],
+    factors: 'video quality, clinical integration, patient experience, compliance, and pricing'
+  },
+  medbilling: {
+    name: 'Medical Billing & RCM',
+    link: 'https://healthcareindustryreviews.com/pages/billing-rankings.html',
+    top: ['Waystar','R1 RCM','athenahealth RCM','Availity','Tebra','AdvancedMD','CareCloud','DrChrono','CollaborateMD','Inbox Health'],
+    factors: 'claims processing, coding accuracy, denial management, reporting, and integration'
+  },
+  clinical: {
+    name: 'Clinical Trial Software',
+    link: 'https://healthcareindustryreviews.com/pages/clinical-rankings.html',
+    top: ['Medidata','Veeva Vault','Oracle Health Sciences','IQVIA','Castor','Medrio','Clinical Conductor','REDCap','OpenClinica','Ripple Science'],
+    factors: 'study management, data collection, regulatory compliance, patient engagement, and integration'
+  },
+  wellness: {
+    name: 'Health & Wellness Apps',
+    link: 'https://healthcareindustryreviews.com/pages/wellness-rankings.html',
+    top: ['Noom','Peloton','Calm','Headspace','Whoop','Oura Ring','MyFitnessPal','Fitbit','Apple Health','Strava'],
+    factors: 'health outcomes, user engagement, clinical validation, data privacy, and pricing'
+  },
+  pharma: {
+    name: 'Pharma & Biotech Tools',
+    link: 'https://healthcareindustryreviews.com/pages/pharma-rankings.html',
+    top: ['Veeva Systems','IQVIA','Benchling','Certara','Dotmatics','Saama Technologies','MasterControl','TraceLink','IDBS','Schrodinger'],
+    factors: 'drug development capabilities, regulatory compliance, data management, manufacturing, and integration'
+  },
+  banking: {
+    name: 'Banking & Core Systems',
+    link: 'https://financialindustryreviews.com/pages/banking-rankings.html',
+    top: ['FIS','Temenos','Thought Machine','Mambu','nCino','Finastra','Jack Henry','Q2 Holdings','Backbase','Finxact'],
+    factors: 'digital capabilities, scalability, compliance, integration, and cloud architecture'
+  },
+  wealth: {
+    name: 'Wealth Management',
+    link: 'https://financialindustryreviews.com/pages/wealth-rankings.html',
+    top: ['Addepar','Orion','Black Diamond','Envestnet Tamarac','Nitrogen','Morningstar Direct','eMoney Advisor','MoneyGuidePro','Wealthbox','Redtail'],
+    factors: 'portfolio management, client experience, automation, compliance, and reporting'
+  },
+  insurtech: {
+    name: 'Insurance Technology',
+    link: 'https://financialindustryreviews.com/pages/insurtech-rankings.html',
+    top: ['Guidewire','Duck Creek','Majesco','EIS Group','Lemonade','Root Insurance','Hippo Insurance','Snapsheet','CCC Intelligent Solutions','Verisk'],
+    factors: 'core insurance capabilities, digital experience, data analytics, integration, and scalability'
+  },
+  payments: {
+    name: 'Payment Platforms',
+    link: 'https://financialindustryreviews.com/pages/payments-rankings.html',
+    top: ['Stripe','Adyen','PayPal','Square','Worldpay','Checkout.com','Braintree','Authorize.Net','Clover','Toast'],
+    factors: 'processing capabilities, merchant experience, global reach, security, and pricing'
+  },
+  lending: {
+    name: 'Lending & Mortgage Tech',
+    link: 'https://financialindustryreviews.com/pages/lending-rankings.html',
+    top: ['ICE Mortgage Technology','Black Knight','Blend','nCino','Finastra','Tavant','Roostify','LoanPro','Sagent','Brace'],
+    factors: 'origination capabilities, automation, compliance, borrower experience, and integration'
+  },
+  regtech: {
+    name: 'Compliance & RegTech',
+    link: 'https://financialindustryreviews.com/pages/compliance-rankings.html',
+    top: ['ComplyAdvantage','Chainalysis','Hummingbird','Sumsub','Alloy','NICE Actimize','Onfido','Sardine','Unit21','Featurespace'],
+    factors: 'regulatory coverage, automation, risk management, reporting, and integration'
+  },
   pr: {
     name: 'PR & Newswire Software',
     link: 'https://softwareindustryreviews.com/pages/pr-rankings.html',
@@ -370,7 +458,6 @@ function runCheck() {
   var email = document.getElementById('userEmail').value.trim();
   if (!email || email.indexOf('@') === -1) { alert('Please enter your email to receive your visibility report'); return; }
 
-  // Send lead data to Formspree
   fetch('https://formspree.io/f/xqegnezp', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -425,8 +512,6 @@ function runCheck() {
     content.style.display = 'block';
 
     var score, scoreClass, scoreLabel, likelihood, gaps, compList;
-
-    // Deterministic scores based on position - consistent everywhere
     var positionScores = [9, 9, 8, 7, 7, 6, 5, 4, 3, 3];
 
     if (foundIndex > -1 && foundIndex < 3) {
