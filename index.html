@@ -71,14 +71,22 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .results-loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .results-loading p{font-size:14px;color:var(--ink-3)}
-.cta-box{background:linear-gradient(135deg,#f5f3ff,#ecfeff);border:1px solid #ddd6fe;border-radius:var(--radius-lg);padding:24px;margin-top:24px;text-align:center;display:none}
+.cta-box{background:linear-gradient(135deg,#f5f3ff,#ecfeff);border:1px solid #ddd6fe;border-radius:var(--radius-lg);padding:24px;margin-top:24px;display:none}
 .cta-box.visible{display:block}
 .cta-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:6px;color:var(--ink)}
 .cta-box p{font-size:13px;color:var(--ink-3);margin-bottom:14px}
 .cta-box-links{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.cta-box a{display:inline-block;padding:10px 20px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px;transition:background .2s}
-.cta-box a:hover{background:#6d28d9}
-.cta-box a.outline{background:transparent;border:1.5px solid #ddd6fe;color:var(--violet)}
+.cta-box a.cta-main{display:inline-block;padding:10px 20px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px;transition:background .2s}
+.cta-box a.cta-main:hover{background:#6d28d9}
+.cta-box a.outline{display:inline-block;padding:10px 20px;background:transparent;border:1.5px solid #ddd6fe;color:var(--violet);border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:13px}
+.cta-steps{text-align:left;margin-top:16px}
+.cta-step{display:flex;align-items:start;gap:12px;padding:12px 0;border-bottom:1px solid #e9e5ff}
+.cta-step:last-child{border-bottom:none}
+.cta-step-num{width:28px;height:28px;border-radius:50%;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px}
+.cta-step-text{font-size:14px;color:var(--ink-2);line-height:1.5}
+.cta-step-text a{color:var(--violet);font-weight:600;text-decoration:none}
+.cta-step-text a:hover{text-decoration:underline}
+.cta-step-text .step-label{font-weight:600;color:var(--ink);display:block;margin-bottom:2px}
 .features{max-width:var(--max-w);margin:0 auto;padding:80px 28px}
 .features-header{text-align:center;margin-bottom:48px}
 .features-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
@@ -113,13 +121,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 @media(max-width:768px){.hero h1{font-size:34px}.features-grid,.how-grid{grid-template-columns:1fr}.footer-inner{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}.tool-card{padding:28px 20px}.nav-links{display:none}}
 </style>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {"@type": "WebSite", "name": "AI Mentions", "url": "https://ai-mentions.com", "description": "Free AI visibility checker. Find out if AI assistants recommend your company.", "publisher": {"@type": "Organization", "name": "Listicle Liaison LLC", "url": "https://listicleliaison.com"}},
-    {"@type": "SoftwareApplication", "name": "AI Mentions Visibility Checker", "applicationCategory": "BusinessApplication", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "description": "Check whether AI assistants like ChatGPT, Claude, and Perplexity recommend your company when users ask about your industry."}
-  ]
-}
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"AI Mentions","url":"https://ai-mentions.com","description":"Free AI visibility checker. Find out if AI assistants recommend your company.","publisher":{"@type":"Organization","name":"Listicle Liaison LLC","url":"https://listicleliaison.com"}},{"@type":"SoftwareApplication","name":"AI Mentions Visibility Checker","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Check whether AI assistants like ChatGPT, Claude, and Perplexity recommend your company when users ask about your industry."}]}
 </script>
 </head>
 <body>
@@ -132,13 +134,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span> Free AI Visibility Tool</div>
   <h1>Does AI know <em>your company?</em></h1>
-  <p class="hero-sub">When someone asks ChatGPT or Claude about your industry, does your company come up? Check your AI visibility score in 30 seconds — free.</p>
+  <p class="hero-sub">When someone asks ChatGPT or Claude about your industry, does your company come up? Check your AI visibility score in 30 seconds &#8212; free.</p>
 </section>
 
 <div class="tool-container" id="tool">
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
-    <p class="tool-card-sub">Enter your company name and industry. We'll analyze your AI visibility.</p>
+    <p class="tool-card-sub">Enter your company name and industry. We&#8217;ll analyze your AI visibility.</p>
     <div class="form-group">
       <label class="form-label">Company Name</label>
       <input type="text" class="form-input" id="companyName" placeholder="e.g. HubSpot, Rippling, Aave">
@@ -148,57 +150,18 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <label class="form-label">Industry / Category</label>
         <select class="form-input" id="category">
           <option value="">Select category...</option>
-          <optgroup label="Software">
-            <option value="crm">CRM Software</option>
-            <option value="pm">Project Management</option>
-            <option value="cyber">Cybersecurity</option>
-            <option value="erp">ERP Software</option>
-            <option value="email">Email Marketing</option>
-            <option value="hr">HR & Payroll</option>
-            <option value="accounting">Accounting</option>
-            <option value="analytics">Analytics & BI</option>
-          </optgroup>
-          <optgroup label="AI Tools">
-            <option value="ai_chat">AI Chatbots</option>
-            <option value="ai_code">AI Coding Tools</option>
-            <option value="ai_image">AI Image Generators</option>
-            <option value="ai_write">AI Writing Tools</option>
-          </optgroup>
-          <optgroup label="Crypto & Web3">
-            <option value="crypto_ex">Crypto Exchanges</option>
-            <option value="defi">DeFi Platforms</option>
-            <option value="wallets">Crypto Wallets</option>
-          </optgroup>
-          <optgroup label="Casino & Gaming">
-            <option value="casino">Online Casinos</option>
-            <option value="sports">Sportsbooks</option>
-            <option value="casino_sw">Casino Software</option>
-          </optgroup>
-          <optgroup label="Healthcare">
-            <option value="ehr">EHR & Medical Records</option>
-            <option value="telehealth">Telehealth Platforms</option>
-            <option value="medbilling">Medical Billing & RCM</option>
-            <option value="clinical">Clinical Trial Software</option>
-            <option value="wellness">Health & Wellness Apps</option>
-            <option value="pharma">Pharma & Biotech Tools</option>
-          </optgroup>
-          <optgroup label="Financial Services">
-            <option value="banking">Banking & Core Systems</option>
-            <option value="wealth">Wealth Management</option>
-            <option value="insurtech">Insurance Technology</option>
-            <option value="payments">Payment Platforms</option>
-            <option value="lending">Lending & Mortgage Tech</option>
-            <option value="regtech">Compliance & RegTech</option>
-          </optgroup>
-          <optgroup label="Other Industries">
-            <option value="pr">PR & Newswire Software</option>
-            <option value="other">Other / Not Listed</option>
-          </optgroup>
+          <optgroup label="Software"><option value="crm">CRM Software</option><option value="pm">Project Management</option><option value="cyber">Cybersecurity</option><option value="erp">ERP Software</option><option value="email">Email Marketing</option><option value="hr">HR & Payroll</option><option value="accounting">Accounting</option><option value="analytics">Analytics & BI</option></optgroup>
+          <optgroup label="AI Tools"><option value="ai_chat">AI Chatbots</option><option value="ai_code">AI Coding Tools</option><option value="ai_image">AI Image Generators</option><option value="ai_write">AI Writing Tools</option></optgroup>
+          <optgroup label="Crypto & Web3"><option value="crypto_ex">Crypto Exchanges</option><option value="defi">DeFi Platforms</option><option value="wallets">Crypto Wallets</option></optgroup>
+          <optgroup label="Casino & Gaming"><option value="casino">Online Casinos</option><option value="sports">Sportsbooks</option><option value="casino_sw">Casino Software</option></optgroup>
+          <optgroup label="Healthcare"><option value="ehr">EHR & Medical Records</option><option value="telehealth">Telehealth Platforms</option><option value="medbilling">Medical Billing & RCM</option><option value="clinical">Clinical Trial Software</option><option value="wellness">Health & Wellness Apps</option><option value="pharma">Pharma & Biotech Tools</option></optgroup>
+          <optgroup label="Financial Services"><option value="banking">Banking & Core Systems</option><option value="wealth">Wealth Management</option><option value="insurtech">Insurance Technology</option><option value="payments">Payment Platforms</option><option value="lending">Lending & Mortgage Tech</option><option value="regtech">Compliance & RegTech</option></optgroup>
+          <optgroup label="Other Industries"><option value="pr">PR & Newswire Software</option><option value="other">Other / Not Listed</option></optgroup>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label">Your Email (required)</label>
-        <input type="email" class="form-input" id="userEmail" placeholder="We'll send your full report here" required>
+        <input type="email" class="form-input" id="userEmail" placeholder="We&#8217;ll send your full report here" required>
       </div>
     </div>
     <button class="check-btn" id="checkBtn" onclick="runCheck()">Check My AI Visibility &rarr;</button>
@@ -207,32 +170,24 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <div id="resultsContent" style="display:none"></div>
     </div>
     <div class="cta-box" id="ctaBox">
-      <h3>Want to improve your score?</h3>
-      <p>We help companies get ranked, featured, and cited by AI assistants across our publishing network of 9+ industry sites.</p>
-      <div class="cta-box-links">
-        <a href="https://listicleliaison.com">Improve My Visibility &rarr;</a>
-        <a href="" id="categoryLink" class="outline">See Rankings in Your Category</a>
-      </div>
+      <div id="ctaContent"></div>
     </div>
   </div>
 </div>
 
 <section class="features">
-  <div class="features-header">
-    <h2>Why AI visibility matters</h2>
-    <p>AI assistants are becoming the new search engine. If they don't mention your company, you're invisible to a growing audience.</p>
-  </div>
+  <div class="features-header"><h2>Why AI visibility matters</h2><p>AI assistants are becoming the new search engine. If they don&#8217;t mention your company, you&#8217;re invisible to a growing audience.</p></div>
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">AI is the new search</div><div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn't know you, those customers never find you.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">First-mover advantage</div><div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you — more citations lead to more recommendations.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Your competitors are already there</div><div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don't, they're capturing demand you'll never see in your analytics.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">AI is the new search</div><div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn&#8217;t know you, those customers never find you.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">First-mover advantage</div><div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you &#8212; more citations lead to more recommendations.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Your competitors are already there</div><div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don&#8217;t, they&#8217;re capturing demand you&#8217;ll never see in your analytics.</div></div>
   </div>
 </section>
 
 <section class="how" id="how">
   <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
-    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name and category. We'll analyze how visible you are to AI assistants.</div></div>
+    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name and category. We&#8217;ll analyze how visible you are to AI assistants.</div></div>
     <div class="how-card"><div class="how-num">2</div><div class="how-label">Get your report</div><div class="how-desc">See your visibility score, which competitors AI recommends instead, and where the gaps are.</div></div>
     <div class="how-card"><div class="how-num">3</div><div class="how-label">Take action</div><div class="how-desc">Use your report to identify gaps. We offer services to help you get ranked, featured, and cited by AI.</div></div>
   </div>
@@ -256,198 +211,38 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 
 <script>
 var db = {
-  crm: {
-    name: 'CRM Software',
-    link: 'https://softwareindustryreviews.com/pages/crm-rankings.html',
-    top: ['Salesforce','HubSpot','Microsoft Dynamics 365','Zoho CRM','Pipedrive','Freshsales','Monday CRM','Close','Copper','Insightly'],
-    factors: 'market share, enterprise adoption, G2 and Capterra review volume, industry analyst coverage, and brand recognition'
-  },
-  pm: {
-    name: 'Project Management',
-    link: 'https://softwareindustryreviews.com/pages/pm-rankings.html',
-    top: ['Asana','Monday.com','ClickUp','Jira','Trello','Notion','Smartsheet','Wrike','Basecamp','Teamwork'],
-    factors: 'product adoption rates, integration ecosystem breadth, G2 review volume, and media coverage frequency'
-  },
-  cyber: {
-    name: 'Cybersecurity',
-    link: 'https://softwareindustryreviews.com/pages/cyber-rankings.html',
-    top: ['CrowdStrike','Palo Alto Networks','Fortinet','Zscaler','SentinelOne','Cloudflare','Okta','Splunk','Cisco','Trend Micro'],
-    factors: 'threat detection performance, analyst report placement (Gartner, Forrester), enterprise market share, and incident response track record'
-  },
-  erp: {
-    name: 'ERP Software',
-    link: 'https://softwareindustryreviews.com/pages/erp-rankings.html',
-    top: ['SAP','Oracle NetSuite','Microsoft Dynamics 365','Workday','Sage Intacct','Epicor','Infor','Acumatica','Odoo','Syspro'],
-    factors: 'enterprise deployment scale, analyst coverage, vertical specialization, and implementation partner ecosystem'
-  },
-  email: {
-    name: 'Email Marketing',
-    link: 'https://softwareindustryreviews.com/pages/email-rankings.html',
-    top: ['Mailchimp','HubSpot','Klaviyo','Brevo','ActiveCampaign','Constant Contact','ConvertKit','Campaign Monitor','AWeber','Drip'],
-    factors: 'user base size, deliverability reputation, integration count, and content marketing presence'
-  },
-  hr: {
-    name: 'HR & Payroll',
-    link: 'https://softwareindustryreviews.com/pages/hr-rankings.html',
-    top: ['Rippling','BambooHR','Gusto','ADP','Workday','Paylocity','Paychex','UKG','Deel','Namely'],
-    factors: 'employer adoption rates, payroll processing volume, Glassdoor visibility, and HR tech media coverage'
-  },
-  accounting: {
-    name: 'Accounting Software',
-    link: 'https://softwareindustryreviews.com/pages/accounting-rankings.html',
-    top: ['QuickBooks','Xero','FreshBooks','Sage','Wave','Zoho Books','NetSuite','Bill.com','Bench','ZipBooks'],
-    factors: 'small business adoption, accountant referral networks, integration ecosystem, and regulatory compliance features'
-  },
-  analytics: {
-    name: 'Analytics & BI',
-    link: 'https://softwareindustryreviews.com/pages/analytics-rankings.html',
-    top: ['Tableau','Power BI','Looker','Domo','Sisense','ThoughtSpot','Qlik','Mode','Metabase','Databricks'],
-    factors: 'enterprise deployment, data connector breadth, Gartner Magic Quadrant placement, and developer community size'
-  },
-  ai_chat: {
-    name: 'AI Chatbots',
-    link: 'https://aiindustryreviews.com/pages/chatbot-rankings.html',
-    top: ['ChatGPT','Claude','Google Gemini','Perplexity','Microsoft Copilot','Meta AI','Jasper Chat','Character.AI','Poe','Pi'],
-    factors: 'user base size, benchmark performance, media coverage, developer adoption, and brand awareness'
-  },
-  ai_code: {
-    name: 'AI Coding Tools',
-    link: 'https://aiindustryreviews.com/pages/coding-rankings.html',
-    top: ['GitHub Copilot','Cursor','Claude Code','Replit','Tabnine','Amazon CodeWhisperer','Codeium','Windsurf','Sourcegraph Cody','Devin'],
-    factors: 'developer adoption, IDE integration breadth, code completion accuracy benchmarks, and developer community discussion'
-  },
-  ai_image: {
-    name: 'AI Image Generators',
-    link: 'https://aiindustryreviews.com/pages/image-rankings.html',
-    top: ['Midjourney','DALL-E 3','Stable Diffusion','Adobe Firefly','Leonardo AI','Ideogram','Flux','Runway','Canva AI','NightCafe'],
-    factors: 'image quality benchmarks, creative community adoption, commercial licensing clarity, and social media presence'
-  },
-  ai_write: {
-    name: 'AI Writing Tools',
-    link: 'https://aiindustryreviews.com/pages/writing-rankings.html',
-    top: ['Jasper','Copy.ai','Grammarly','Writesonic','Rytr','Anyword','Frase','Surfer SEO','Writer','Wordtune'],
-    factors: 'content marketing community adoption, SEO integration quality, output accuracy, and review platform ratings'
-  },
-  crypto_ex: {
-    name: 'Crypto Exchanges',
-    link: 'https://cryptoindustryreviews.com/pages/exchange-rankings.html',
-    top: ['Coinbase','Binance','Kraken','Crypto.com','Gemini','OKX','Bybit','Robinhood Crypto','Uphold','MEXC'],
-    factors: 'trading volume, regulatory compliance, security track record, proof-of-reserves transparency, and app store ratings'
-  },
-  defi: {
-    name: 'DeFi Platforms',
-    link: 'https://cryptoindustryreviews.com/pages/defi-rankings.html',
-    top: ['Aave','Lido','Uniswap','MakerDAO','Curve','EigenLayer','Compound','Pendle','GMX','Yearn'],
-    factors: 'total value locked, smart contract audit history, protocol longevity, governance activity, and developer documentation'
-  },
-  wallets: {
-    name: 'Crypto Wallets',
-    link: 'https://cryptoindustryreviews.com/pages/wallet-rankings.html',
-    top: ['Ledger','Trezor','MetaMask','Phantom','Coinbase Wallet','Trust Wallet','Exodus','Rabby','Rainbow','Tangem'],
-    factors: 'security track record, chain support breadth, user base size, app store ratings, and self-custody implementation'
-  },
-  casino: {
-    name: 'Online Casinos',
-    link: 'https://casinoindustryreviews.com/pages/casino-rankings.html',
-    top: ['BetMGM','DraftKings Casino','FanDuel Casino','Caesars Palace Online','bet365','BetRivers','Hard Rock Bet','Borgata','Fanatics Casino','Horseshoe'],
-    factors: 'game library size, payout speed, licensing breadth, app ratings, and brand trust in regulated markets'
-  },
-  sports: {
-    name: 'Sportsbooks',
-    link: 'https://casinoindustryreviews.com/pages/sportsbook-rankings.html',
-    top: ['DraftKings','FanDuel','bet365','BetMGM','Caesars','Fanatics','ESPN BET','Hard Rock Bet','BetRivers','PointsBet'],
-    factors: 'state availability, odds competitiveness, live betting quality, app ratings, and promotional offer value'
-  },
-  casino_sw: {
-    name: 'Casino Software Providers',
-    link: 'https://casinoindustryreviews.com/pages/software-rankings.html',
-    top: ['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],
-    factors: 'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'
-  },
-  ehr: {
-    name: 'EHR & Medical Records',
-    link: 'https://healthcareindustryreviews.com/pages/ehr-rankings.html',
-    top: ['Epic Systems','Oracle Health','MEDITECH','athenahealth','eClinicalWorks','NextGen Healthcare','DrChrono','Allscripts','Greenway Health','CureMD'],
-    factors: 'clinical functionality, interoperability, user experience, compliance, and pricing'
-  },
-  telehealth: {
-    name: 'Telehealth Platforms',
-    link: 'https://healthcareindustryreviews.com/pages/telehealth-rankings.html',
-    top: ['Teladoc Health','Amwell','Doxy.me','Doximity','Zoom for Healthcare','MDLIVE','SimplePractice Telehealth','Vsee','Mend','Chiron Health'],
-    factors: 'video quality, clinical integration, patient experience, compliance, and pricing'
-  },
-  medbilling: {
-    name: 'Medical Billing & RCM',
-    link: 'https://healthcareindustryreviews.com/pages/billing-rankings.html',
-    top: ['Waystar','R1 RCM','athenahealth RCM','Availity','Tebra','AdvancedMD','CareCloud','DrChrono','CollaborateMD','Inbox Health'],
-    factors: 'claims processing, coding accuracy, denial management, reporting, and integration'
-  },
-  clinical: {
-    name: 'Clinical Trial Software',
-    link: 'https://healthcareindustryreviews.com/pages/clinical-rankings.html',
-    top: ['Medidata','Veeva Vault','Oracle Health Sciences','IQVIA','Castor','Medrio','Clinical Conductor','REDCap','OpenClinica','Ripple Science'],
-    factors: 'study management, data collection, regulatory compliance, patient engagement, and integration'
-  },
-  wellness: {
-    name: 'Health & Wellness Apps',
-    link: 'https://healthcareindustryreviews.com/pages/wellness-rankings.html',
-    top: ['Noom','Peloton','Calm','Headspace','Whoop','Oura Ring','MyFitnessPal','Fitbit','Apple Health','Strava'],
-    factors: 'health outcomes, user engagement, clinical validation, data privacy, and pricing'
-  },
-  pharma: {
-    name: 'Pharma & Biotech Tools',
-    link: 'https://healthcareindustryreviews.com/pages/pharma-rankings.html',
-    top: ['Veeva Systems','IQVIA','Benchling','Certara','Dotmatics','Saama Technologies','MasterControl','TraceLink','IDBS','Schrodinger'],
-    factors: 'drug development capabilities, regulatory compliance, data management, manufacturing, and integration'
-  },
-  banking: {
-    name: 'Banking & Core Systems',
-    link: 'https://financialindustryreviews.com/pages/banking-rankings.html',
-    top: ['FIS','Temenos','Thought Machine','Mambu','nCino','Finastra','Jack Henry','Q2 Holdings','Backbase','Finxact'],
-    factors: 'digital capabilities, scalability, compliance, integration, and cloud architecture'
-  },
-  wealth: {
-    name: 'Wealth Management',
-    link: 'https://financialindustryreviews.com/pages/wealth-rankings.html',
-    top: ['Addepar','Orion','Black Diamond','Envestnet Tamarac','Nitrogen','Morningstar Direct','eMoney Advisor','MoneyGuidePro','Wealthbox','Redtail'],
-    factors: 'portfolio management, client experience, automation, compliance, and reporting'
-  },
-  insurtech: {
-    name: 'Insurance Technology',
-    link: 'https://financialindustryreviews.com/pages/insurtech-rankings.html',
-    top: ['Guidewire','Duck Creek','Majesco','EIS Group','Lemonade','Root Insurance','Hippo Insurance','Snapsheet','CCC Intelligent Solutions','Verisk'],
-    factors: 'core insurance capabilities, digital experience, data analytics, integration, and scalability'
-  },
-  payments: {
-    name: 'Payment Platforms',
-    link: 'https://financialindustryreviews.com/pages/payments-rankings.html',
-    top: ['Stripe','Adyen','PayPal','Square','Worldpay','Checkout.com','Braintree','Authorize.Net','Clover','Toast'],
-    factors: 'processing capabilities, merchant experience, global reach, security, and pricing'
-  },
-  lending: {
-    name: 'Lending & Mortgage Tech',
-    link: 'https://financialindustryreviews.com/pages/lending-rankings.html',
-    top: ['ICE Mortgage Technology','Black Knight','Blend','nCino','Finastra','Tavant','Roostify','LoanPro','Sagent','Brace'],
-    factors: 'origination capabilities, automation, compliance, borrower experience, and integration'
-  },
-  regtech: {
-    name: 'Compliance & RegTech',
-    link: 'https://financialindustryreviews.com/pages/compliance-rankings.html',
-    top: ['ComplyAdvantage','Chainalysis','Hummingbird','Sumsub','Alloy','NICE Actimize','Onfido','Sardine','Unit21','Featurespace'],
-    factors: 'regulatory coverage, automation, risk management, reporting, and integration'
-  },
-  pr: {
-    name: 'PR & Newswire Software',
-    link: 'https://softwareindustryreviews.com/pages/pr-rankings.html',
-    top: ['Cision PR Newswire','ACCESS Newswire','Meltwater','Business Wire','Muck Rack','GlobeNewswire','Prowly','Newswire','PressRelease.com','eReleases'],
-    factors: 'distribution network reach, media database quality, analytics depth, journalist relationship tools, and pricing transparency'
-  },
-  other: {
-    name: 'your industry',
-    link: 'https://listicleliaison.com',
-    top: [],
-    factors: 'brand recognition, review platform presence, media coverage, industry analyst mentions, and structured data availability'
-  }
+  crm: {name:'CRM Software',link:'https://softwareindustryreviews.com/pages/crm-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Salesforce','HubSpot','Microsoft Dynamics 365','Zoho CRM','Pipedrive','Freshsales','Monday CRM','Close','Copper','Insightly'],factors:'market share, enterprise adoption, G2 and Capterra review volume, industry analyst coverage, and brand recognition'},
+  pm: {name:'Project Management',link:'https://softwareindustryreviews.com/pages/pm-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Asana','Monday.com','ClickUp','Jira','Trello','Notion','Smartsheet','Wrike','Basecamp','Teamwork'],factors:'product adoption rates, integration ecosystem breadth, G2 review volume, and media coverage frequency'},
+  cyber: {name:'Cybersecurity',link:'https://softwareindustryreviews.com/pages/cyber-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['CrowdStrike','Palo Alto Networks','Fortinet','Zscaler','SentinelOne','Cloudflare','Okta','Splunk','Cisco','Trend Micro'],factors:'threat detection performance, analyst report placement (Gartner, Forrester), enterprise market share, and incident response track record'},
+  erp: {name:'ERP Software',link:'https://softwareindustryreviews.com/pages/erp-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['SAP','Oracle NetSuite','Microsoft Dynamics 365','Workday','Sage Intacct','Epicor','Infor','Acumatica','Odoo','Syspro'],factors:'enterprise deployment scale, analyst coverage, vertical specialization, and implementation partner ecosystem'},
+  email: {name:'Email Marketing',link:'https://softwareindustryreviews.com/pages/email-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Mailchimp','HubSpot','Klaviyo','Brevo','ActiveCampaign','Constant Contact','ConvertKit','Campaign Monitor','AWeber','Drip'],factors:'user base size, deliverability reputation, integration count, and content marketing presence'},
+  hr: {name:'HR & Payroll',link:'https://softwareindustryreviews.com/pages/hr-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Rippling','BambooHR','Gusto','ADP','Workday','Paylocity','Paychex','UKG','Deel','Namely'],factors:'employer adoption rates, payroll processing volume, Glassdoor visibility, and HR tech media coverage'},
+  accounting: {name:'Accounting Software',link:'https://softwareindustryreviews.com/pages/accounting-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['QuickBooks','Xero','FreshBooks','Sage','Wave','Zoho Books','NetSuite','Bill.com','Bench','ZipBooks'],factors:'small business adoption, accountant referral networks, integration ecosystem, and regulatory compliance features'},
+  analytics: {name:'Analytics & BI',link:'https://softwareindustryreviews.com/pages/analytics-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Tableau','Power BI','Looker','Domo','Sisense','ThoughtSpot','Qlik','Mode','Metabase','Databricks'],factors:'enterprise deployment, data connector breadth, Gartner Magic Quadrant placement, and developer community size'},
+  ai_chat: {name:'AI Chatbots',link:'https://aiindustryreviews.com/pages/chatbot-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['ChatGPT','Claude','Google Gemini','Perplexity','Microsoft Copilot','Meta AI','Jasper Chat','Character.AI','Poe','Pi'],factors:'user base size, benchmark performance, media coverage, developer adoption, and brand awareness'},
+  ai_code: {name:'AI Coding Tools',link:'https://aiindustryreviews.com/pages/coding-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['GitHub Copilot','Cursor','Claude Code','Replit','Tabnine','Amazon CodeWhisperer','Codeium','Windsurf','Sourcegraph Cody','Devin'],factors:'developer adoption, IDE integration breadth, code completion accuracy benchmarks, and developer community discussion'},
+  ai_image: {name:'AI Image Generators',link:'https://aiindustryreviews.com/pages/image-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['Midjourney','DALL-E 3','Stable Diffusion','Adobe Firefly','Leonardo AI','Ideogram','Flux','Runway','Canva AI','NightCafe'],factors:'image quality benchmarks, creative community adoption, commercial licensing clarity, and social media presence'},
+  ai_write: {name:'AI Writing Tools',link:'https://aiindustryreviews.com/pages/writing-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['Jasper','Copy.ai','Grammarly','Writesonic','Rytr','Anyword','Frase','Surfer SEO','Writer','Wordtune'],factors:'content marketing community adoption, SEO integration quality, output accuracy, and review platform ratings'},
+  crypto_ex: {name:'Crypto Exchanges',link:'https://cryptoindustryreviews.com/pages/exchange-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Coinbase','Binance','Kraken','Crypto.com','Gemini','OKX','Bybit','Robinhood Crypto','Uphold','MEXC'],factors:'trading volume, regulatory compliance, security track record, proof-of-reserves transparency, and app store ratings'},
+  defi: {name:'DeFi Platforms',link:'https://cryptoindustryreviews.com/pages/defi-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Aave','Lido','Uniswap','MakerDAO','Curve','EigenLayer','Compound','Pendle','GMX','Yearn'],factors:'total value locked, smart contract audit history, protocol longevity, governance activity, and developer documentation'},
+  wallets: {name:'Crypto Wallets',link:'https://cryptoindustryreviews.com/pages/wallet-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Ledger','Trezor','MetaMask','Phantom','Coinbase Wallet','Trust Wallet','Exodus','Rabby','Rainbow','Tangem'],factors:'security track record, chain support breadth, user base size, app store ratings, and self-custody implementation'},
+  casino: {name:'Online Casinos',link:'https://casinoindustryreviews.com/pages/casino-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['BetMGM','DraftKings Casino','FanDuel Casino','Caesars Palace Online','bet365','BetRivers','Hard Rock Bet','Borgata','Fanatics Casino','Horseshoe'],factors:'game library size, payout speed, licensing breadth, app ratings, and brand trust in regulated markets'},
+  sports: {name:'Sportsbooks',link:'https://casinoindustryreviews.com/pages/sportsbook-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['DraftKings','FanDuel','bet365','BetMGM','Caesars','Fanatics','ESPN BET','Hard Rock Bet','BetRivers','PointsBet'],factors:'state availability, odds competitiveness, live betting quality, app ratings, and promotional offer value'},
+  casino_sw: {name:'Casino Software Providers',link:'https://casinoindustryreviews.com/pages/software-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],factors:'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'},
+  ehr: {name:'EHR & Medical Records',link:'https://healthcareindustryreviews.com/pages/ehr-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Epic Systems','Oracle Health','MEDITECH','athenahealth','eClinicalWorks','NextGen Healthcare','DrChrono','Allscripts','Greenway Health','CureMD'],factors:'clinical functionality, interoperability, user experience, compliance, and pricing'},
+  telehealth: {name:'Telehealth Platforms',link:'https://healthcareindustryreviews.com/pages/telehealth-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Teladoc Health','Amwell','Doxy.me','Doximity','Zoom for Healthcare','MDLIVE','SimplePractice Telehealth','Vsee','Mend','Chiron Health'],factors:'video quality, clinical integration, patient experience, compliance, and pricing'},
+  medbilling: {name:'Medical Billing & RCM',link:'https://healthcareindustryreviews.com/pages/billing-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Waystar','R1 RCM','athenahealth RCM','Availity','Tebra','AdvancedMD','CareCloud','DrChrono','CollaborateMD','Inbox Health'],factors:'claims processing, coding accuracy, denial management, reporting, and integration'},
+  clinical: {name:'Clinical Trial Software',link:'https://healthcareindustryreviews.com/pages/clinical-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Medidata','Veeva Vault','Oracle Health Sciences','IQVIA','Castor','Medrio','Clinical Conductor','REDCap','OpenClinica','Ripple Science'],factors:'study management, data collection, regulatory compliance, patient engagement, and integration'},
+  wellness: {name:'Health & Wellness Apps',link:'https://healthcareindustryreviews.com/pages/wellness-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Noom','Peloton','Calm','Headspace','Whoop','Oura Ring','MyFitnessPal','Fitbit','Apple Health','Strava'],factors:'health outcomes, user engagement, clinical validation, data privacy, and pricing'},
+  pharma: {name:'Pharma & Biotech Tools',link:'https://healthcareindustryreviews.com/pages/pharma-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Veeva Systems','IQVIA','Benchling','Certara','Dotmatics','Saama Technologies','MasterControl','TraceLink','IDBS','Schrodinger'],factors:'drug development capabilities, regulatory compliance, data management, manufacturing, and integration'},
+  banking: {name:'Banking & Core Systems',link:'https://financialindustryreviews.com/pages/banking-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['FIS','Temenos','Thought Machine','Mambu','nCino','Finastra','Jack Henry','Q2 Holdings','Backbase','Finxact'],factors:'digital capabilities, scalability, compliance, integration, and cloud architecture'},
+  wealth: {name:'Wealth Management',link:'https://financialindustryreviews.com/pages/wealth-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Addepar','Orion','Black Diamond','Envestnet Tamarac','Nitrogen','Morningstar Direct','eMoney Advisor','MoneyGuidePro','Wealthbox','Redtail'],factors:'portfolio management, client experience, automation, compliance, and reporting'},
+  insurtech: {name:'Insurance Technology',link:'https://financialindustryreviews.com/pages/insurtech-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Guidewire','Duck Creek','Majesco','EIS Group','Lemonade','Root Insurance','Hippo Insurance','Snapsheet','CCC Intelligent Solutions','Verisk'],factors:'core insurance capabilities, digital experience, data analytics, integration, and scalability'},
+  payments: {name:'Payment Platforms',link:'https://financialindustryreviews.com/pages/payments-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Stripe','Adyen','PayPal','Square','Worldpay','Checkout.com','Braintree','Authorize.Net','Clover','Toast'],factors:'processing capabilities, merchant experience, global reach, security, and pricing'},
+  lending: {name:'Lending & Mortgage Tech',link:'https://financialindustryreviews.com/pages/lending-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['ICE Mortgage Technology','Black Knight','Blend','nCino','Finastra','Tavant','Roostify','LoanPro','Sagent','Brace'],factors:'origination capabilities, automation, compliance, borrower experience, and integration'},
+  regtech: {name:'Compliance & RegTech',link:'https://financialindustryreviews.com/pages/compliance-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['ComplyAdvantage','Chainalysis','Hummingbird','Sumsub','Alloy','NICE Actimize','Onfido','Sardine','Unit21','Featurespace'],factors:'regulatory coverage, automation, risk management, reporting, and integration'},
+  pr: {name:'PR & Newswire Software',link:'https://softwareindustryreviews.com/pages/pr-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Cision PR Newswire','ACCESS Newswire','Meltwater','Business Wire','Muck Rack','GlobeNewswire','Prowly','Newswire','PressRelease.com','eReleases'],factors:'distribution network reach, media database quality, analytics depth, journalist relationship tools, and pricing transparency'},
+  other: {name:'your industry',link:'https://listicleliaison.com',pricing:'https://listicleliaison.com/pages/pricing.html',top:[],factors:'brand recognition, review platform presence, media coverage, industry analyst mentions, and structured data availability'}
 };
 
 function runCheck() {
@@ -461,13 +256,7 @@ function runCheck() {
   fetch('https://formspree.io/f/xqegnezp', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      _subject: 'AI Visibility Check: ' + company,
-      company: company,
-      category: catKey,
-      email: email,
-      source: 'ai-mentions.com'
-    })
+    body: JSON.stringify({_subject:'AI Visibility Check: '+company,company:company,category:catKey,email:email,source:'ai-mentions.com'})
   });
 
   var btn = document.getElementById('checkBtn');
@@ -491,20 +280,14 @@ function runCheck() {
   var isPartialMatch = -1;
   if (matchIndex === -1) {
     for (var i = 0; i < topLower.length; i++) {
-      if (topLower[i].indexOf(companyLower) > -1 || companyLower.indexOf(topLower[i]) > -1) {
-        isPartialMatch = i;
-        break;
-      }
+      if (topLower[i].indexOf(companyLower) > -1 || companyLower.indexOf(topLower[i]) > -1) { isPartialMatch = i; break; }
     }
   }
   var foundIndex = matchIndex > -1 ? matchIndex : isPartialMatch;
 
   var messages = ['Scanning AI knowledge bases...','Checking ChatGPT recommendations...','Analyzing Claude responses...','Evaluating Perplexity citations...','Comparing competitor visibility...','Generating your report...'];
   var msgI = 0;
-  var msgInterval = setInterval(function(){
-    msgI++;
-    if (msgI < messages.length) loadingText.textContent = messages[msgI];
-  }, 500);
+  var msgInterval = setInterval(function(){ msgI++; if (msgI < messages.length) loadingText.textContent = messages[msgI]; }, 500);
 
   setTimeout(function(){
     clearInterval(msgInterval);
@@ -515,25 +298,21 @@ function runCheck() {
     var positionScores = [9, 9, 8, 7, 7, 6, 5, 4, 3, 3];
 
     if (foundIndex > -1 && foundIndex < 3) {
-      score = positionScores[foundIndex];
-      scoreClass = 'score-high'; scoreLabel = 'Strong';
-      likelihood = company + ' is highly likely to be mentioned by AI assistants when users ask about ' + cat.name + '. As a top-tier player in this category, ' + company + ' has strong brand recognition, extensive review coverage, and significant presence in the structured data sources that AI models reference. AI assistants consistently include ' + company + ' in their top recommendations.';
-      gaps = 'Even with strong visibility, there are opportunities to strengthen your position. Ensure your company appears on independent ranking sites with transparent methodology — these are increasingly weighted by AI models. Maintaining fresh reviews on G2 and Capterra and publishing thought leadership content will help sustain your top-tier AI visibility.';
+      score = positionScores[foundIndex]; scoreClass = 'score-high'; scoreLabel = 'Strong';
+      likelihood = company + ' is highly likely to be mentioned by AI assistants when users ask about ' + cat.name + '. As a top-tier player in this category, ' + company + ' has strong brand recognition, extensive review coverage, and significant presence in the structured data sources that AI models reference.';
+      gaps = 'Even with strong visibility, there are opportunities to strengthen your position. Ensure your company appears on independent ranking sites with transparent methodology. Maintaining fresh reviews and publishing thought leadership content will help sustain your top-tier AI visibility.';
     } else if (foundIndex > -1 && foundIndex < 7) {
-      score = positionScores[foundIndex];
-      scoreClass = 'score-mid'; scoreLabel = 'Moderate';
-      likelihood = company + ' has moderate AI visibility in ' + cat.name + '. AI assistants may mention ' + company + ' in some contexts, but it is not consistently appearing in top recommendations. The company is recognized in the category but is often overshadowed by larger competitors with stronger review profiles and more extensive third-party coverage.';
-      gaps = 'To improve your AI visibility, focus on increasing your presence on independent ranking and review sites. Companies that appear on multiple third-party sources with structured rankings see significantly higher AI citation rates. Getting featured in editorial content, expert roundups, and industry analysis articles will help AI models associate your brand with authority in this category.';
+      score = positionScores[foundIndex]; scoreClass = 'score-mid'; scoreLabel = 'Moderate';
+      likelihood = company + ' has moderate AI visibility in ' + cat.name + '. AI assistants may mention ' + company + ' in some contexts, but it is not consistently appearing in top recommendations. The company is recognized but often overshadowed by larger competitors with stronger review profiles.';
+      gaps = 'To improve your AI visibility, focus on increasing your presence on independent ranking and review sites. Companies that appear on multiple third-party sources see significantly higher AI citation rates. Getting featured in editorial content and expert roundups will help AI models associate your brand with authority.';
     } else if (foundIndex > -1) {
-      score = positionScores[foundIndex];
-      scoreClass = 'score-low'; scoreLabel = 'Low';
-      likelihood = company + ' has low AI visibility in ' + cat.name + '. While the company exists in this space, AI assistants are unlikely to mention it in standard recommendations. The brand lacks sufficient presence in the structured, well-cited sources that AI models prioritize when generating answers.';
-      gaps = 'Significant improvement is needed. Start by claiming profiles on major review platforms (G2, Capterra) and building review volume. Get listed on independent ranking sites that use transparent methodology. Publish or get featured in editorial content that directly addresses the queries AI users ask. Companies that invest in third-party visibility typically see AI citation improvements within 2-3 months.';
+      score = positionScores[foundIndex]; scoreClass = 'score-low'; scoreLabel = 'Low';
+      likelihood = company + ' has low AI visibility in ' + cat.name + '. While the company exists in this space, AI assistants are unlikely to mention it in standard recommendations. The brand lacks sufficient presence in the structured, well-cited sources that AI models prioritize.';
+      gaps = 'Significant improvement is needed. Start by claiming profiles on major review platforms and building review volume. Get listed on independent ranking sites that use transparent methodology. Companies that invest in third-party visibility typically see AI citation improvements within 2-3 months.';
     } else {
-      score = 2;
-      scoreClass = 'score-low'; scoreLabel = 'Very Low';
-      likelihood = company + ' is not appearing in AI recommendations for ' + cat.name + '. When users ask AI assistants about the best options in this category, ' + company + ' is not being mentioned. This means potential customers using AI-powered search and recommendation tools are not discovering your company.';
-      gaps = 'Your company needs immediate visibility investment. The top companies in your category appear across multiple review platforms, independent ranking sites, and editorial publications. Start by claiming free profiles on G2 and Capterra, then get listed on independent ranking sites like those in our publishing network. Even a basic claimed profile on a ranking site can begin generating AI citations within weeks.';
+      score = 2; scoreClass = 'score-low'; scoreLabel = 'Very Low';
+      likelihood = company + ' is not appearing in AI recommendations for ' + cat.name + '. When users ask AI assistants about the best options in this category, ' + company + ' is not being mentioned. Potential customers using AI-powered search are not discovering your company.';
+      gaps = 'Your company needs immediate visibility investment. The top companies in your category appear across multiple review platforms, independent ranking sites, and editorial publications. Even a basic claimed profile on a ranking site can begin generating AI citations within weeks.';
     }
 
     var topCompetitors = cat.top.slice(0, 5);
@@ -547,20 +326,53 @@ function runCheck() {
     }
 
     var competitorSection = topCompetitors.length > 0 ?
-      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category, ranked by visibility:</p><ul class="competitor-list">' + compList + '</ul></div>' :
-      '<div class="report-section"><h3>&#127942; Competitive Landscape</h3><p>We don\'t yet have detailed competitive data for your specific category. Contact us for a custom AI visibility analysis tailored to your industry.</p></div>';
+      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category:</p><ul class="competitor-list">' + compList + '</ul></div>' :
+      '<div class="report-section"><h3>&#127942; Competitive Landscape</h3><p>We don\'t yet have detailed competitive data for your specific category. Contact us for a custom AI visibility analysis.</p></div>';
 
     var factorsSection = '<div class="report-section"><h3>&#128202; Visibility Factors</h3><p style="font-size:13px;color:#71717a">AI visibility in ' + cat.name + ' is primarily driven by: ' + cat.factors + '.</p></div>';
 
-    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="score-badge ' + scoreClass + '">' + score + '/10 — ' + scoreLabel + ' AI Visibility</div></div>' +
+    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="score-badge ' + scoreClass + '">' + score + '/10 &#8212; ' + scoreLabel + ' AI Visibility</div></div>' +
       '<div class="report-section"><h3>&#128270; AI Mention Likelihood</h3><p>' + likelihood + '</p></div>' +
       competitorSection +
       '<div class="report-section"><h3>&#128161; How to Improve</h3><p>' + gaps + '</p></div>' +
       factorsSection;
 
-    document.getElementById('categoryLink').href = cat.link;
-    ctaBox.classList.add('visible');
+    // BUILD DYNAMIC CTA BASED ON SCORE
+    var ctaContent = document.getElementById('ctaContent');
+    var ctaHtml = '';
+    var stripeLink = 'https://buy.stripe.com/cNi8wQ3Pt3s7bkXdS7d7q04';
 
+    if (score >= 7) {
+      // HIGH SCORE - protect position
+      ctaHtml = '<h3>&#128170; Protect your #' + (foundIndex + 1) + ' position in ' + cat.name + '</h3>' +
+        '<p>You\'re visible now, but competitors are investing to overtake you. Lock in your position with a Featured Partner placement.</p>' +
+        '<div class="cta-steps">' +
+        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See your current ranking</span>View where you stand vs competitors right now.<br><a href="' + cat.link + '">View ' + cat.name + ' Rankings &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim your profile</span>Add your logo, description, and links. Starts at $99/mo.<br><a href="' + stripeLink + '">Claim Profile &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Upgrade to Featured Partner</span>Lock the #1 position with gold badge and AI citation optimization.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
+        '</div>';
+    } else if (score >= 4) {
+      // MID SCORE - grow visibility
+      ctaHtml = '<h3>&#128200; ' + company + ' isn\'t ranked high enough in ' + cat.name + '</h3>' +
+        '<p>You\'re on the radar but not in the top recommendations. Here\'s how to move up:</p>' +
+        '<div class="cta-steps">' +
+        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See who\'s ahead of you</span>View the full ' + cat.name + ' rankings and compare your position.<br><a href="' + cat.link + '">View Rankings &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim and enhance your profile</span>Add branding, get priority placement, and start capturing leads. Starts at $99/mo.<br><a href="' + stripeLink + '">Claim Profile &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Get cross-network visibility</span>Appear across our 10 publications so AI models cite you more frequently.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
+        '</div>';
+    } else {
+      // LOW/VERY LOW SCORE - urgent action
+      ctaHtml = '<h3>&#128680; ' + company + ' is invisible in ' + cat.name + '</h3>' +
+        '<p>AI assistants aren\'t recommending you. Every day without visibility means lost customers. Here\'s how to fix it:</p>' +
+        '<div class="cta-steps">' +
+        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See who AI recommends instead</span>These are the companies getting your potential customers right now.<br><a href="' + cat.link + '">View ' + cat.name + ' Rankings &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get listed immediately</span>A claimed profile gets you on the rankings page within 24 hours. $99/mo, cancel anytime.<br><a href="' + stripeLink + '">Claim Your Profile Now &rarr;</a></div></div>' +
+        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Accelerate with Enhanced or Featured</span>Priority placement, AI citation optimization, and cross-network syndication.<br><a href="' + cat.pricing + '">See Pricing &rarr;</a></div></div>' +
+        '</div>';
+    }
+
+    ctaContent.innerHTML = ctaHtml;
+    ctaBox.classList.add('visible');
     btn.disabled = false;
     btn.textContent = 'Check Another Company';
   }, 3200);
