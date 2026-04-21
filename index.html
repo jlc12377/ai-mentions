@@ -41,7 +41,10 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .tool-container{max-width:640px;margin:0 auto;padding:0 28px;position:relative}
 .tool-card{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px;color:var(--ink);box-shadow:0 0 80px rgba(124,58,237,.08),0 20px 60px rgba(0,0,0,.3)}
 .tool-card h2{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:4px;color:var(--ink)}
-.tool-card-sub{font-size:14px;color:var(--ink-3);margin-bottom:24px}
+.tool-card-sub{font-size:14px;color:var(--ink-3);margin-bottom:8px}
+.trust-signals{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.trust-signals span{font-size:12px;color:#71717a;display:flex;align-items:center;gap:4px}
+.trust-signals .check{color:#22c55e}
 .form-group{margin-bottom:16px}
 .form-label{font-size:12px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
 .form-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--white);transition:border-color .2s;outline:none}
@@ -49,6 +52,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .form-input::placeholder{color:var(--ink-4)}
 select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.email-note{font-size:11px;color:#a1a1aa;margin-top:4px;display:block}
 .check-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:-.2px}
 .check-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
 .check-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -141,6 +145,11 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
     <p class="tool-card-sub">Enter your company name and industry. We&#8217;ll analyze your AI visibility.</p>
+    <div class="trust-signals">
+      <span><span class="check">&#10003;</span> 1,350+ companies ranked</span>
+      <span><span class="check">&#10003;</span> 10 industry publications</span>
+      <span><span class="check">&#10003;</span> Takes 30 seconds</span>
+    </div>
     <div class="form-group">
       <label class="form-label">Company Name</label>
       <input type="text" class="form-input" id="companyName" placeholder="e.g. HubSpot, Rippling, Aave">
@@ -162,9 +171,10 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <div class="form-group">
         <label class="form-label">Your Email (required)</label>
         <input type="email" class="form-input" id="userEmail" placeholder="We&#8217;ll send your full report here" required>
+        <span class="email-note">Your detailed report is sent here. No spam, no sales calls, unsubscribe anytime.</span>
       </div>
     </div>
-    <button class="check-btn" id="checkBtn" onclick="runCheck()">Check My AI Visibility &rarr;</button>
+    <button class="check-btn" id="checkBtn" onclick="runCheck()">Get My Free Visibility Score &rarr;</button>
     <div class="results" id="results">
       <div class="results-loading" id="resultsLoading"><div class="spinner"></div><p id="loadingText">Analyzing AI visibility...</p></div>
       <div id="resultsContent" style="display:none"></div>
@@ -259,6 +269,16 @@ function runCheck() {
     body: JSON.stringify({_subject:'AI Visibility Check: '+company,company:company,category:catKey,email:email,source:'ai-mentions.com'})
   });
 
+  // Track form fill in GA4
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'visibility_check', {
+      'company': company,
+      'category': catKey,
+      'event_category': 'engagement',
+      'event_label': company + ' - ' + catKey
+    });
+  }
+
   var btn = document.getElementById('checkBtn');
   var results = document.getElementById('results');
   var loading = document.getElementById('resultsLoading');
@@ -337,13 +357,11 @@ function runCheck() {
       '<div class="report-section"><h3>&#128161; How to Improve</h3><p>' + gaps + '</p></div>' +
       factorsSection;
 
-    // BUILD DYNAMIC CTA BASED ON SCORE
     var ctaContent = document.getElementById('ctaContent');
     var ctaHtml = '';
     var stripeLink = 'https://buy.stripe.com/cNi8wQ3Pt3s7bkXdS7d7q04';
 
     if (score >= 7) {
-      // HIGH SCORE - protect position
       ctaHtml = '<h3>&#128170; Protect your #' + (foundIndex + 1) + ' position in ' + cat.name + '</h3>' +
         '<p>You\'re visible now, but competitors are investing to overtake you. Lock in your position with a Featured Partner placement.</p>' +
         '<div class="cta-steps">' +
@@ -352,7 +370,6 @@ function runCheck() {
         '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Upgrade to Featured Partner</span>Lock the #1 position with gold badge and AI citation optimization.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
         '</div>';
     } else if (score >= 4) {
-      // MID SCORE - grow visibility
       ctaHtml = '<h3>&#128200; ' + company + ' isn\'t ranked high enough in ' + cat.name + '</h3>' +
         '<p>You\'re on the radar but not in the top recommendations. Here\'s how to move up:</p>' +
         '<div class="cta-steps">' +
@@ -361,7 +378,6 @@ function runCheck() {
         '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Get cross-network visibility</span>Appear across our 10 publications so AI models cite you more frequently.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
         '</div>';
     } else {
-      // LOW/VERY LOW SCORE - urgent action
       ctaHtml = '<h3>&#128680; ' + company + ' is invisible in ' + cat.name + '</h3>' +
         '<p>AI assistants aren\'t recommending you. Every day without visibility means lost customers. Here\'s how to fix it:</p>' +
         '<div class="cta-steps">' +
