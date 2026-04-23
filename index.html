@@ -7,6 +7,9 @@
 <meta name="description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. Free AI visibility checker for businesses.">
 <link rel="canonical" href="https://ai-mentions.com/">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+
+<!-- Microsoft UET Tag -->
+<script>(function(w, d, t, u, o) {w[u] = w[u] || [], o.ts = (new Date).getTime();var n = d.createElement(t);n.src = "https://bat.bing.net/bat.js?ti=" + o.ti + ("uetq" != u ? "&q=" + u : ""),n.async = 1, n.onload = n.onreadystatechange = function() {var s = this.readyState;s && "loaded" !== s && "complete" !== s ||(o.q = w[u], w[u] = new UET(o), w[u].push("pageLoad"),n.onload = n.onreadystatechange = null)};var i = d.getElementsByTagName(t)[0];i.parentNode.insertBefore(n, i);})(window, document, "script", "uetq", {ti: "187247762",enableAutoSpaTracking: true});</script>
 <style>
 :root{
   --bg:#09090b;--bg-2:#18181b;--bg-3:#27272a;
@@ -276,6 +279,16 @@ function runCheck() {
       'category': catKey,
       'event_category': 'engagement',
       'event_label': company + ' - ' + catKey
+    });
+  }
+
+  // Track form fill in Microsoft UET (Bing Ads)
+  if (typeof window.uetq !== 'undefined') {
+    window.uetq = window.uetq || [];
+    window.uetq.push('event', 'visibility_check', {
+      'event_category': 'form_submission',
+      'event_label': company + ' - ' + catKey,
+      'event_value': 1
     });
   }
 
