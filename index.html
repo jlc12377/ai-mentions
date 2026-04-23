@@ -285,6 +285,9 @@ function runCheck() {
   // Track form fill in Microsoft UET (Bing Ads)
   if (typeof window.uetq !== 'undefined') {
     window.uetq = window.uetq || [];
+    // Enhanced conversions - pass email for better attribution
+    window.uetq.push('set', { 'pid': { 'em': email } });
+    // Conversion event
     window.uetq.push('event', 'visibility_check', {
       'event_category': 'form_submission',
       'event_label': company + ' - ' + catKey,
