@@ -1,3 +1,70 @@
+# robots.txt for ai-mentions.com
+# Last updated: April 2026
+
+# Standard search engine crawlers
 User-agent: *
 Allow: /
+
+# AI tool crawlers - explicitly permitted
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+User-agent: ImagesiftBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: Timpibot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+# Sitemap location
 Sitemap: https://ai-mentions.com/sitemap.xml
