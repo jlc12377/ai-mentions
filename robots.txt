@@ -1,5 +1,5 @@
-# robots.txt for ai-mentions.com
-# Last updated: April 2026
+# robots.txt for www.ai-mentions.com
+# Last updated: October 2026
 
 # Standard search engine crawlers
 User-agent: *
@@ -67,4 +67,4 @@ User-agent: YouBot
 Allow: /
 
 # Sitemap location
-Sitemap: https://ai-mentions.com/sitemap.xml
+Sitemap: https://www.ai-mentions.com/sitemap.xml
