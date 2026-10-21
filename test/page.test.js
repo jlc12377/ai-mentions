@@ -32,6 +32,16 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /\$65\/mo/);
   assert.match(page, /3-month minimum/);
   assert.equal(/credited toward/i.test(page), false);
+  assert.equal(page.includes('We saved your request'), false);
+  assert.equal(page.includes('There is no score to act on yet'), false);
+  assert.equal(page.includes('separate from the live AI check'), false);
+  assert.equal(/priority placement/i.test(page), false);
+  assert.equal(page.includes('cross-network syndication'), false);
+  assert.match(page, /We could not score this one/);
+  assert.match(page, /we did not invent a number/);
+  assert.match(page, /See where businesses rank on our independent Best-of lists/);
+  assert.match(page, /Get verified and listed/);
+  assert.match(page, /AI Visibility Package from \$299\/mo/);
   assert.equal(page.includes('cNi8wQ3Pt3s7bkXdS7d7q04'), false);
 });
 

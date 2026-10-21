@@ -274,6 +274,9 @@ test('a miss is score 0 and a total failure is unavailable, not a fake number', 
   assert.equal(miss.body.score, 0);
   assert.equal(miss.body.unavailable, false);
   assert.equal(miss.body.summary.mentions, 0);
+  assert.equal((miss.body.skipped || []).some((row) => row.id === 'gemini' || row.label === 'Gemini'), false);
+  assert.ok((miss.body.skipped || []).some((row) => row.id === 'perplexity'));
+  assert.deepEqual(miss.body.competitors.map((row) => row.name), ['Salesforce', 'Zoho']);
 
   const failing = setup({ OPENAI_API_KEY: 'test-openai' }, async () => ({
     ok: false,
