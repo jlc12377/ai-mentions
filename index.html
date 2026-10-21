@@ -138,6 +138,9 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .cta-step-text a{color:var(--violet);font-weight:600;text-decoration:none}
 .cta-step-text a:hover{text-decoration:underline}
 .cta-step-text .step-label{font-weight:600;color:var(--ink);display:block;margin-bottom:2px}
+.upgrade{background:#fff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:14px 14px 12px;margin-bottom:8px}
+.upgrade h3{margin-bottom:4px}
+.upgrade-note{font-size:12px;color:var(--ink-3);margin:10px 0 0}
 .features{max-width:var(--max-w);margin:0 auto;padding:80px 28px}
 .features-header{text-align:center;margin-bottom:48px}
 .features-header h2{font-family:var(--font-display);font-size:36px;font-weight:400;letter-spacing:-1px;margin-bottom:8px}
@@ -179,7 +182,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 
 <nav class="nav">
   <a href="/" class="nav-brand"><div class="nav-icon">ai</div><div class="nav-name">AI <span>Mentions</span></div></a>
-  <div class="nav-links"><a href="#tool">Check Visibility</a><a href="#how">How It Works</a><a href="#methodology">Methodology</a><a href="https://listicleliaison.com">Listicle Liaison</a></div>
+  <div class="nav-links"><a href="#tool">Check Visibility</a><a href="/report">Reports</a><a href="#how">How It Works</a><a href="#methodology">Methodology</a><a href="https://listicleliaison.com">Listicle Liaison</a></div>
 </nav>
 
 <section class="hero">
@@ -443,28 +446,33 @@ function renderScore(data) {
 }
 
 function renderCta(cat, company, score, unavailable) {
-  var stripeLink = 'https://buy.stripe.com/cNi8wQ3Pt3s7bkXdS7d7q04';
+  var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
+  var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
   var heading;
   var intro;
   if (unavailable) {
     heading = 'We saved your request';
-    intro = 'There is no score to act on yet. You can still look at the public rankings or claim a profile.';
+    intro = 'There is no score to act on yet. The paid report runs the same live check once ChatGPT, Perplexity, and Claude are all connected.';
   } else if (score >= 70) {
     heading = company + ' is showing up in these AI answers';
-    intro = 'You appeared often in this check. A claimed profile gives buyers another page that names you.';
+    intro = 'You appeared often in this check. The full report adds the rank, the competitors, the sources, and a private link.';
   } else if (score >= 40) {
     heading = company + ' showed up in some of these answers';
-    intro = 'You were named, but not in every answer. These are the same next steps we offer every company.';
+    intro = 'You were named, but not in every answer. The full report shows which assistant said what, and what to change.';
   } else {
     heading = company + ' rarely appeared in these answers';
-    intro = 'In this check, the assistants usually named other companies. A public profile is one page they can cite later.';
+    intro = 'In this check, the assistants usually named other companies. The full report lists those competitors and the sources they cited.';
   }
   document.getElementById('ctaContent').innerHTML =
-    '<h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
+    '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
+    '<div class="cta-box-links">' +
+    '<a class="cta-main" href="' + esc(reportUrl) + '">Full AI Visibility Report — $150</a>' +
+    '<a class="outline" href="' + esc(trackingUrl) + '">AI Visibility Tracking — $65/mo</a>' +
+    '</div>' +
+    '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
     '<div class="cta-steps">' +
     '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the public rankings</span>These pages are ours, separate from the live AI check.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +
-    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim your profile</span>Add your logo, description, and links. Starts at $99/mo.<br><a href="' + esc(stripeLink) + '">Claim profile &rarr;</a></div></div>' +
-    '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">See featured plans</span>Priority placement and cross-network syndication.<br><a href="' + esc(cat.pricing) + '">View plans &rarr;</a></div></div>' +
+    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">See featured plans</span>Priority placement and cross-network syndication.<br><a href="' + esc(cat.pricing) + '">View plans &rarr;</a></div></div>' +
     '</div>';
   document.getElementById('ctaBox').classList.add('visible');
 }

@@ -79,8 +79,6 @@ Claude asks with the web search tool (`web_search_20250305` by default, one sear
 | `RATE_LIMIT_MAX` | `8` | Checks per IP per window. |
 | `RATE_LIMIT_WINDOW_SEC` | `3600` | Rate-limit window. |
 | `GEMINI_THINKING_BUDGET` | unset | Sent only when set. `0` disables thinking on Gemini models that accept `thinkingBudget`. |
-| `KV_REST_API_URL` and `KV_REST_API_TOKEN` | unset | Vercel KV / Upstash Redis REST. Shared 24-hour cache and shared rate limit. |
-| `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` | unset | Same as the KV pair, if you created the database as Upstash directly. |
 
 `vercel.json` caps the function at 60 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls. ChatGPT, Gemini, and Claude fire together. Perplexity is the long pole: up to its budget, default 50 seconds, still under the cap. The page waits up to 58 seconds before it gives up on the request.
 
@@ -108,9 +106,7 @@ The Gemini free-tier API can also ground searches, with a smaller daily cap, and
 
 ### Rate limit and cache
 
-Without KV, the limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap.
-
-With `KV_REST_API_URL` and `KV_REST_API_TOKEN` (or the Upstash pair), both the cache and the counter are shared. If KV errors, the function falls back to memory for that request instead of failing the check. Only successful scores are cached. An outage is not cached, so adding a key takes effect on the next request. The cache key is a hash of the normalized name, domain, category, city, prompt count, formula version, and the configured model names.
+The free-score limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap. Only successful scores are cached. An outage is not cached. The cache key is a hash of the normalized name, domain, category, city, prompt count, formula version, and the configured model names.
 
 The limiter reads the first address in `x-forwarded-for`, which Vercel sets. It is per IP, default 8 requests per hour, including cache hits.
 
@@ -132,3 +128,46 @@ curl -s -X POST http://127.0.0.1:3000/api/score \
 Unit tests cover mention detection, list position, citations, the scoring formula, mocked provider responses, the no-keys response, total failure, partial failure, validation, the rate limit, and the 24-hour cache. They do not call the real providers.
 
 The lead form still posts to the existing Formspree endpoint after the check resolves (including when the score is unavailable). The payload includes the real score, or `unavailable`. No score is sent to the provider APIs, and the email address stays on the form post.
+
+## Paid reports
+
+The free score stays free. Three Stripe Payment Links take payment and return the buyer to `https://ai-mentions.com/report?session_id={CHECKOUT_SESSION_ID}`:
+
+| Product | Price | Link |
+| --- | --- | --- |
+| Full AI Visibility Report | $150 one-time | `https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u` |
+| AI Visibility Tracking | $65/month, 3-month minimum | `https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v` |
+| Add-on tracking, sold with packages on other network sites | $49/month | `https://buy.stripe.com/6oU5kEclZgeT1Kng0fd7q0w` |
+
+`/report` reads `session_id` and checks the Checkout Session with `STRIPE_RESTRICTED_KEY` (read-only: Checkout Sessions, Customers, and Subscriptions). The session has to be complete and paid. A one-time payment is the $150 report. A subscription is tracking; an amount of $49 is the add-on, and any other subscription amount is the $65 plan. The buyer enters one business. The server runs ChatGPT, Perplexity, and Claude through the same scorer as `/api/score`, stores the report, and returns a private link `/r/<token>`. The same payment cannot run a second business. Opening the checkout page again, or the private link, shows the saved report.
+
+The report on screen includes each assistant's mentions and list rank, competitors named instead, source URLs, and next steps drawn from those results. Resend emails a summary and the private link to the checkout email. `RESEND_API_KEY` is a sending-only key, and the app only calls `POST https://api.resend.com/emails`. `REPORT_FROM_EMAIL` is `AI Mentions <reports@ai-mentions.com>`. The domain `ai-mentions.com` is verified in Resend. If either email variable is missing, the report is still saved and the page says to keep the link.
+
+Reports, subscribers, report history, and used checkout sessions are stored in Supabase (Postgres). The Vercel project already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for production and preview. The service key is the new `sb_secret_` key. The server sends that value only in the PostgREST `apikey` header, the same place supabase-js puts a secret key, and never in `Authorization`. It is not a JWT. Supabase maps it to `service_role`. The server reads `SUPABASE_URL` first and falls back to `NEXT_PUBLIC_SUPABASE_URL` for the project URL only. The key is not read by the browser and is not written into the pages. A publishable key in `SUPABASE_SERVICE_ROLE_KEY` is rejected.
+
+The Supabase project is empty. Before the first paid report, open the SQL editor and paste `supabase/schema.sql` once. That file is the whole setup: `reports`, `subscribers`, `report_history`, `checkout_sessions`, and a short-lived `report_locks` table. Row level security is enabled and forced, grants for `anon` and `authenticated` are revoked, and there are no policies, so the public Data API cannot read the rows. `service_role` bypasses row level security, which is why the secret key stays on the server. If the tables are missing, the paid endpoints say to run that file and do not pretend a report was saved.
+
+These six names are set on the ai-mentions Vercel project: `STRIPE_RESTRICTED_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REPORT_FROM_EMAIL`, and `CRON_SECRET`. The app reads those names and no aliases.
+
+Subscribers (the $65 and $49 plans) are stored with email, Stripe subscription id, business, and a `report_history` row per report. Vercel Cron calls `GET /api/cron/reports` daily at 14:00 UTC. The route requires `Authorization: Bearer <CRON_SECRET>`. It runs a subscriber whose last report is at least 30 days old, after Stripe says the subscription is still `active`. Canceled, unpaid, expired, or paused subscriptions are marked inactive and are not checked again. The new email includes the score change since the previous report. A full check can take about a minute, so the default `CRON_BUDGET_MS` of 65000 runs one subscriber per day and leaves the rest for the next day. Raise that value, up to the cron function's 300 second limit, to clear more than one in a run.
+
+Paid reports are not stored in the free-score cache.
+
+### Env vars for paid reports
+
+Set these in Vercel. Do not commit values. Do not put `SUPABASE_SERVICE_ROLE_KEY` in any `NEXT_PUBLIC_` variable or in the browser.
+
+| Env var | Required | What it does |
+| --- | --- | --- |
+| `STRIPE_RESTRICTED_KEY` | yes | Read-only Stripe key for Checkout Sessions, Customers, and Subscriptions. |
+| `SUPABASE_URL` | yes, unless `NEXT_PUBLIC_SUPABASE_URL` is set | Supabase project URL. Injected by the Vercel integration. |
+| `NEXT_PUBLIC_SUPABASE_URL` | the URL, if `SUPABASE_URL` is unset | Same project URL. Used only as a fallback. The anon key is not used. |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes, already set | Server-only `sb_secret_` key. Sent as the PostgREST `apikey`. Never send it to the browser. |
+| `RESEND_API_KEY` | yes, already set | Sending-only Resend key. Used only to send the report email. |
+| `REPORT_FROM_EMAIL` | yes, already set | `AI Mentions <reports@ai-mentions.com>`. `ai-mentions.com` is verified in Resend. |
+| `CRON_SECRET` | yes, already set | Bearer token Vercel sends on the cron request. The route rejects every call when this is unset. |
+| `PUBLIC_BASE_URL` | no | Link host in emails. Default `https://ai-mentions.com`. |
+| `CRON_BUDGET_MS` | no | Time budget for the daily job. Default `65000` (one report). |
+| `OPENAI_API_KEY`, `PERPLEXITY_API_KEY`, `ANTHROPIC_API_KEY` | yes, for a report to run | The paid check uses these three engines. Gemini is not part of the paid report. |
+
+The free score still uses the provider keys, rate limit, and cache documented above.

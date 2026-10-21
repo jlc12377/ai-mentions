@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>AI Visibility Report — AI Mentions</title>
+<meta name="description" content="Paid AI visibility report for ChatGPT, Perplexity, and Claude. One-time report or monthly tracking.">
+<link rel="canonical" href="https://www.ai-mentions.com/report">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{--violet:#7c3aed;--ink:#09090b;--ink-2:#3f3f46;--ink-3:#71717a;--border:#e4e4e7;--radius:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#09090b;color:#fff;font-family:'Space Grotesk',sans-serif;line-height:1.55;min-height:100vh}
+a{color:#a78bfa}
+.nav{max-width:800px;margin:0 auto;padding:20px 20px 0;display:flex;justify-content:space-between;align-items:center}
+.nav a.brand{color:#fff;text-decoration:none;font-weight:600}
+.wrap{max-width:800px;margin:0 auto;padding:28px 20px 72px}
+.card{background:#fff;color:var(--ink);border-radius:20px;padding:28px 24px}
+h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:36px;letter-spacing:-.5px;margin-bottom:8px}
+h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:26px 0 8px}
+.lead{color:#a1a1aa;margin-bottom:18px}
+.offer{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:10px 0}
+.offer strong{display:block}
+.offer p{color:var(--ink-2);font-size:14px;margin-top:4px}
+.offer a.buy{display:inline-block;margin-top:8px;background:var(--violet);color:#fff;text-decoration:none;border-radius:8px;padding:8px 12px;font-weight:600;font-size:13px}
+.form-group{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:8px;font:inherit;font-size:15px}
+input:focus{outline:none;border-color:var(--violet)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{width:100%;margin-top:6px;padding:14px;border:0;border-radius:8px;background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+button:disabled{opacity:.6;cursor:wait}
+.note,.error{font-size:14px;margin:10px 0}
+.error{color:#92400e;background:#fef3c7;border-radius:8px;padding:12px 14px}
+.meta{color:var(--ink-3);font-size:13px}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.badge{padding:6px 14px;border-radius:20px;font-weight:700;font-size:14px;white-space:nowrap}
+.score-high{background:#dcfce7;color:#166534}.score-mid{background:#fef3c7;color:#92400e}.score-low{background:#fee2e2;color:#991b1b}
+.change{background:#f5f3ff;border-radius:8px;padding:12px 14px;color:#5b21b6;font-size:14px}
+.private{word-break:break-all;font-size:13px}
+.engine{border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:10px 0}
+.engine-head{display:flex;gap:8px;justify-content:space-between;align-items:baseline;font-size:14px}
+.engine-head span{color:var(--ink-3);font-size:12px}
+.check{font-size:13px;color:var(--ink-2);padding:6px 0;border-bottom:1px solid #f4f4f5}
+.check.failed,.warn{color:#92400e}
+.excerpt{font-size:12px;color:var(--ink-3);margin-top:4px}
+ul,ol{margin:8px 0 0 18px}li{margin:6px 0;font-size:14px;color:var(--ink-2)}
+.sources{list-style:none;margin-left:0}.sources a,.private a{word-break:break-all}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:12px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.row{grid-template-columns:1fr}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<nav class="nav"><a class="brand" href="/">AI Mentions</a><a href="/#tool">Free score</a></nav>
+<div class="wrap">
+<div class="card" id="card">
+  <h1>AI visibility report</h1>
+  <p class="lead">Loading checkout…</p>
+</div>
+</div>
+<script>
+var OFFERS = [
+  { name: 'Full AI Visibility Report', price: '$150 one-time', detail: 'One business. ChatGPT, Perplexity, and Claude, with ranks, competitors, sources, and what to do next. Emailed to the checkout address and saved at a private link.', url: 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u' },
+  { name: 'AI Visibility Tracking', price: '$65/month', detail: 'The same report on day one, then again every 30 days while the subscription is active, with the change since last month. 3-month minimum.', url: 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v' },
+  { name: 'Add-on tracking', price: '$49/month', detail: 'Sold with packages on other network sites. Same monthly report and private link.', url: 'https://buy.stripe.com/6oU5kEclZgeT1Kng0fd7q0w' }
+];
+
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function safeUrl(url) {
+  try {
+    var parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+    return parsed.href;
+  } catch (e) { return ''; }
+}
+function scoreClass(score) {
+  if (score >= 70) return 'score-high';
+  if (score >= 40) return 'score-mid';
+  return 'score-low';
+}
+function offersHtml() {
+  return '<h1>AI visibility report</h1><p class="lead">The free score on the homepage stays free. A paid report runs ChatGPT, Perplexity, and Claude, then keeps the result at a private link and emails it to the checkout address.</p>' +
+    OFFERS.map(function (offer) {
+      return '<div class="offer"><strong>' + esc(offer.name) + ' — ' + esc(offer.price) + '</strong><p>' + esc(offer.detail) + '</p><a class="buy" href="' + esc(offer.url) + '">Continue to checkout</a></div>';
+    }).join('') +
+    '<p class="note">After payment, Stripe sends you back here with your checkout session. One payment runs the report for one business. You can open that report again from the private link.</p>';
+}
+function formHtml(data) {
+  var product = data.product || {};
+  var minimum = product.minimum ? ' ' + product.minimum + '.' : '';
+  return '<h1>' + esc(product.name || 'AI visibility report') + '</h1>' +
+    '<p class="lead">' + esc(product.priceLabel || '') + (product.cadence === 'month' ? ' · monthly' : ' · one-time') + '.' + esc(minimum) + ' This payment covers one business. We email the report to ' + esc(data.email || 'the checkout address') + '.</p>' +
+    '<form id="reportForm">' +
+    '<div class="form-group"><label for="businessName">Company name</label><input id="businessName" maxlength="80" required placeholder="Morgan & Morgan"></div>' +
+    '<div class="row"><div class="form-group"><label for="domain">Website</label><input id="domain" maxlength="200" required placeholder="morganandmorgan.com"></div>' +
+    '<div class="form-group"><label for="city">City (optional)</label><input id="city" maxlength="80" placeholder="Nashville"></div></div>' +
+    '<div class="form-group"><label for="category">Category</label><input id="category" maxlength="80" required placeholder="personal injury lawyers"></div>' +
+    '<button id="runBtn" type="submit">Run the report</button>' +
+    '<p class="note">This asks the three assistants live and can take about a minute. The questions do not include the company name.</p>' +
+    '</form><div id="formError"></div>';
+}
+function reportHtml(data) {
+  var view = data.report || {};
+  var bits = [view.category, view.city, view.domain].filter(Boolean).join(' · ');
+  var summary = view.summary || {};
+  var named = summary.checks ? 'Named in ' + summary.mentions + ' of ' + summary.checks + ' answers.' : '';
+  var emailLine = data.emailSent
+    ? 'Emailed to the checkout address.'
+    : (data.emailReason === 'not_configured' || data.emailReason === 'no_customer_email'
+      ? 'Email is not connected, so keep this private link.'
+      : 'The report is saved. Email could not be sent, so keep this private link.');
+  var engines = (view.providers || []).map(function (provider) {
+    var checks = provider.checks || [];
+    var good = checks.filter(function (check) { return check.ok; });
+    var failed = checks.length - good.length;
+    var mentions = good.filter(function (check) { return check.mentioned; }).length;
+    var citations = good.filter(function (check) { return check.cited; }).length;
+    var positions = good.map(function (check) { return check.position; }).filter(function (position) { return position; });
+    var best = positions.length ? Math.min.apply(null, positions) : null;
+    var lines = checks.map(function (check) {
+      if (!check.ok) return '<div class="check failed">Failed: ' + esc(check.error || 'no answer') + '</div>';
+      var parts = [check.mentioned ? 'Named' : 'Not named'];
+      if (check.position) parts.push('list #' + check.position);
+      else if (check.mentioned) parts.push('no list rank');
+      parts.push(check.cited ? 'domain cited' : 'domain not cited');
+      if (check.grounded === false) parts.push('answered without web search');
+      parts.push(check.score + '/100');
+      var excerpt = check.excerpt ? '<p class="excerpt">' + esc(check.excerpt) + '</p>' : '';
+      return '<div class="check">' + esc(parts.join(' · ')) + '</div>' + excerpt;
+    }).join('');
+    var note = failed ? '<p class="warn">' + failed + ' of ' + checks.length + ' questions failed and were left out of this score.</p>' : '';
+    return '<section class="engine"><div class="engine-head"><strong>' + esc(provider.label) + '</strong><span>' + esc(provider.model || '') + '</span><b>' + (provider.ok && provider.score != null ? esc(provider.score) + '/100' : 'Failed') + '</b></div><p>' + (best ? 'Best list rank #' + best + '. ' : '') + 'Named in ' + mentions + ' of ' + good.length + ' answers. Domain cited in ' + citations + '.</p>' + note + lines + '</section>';
+  }).join('');
+  var competitors = (view.competitors || []).length
+    ? '<ul>' + view.competitors.map(function (row) { return '<li>' + esc(row.name) + ' — ' + esc(row.mentions) + '</li>'; }).join('') + '</ul>'
+    : '<p>No other companies were named in the lists these assistants returned.</p>';
+  var sources = (view.sources || []).length
+    ? '<ul class="sources">' + view.sources.map(function (source) {
+      var url = safeUrl(source.url);
+      if (!url) return '';
+      return '<li><a href="' + esc(url) + '">' + esc(url) + '</a>' + (source.own ? ' (your domain)' : '') + '</li>';
+    }).join('') + '</ul>'
+    : '<p>No source URLs came back with these answers.</p>';
+  var recs = (view.recommendations || []).map(function (item) {
+    return '<li><strong>' + esc(item.title) + '</strong><p>' + esc(item.detail) + '</p></li>';
+  }).join('');
+  var prompts = (view.prompts || []).map(function (prompt) { return '<li>' + esc(prompt) + '</li>'; }).join('');
+  var change = view.change && view.change.text ? '<p class="change">' + esc(view.change.text) + '</p>' : '';
+  return '<p class="meta">' + esc((data.product && data.product.name) || 'Report') + (data.alreadyGenerated ? ' · saved earlier' : '') + '</p>' +
+    '<div class="top"><div><h1>' + esc(view.businessName) + '</h1><p class="meta">' + esc(bits) + '</p></div><div class="badge ' + scoreClass(view.score) + '">' + esc(view.score) + '/100</div></div>' +
+    change +
+    '<p>' + esc(named) + ' ' + esc(emailLine) + '</p>' +
+    '<p class="private">Private link: <a href="' + esc(data.url) + '">' + esc(data.url) + '</a></p>' +
+    '<h2>By assistant</h2>' + engines +
+    '<h2>Competitors recommended instead</h2>' + competitors +
+    '<h2>Sources cited</h2>' + sources +
+    '<h2>What to do next</h2><ol>' + recs + '</ol>' +
+    '<h2>What we asked</h2><ol>' + prompts + '</ol>' +
+    '<h2>How the score was calculated</h2><p>' + esc(view.formula && view.formula.description ? view.formula.description : '') + '</p>';
+}
+function show(html) { document.getElementById('card').innerHTML = html; }
+function sessionId() { return new URLSearchParams(location.search).get('session_id') || ''; }
+
+async function readJson(response) {
+  var data = await response.json();
+  data._status = response.status;
+  return data;
+}
+
+async function start() {
+  var id = sessionId();
+  if (!id) { show(offersHtml()); return; }
+  show('<h1>Checking payment…</h1><div class="spinner"></div>');
+  var data;
+  try {
+    data = await readJson(await fetch('/api/report?session_id=' + encodeURIComponent(id)));
+  } catch (error) {
+    show('<h1>Payment check failed</h1><p class="error">The checkout could not be verified. Open the link from the payment page again.</p>' + offersHtml());
+    return;
+  }
+  if (!data.ok) {
+    show('<h1>This checkout is not ready</h1><p class="error">' + esc(data.error || 'Payment was not confirmed.') + '</p>');
+    return;
+  }
+  if (data.generated && data.report) { show(reportHtml(data)); return; }
+  show(formHtml(data));
+  document.getElementById('reportForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    submitReport(id);
+  });
+}
+
+async function submitReport(id) {
+  var button = document.getElementById('runBtn');
+  var errorBox = document.getElementById('formError');
+  button.disabled = true;
+  button.textContent = 'Asking ChatGPT, Perplexity, and Claude…';
+  errorBox.innerHTML = '<div class="spinner"></div><p class="note">This is a live check and can take about a minute.</p>';
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = setTimeout(function () { if (controller) controller.abort(); }, 70000);
+  var data;
+  try {
+    var response = await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: id,
+        businessName: document.getElementById('businessName').value.trim(),
+        domain: document.getElementById('domain').value.trim(),
+        category: document.getElementById('category').value.trim(),
+        city: document.getElementById('city').value.trim()
+      }),
+      signal: controller ? controller.signal : undefined
+    });
+    data = await readJson(response);
+  } catch (error) {
+    data = { ok: false, error: 'The report did not finish. Nothing was saved as a guess. You can try this payment again.' };
+  } finally {
+    clearTimeout(timer);
+  }
+  if (data && data._status === 200 && data.report && data.url) {
+    show(reportHtml(data));
+    return;
+  }
+  if (data && data._status === 409 && data.url) {
+    errorBox.innerHTML = '<p class="error">' + esc(data.error || 'This payment was already used.') + ' <a href="' + esc(data.url) + '">Open the saved report</a></p>';
+    button.disabled = false;
+    button.textContent = 'Run the report';
+    return;
+  }
+  button.disabled = false;
+  button.textContent = 'Run the report';
+  errorBox.innerHTML = '<p class="error">' + esc((data && data.error) || 'The report could not be finished.') + '</p>';
+}
+
+start();
+</script>
+</body>
+</html>
