@@ -26,6 +26,13 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /questions failed and were left out of this score/);
   assert.match(page, /answered without web search/);
   assert.equal(page.includes('No answer returned'), false);
+  assert.match(page, /https:\/\/buy\.stripe\.com\/cNieVeclZ8MrbkX15ld7q0u/);
+  assert.match(page, /https:\/\/buy\.stripe\.com\/9B63cw71Fe6LfBd4hxd7q0v/);
+  assert.match(page, /Full AI Visibility Report — \$150/);
+  assert.match(page, /\$65\/mo/);
+  assert.match(page, /3-month minimum/);
+  assert.equal(/credited toward/i.test(page), false);
+  assert.equal(page.includes('cNi8wQ3Pt3s7bkXdS7d7q04'), false);
 });
 
 test('deploy notes name the provider env vars and the formula', () => {
@@ -38,9 +45,33 @@ test('deploy notes name the provider env vars and the formula', () => {
   assert.match(readme, /claude-haiku-5-5/);
   assert.match(readme, /24/);
   assert.match(readme, /in-memory/);
-  assert.match(readme, /KV_REST_API_URL/);
+  assert.match(readme, /SUPABASE_URL/);
+  assert.match(readme, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.equal(/KV_REST_API_URL|UPSTASH_REDIS/.test(readme), false);
   assert.match(readme, /\/v1\/responses/);
   assert.match(readme, /PERPLEXITY_BUDGET_MS/);
   assert.match(readme, /PERPLEXITY_429_RETRIES/);
+  assert.match(readme, /STRIPE_RESTRICTED_KEY/);
+  assert.match(readme, /RESEND_API_KEY/);
+  assert.match(readme, /REPORT_FROM_EMAIL/);
+  assert.match(readme, /CRON_SECRET/);
+  assert.match(readme, /supabase\/schema\.sql/);
+  assert.match(readme, /server/);
+  assert.match(readme, /3-month minimum/);
+  const schema = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
+  for (const name of ['reports', 'subscribers', 'report_history', 'checkout_sessions']) {
+    assert.match(schema, new RegExp(`table if not exists public\\.${name}`));
+    assert.match(schema, new RegExp(`alter table public\\.${name} enable row level security`, 'i'));
+  }
+  assert.match(schema, /revoke all on table public\.reports from public, anon, authenticated/i);
+  assert.equal(/create policy/i.test(schema), false);
+  assert.equal(/to anon/i.test(schema.replace(/from public, anon, authenticated/gi, '')), false);
+  assert.equal(page.includes('SUPABASE_SERVICE_ROLE_KEY'), false);
+  assert.equal(fs.readFileSync(path.join(__dirname, '..', 'report.html'), 'utf8').includes('SUPABASE_SERVICE_ROLE_KEY'), false);
   assert.equal(readme.includes('sk-'), false);
+  assert.equal(/credited toward/i.test(readme), false);
+  const reportPage = fs.readFileSync(path.join(__dirname, '..', 'report.html'), 'utf8');
+  assert.match(reportPage, /3-month minimum/);
+  assert.match(reportPage, /6oU5kEclZgeT1Kng0fd7q0w/);
+  assert.equal(/credited toward/i.test(reportPage), false);
 });

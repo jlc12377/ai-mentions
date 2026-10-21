@@ -4,6 +4,7 @@
 # Standard search engine crawlers
 User-agent: *
 Allow: /
+Disallow: /r/
 
 # AI tool crawlers - explicitly permitted
 User-agent: GPTBot

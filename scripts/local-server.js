@@ -4,9 +4,13 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { createHandler } = require('../lib/handler');
+const { createReportHandler, createPrivateReportHandler, createCronHandler } = require('../lib/report-service');
 
 const root = path.join(__dirname, '..');
 const handler = createHandler();
+const reportHandler = createReportHandler();
+const privateReportHandler = createPrivateReportHandler();
+const cronHandler = createCronHandler();
 const port = Number(process.env.PORT) || 3000;
 
 const types = {
@@ -21,14 +25,21 @@ const types = {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
-  if (url.pathname === '/api/score') {
+  if (req.method === 'POST' && (url.pathname === '/api/score' || url.pathname === '/api/report' || url.pathname === '/api/cron/reports')) {
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
     req.body = Buffer.concat(chunks).toString('utf8');
-    return handler(req, res);
+  }
+  if (url.pathname === '/api/score') return handler(req, res);
+  if (url.pathname === '/api/report') return reportHandler(req, res);
+  if (url.pathname === '/api/cron/reports') return cronHandler(req, res);
+  const privateReport = url.pathname.match(/^\/r\/([A-Za-z0-9_-]{20,80})$/);
+  if (privateReport) {
+    req.query = { token: privateReport[1] };
+    return privateReportHandler(req, res);
   }
 
-  const requested = url.pathname === '/' ? '/index.html' : url.pathname;
+  const requested = url.pathname === '/report' ? '/report.html' : (url.pathname === '/' ? '/index.html' : url.pathname);
   const filePath = path.resolve(root, `.${path.normalize(requested)}`);
   if (filePath !== root && !filePath.startsWith(`${root}${path.sep}`)) {
     res.statusCode = 403;
