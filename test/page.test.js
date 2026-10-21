@@ -22,6 +22,10 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /id="methodology"/);
   assert.match(page, /70%/);
   assert.match(page, /30%/);
+  assert.match(page, /Failed:/);
+  assert.match(page, /questions failed and were left out of this score/);
+  assert.match(page, /answered without web search/);
+  assert.equal(page.includes('No answer returned'), false);
 });
 
 test('deploy notes name the provider env vars and the formula', () => {
@@ -35,5 +39,8 @@ test('deploy notes name the provider env vars and the formula', () => {
   assert.match(readme, /24/);
   assert.match(readme, /in-memory/);
   assert.match(readme, /KV_REST_API_URL/);
+  assert.match(readme, /\/v1\/responses/);
+  assert.match(readme, /PERPLEXITY_BUDGET_MS/);
+  assert.match(readme, /PERPLEXITY_429_RETRIES/);
   assert.equal(readme.includes('sk-'), false);
 });

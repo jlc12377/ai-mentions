@@ -21,7 +21,7 @@ Position 2 is 88, position 3 is 76, and position 8 or lower is 20. Matching is c
 
 **Citation (30%)**
 
-100 if a source URL uses the company's domain (including a subdomain), otherwise 0. `blog.hubspot.com` counts for `hubspot.com`. `nothubspot.com` does not. Citations come from the provider's source list (OpenAI URL citations, Perplexity search results, Gemini grounding chunks, Claude citation objects) and from URLs written in the answer. This part stays 0 when the visitor leaves the website blank.
+100 if a source URL uses the company's domain (including a subdomain), otherwise 0. `blog.hubspot.com` counts for `hubspot.com`. `nothubspot.com` does not. Citations come from the provider's source list (OpenAI URL citations, Perplexity search results, Gemini grounding chunks, Claude citation objects and web search result URLs) and from URLs written in the answer. This part stays 0 when the visitor leaves the website blank.
 
 One answer is `round(0.70 × mention points + 0.30 × citation points)`. The visibility score is the rounded average of every answer that actually came back. Each answer counts equally. Calls that time out, return an error, or come back empty are left out — an empty or failed call is not treated as "not mentioned". If none succeed, `score` is `null`.
 
@@ -55,21 +55,26 @@ Leave a key unset to skip that assistant. With none set, the checker returns "sc
 | Env var | Provider | Default model | Grounding |
 | --- | --- | --- | --- |
 | `OPENAI_API_KEY` | ChatGPT | `gpt-4.1-mini` (`OPENAI_MODEL`) | Responses API `web_search`, `search_context_size: low`, tool choice required |
-| `PERPLEXITY_API_KEY` | Perplexity | `perplexity/sonar` (`PERPLEXITY_MODEL`) | Agent API `web_search` with `search_type: fast` |
+| `PERPLEXITY_API_KEY` | Perplexity | `perplexity/sonar` (`PERPLEXITY_MODEL`) | `POST /v1/responses` `web_search` with `search_type: fast`, one prompt at a time |
 | `GEMINI_API_KEY` | Gemini | `gemini-2.5-flash-lite` (`GEMINI_MODEL`) | `google_search` grounding |
 | `ANTHROPIC_API_KEY` | Claude | `claude-haiku-5-5` (`ANTHROPIC_MODEL`) | `web_search_20250305` (`ANTHROPIC_WEB_SEARCH_TOOL`), one search |
 
-A Perplexity model name without a slash, such as `sonar` or `sonar-pro`, is sent to the older chat completions endpoint instead of the Agent API. Sonar chat completions were discontinued as a product on September 27, 2026; Perplexity still accepts synchronous calls and reformulates them. New keys should use the default `perplexity/sonar`.
+Every Perplexity call is `POST https://api.perplexity.ai/v1/responses`. A model name without a slash, such as `sonar`, is sent as `perplexity/sonar`. The old `/chat/completions` path now returns 403 and tells callers to use `/v1/responses`.
 
-Claude's web search tool has to be available on the Anthropic account. Gemini grounding has to be allowed on the Google AI key. A provider that returns an error is dropped from the average. If the others answer, their answers are still scored.
+Perplexity prompts run one at a time. A new account is tier 0, which allows about one Agent API request per second, so four prompts fired together come back as HTTP 429. The checker waits `PERPLEXITY_PROMPT_DELAY_MS` (default 1100) between prompts and retries a 429 up to `PERPLEXITY_429_RETRIES` times (default 2), honoring `Retry-After` when the response includes it. The whole sequence stops at `PERPLEXITY_BUDGET_MS` (default 50 seconds) so it stays inside the 60 second function cap. Prompts that do not fit are reported as timed out. A 429 on some questions does not zero the provider: those questions are shown with the error and left out of the average.
+
+Claude asks with the web search tool (`web_search_20250305` by default, one search, at least 1600 output tokens so the tool result does not crowd out the answer). The checker keeps every text block and takes source URLs from both citation objects and `web_search_tool_result` entries. If that call has no answer text, the turn was paused, or the tool is rejected, a second call without the tool is scored and labeled "answered without web search". A rejected key, a timeout, or a 429 is not retried that way. Gemini grounding has to be allowed on the Google AI key. A provider that returns an error is dropped from the average. If the others answer, their answers are still scored. Questions that fail inside an otherwise successful provider are shown on the page and left out of that provider's score.
 
 ### Optional settings
 
 | Env var | Default | What it does |
 | --- | --- | --- |
-| `PROVIDER_TIMEOUT_MS` | `20000` | Per-call timeout. Providers run in parallel, so wall time is about one call. |
+| `PROVIDER_TIMEOUT_MS` | `20000` | Per-call timeout. ChatGPT, Gemini, and Claude still run in parallel. Perplexity runs its prompts one at a time inside its own budget. |
+| `PERPLEXITY_BUDGET_MS` | `50000` | Wall-clock budget for every Perplexity prompt, including 429 retries and the delay between prompts. |
+| `PERPLEXITY_PROMPT_DELAY_MS` | `1100` | Pause between Perplexity prompts. Sized for a tier 0 limit of about one request per second. |
+| `PERPLEXITY_429_RETRIES` | `2` | Extra attempts after HTTP 429. Backoff is 1s then 2s, or the `Retry-After` header when it fits the budget. |
 | `SCORE_PROMPT_COUNT` | `4` | Buyer prompts per provider. Clamped to 3–5. |
-| `SCORE_MAX_OUTPUT_TOKENS` | `600` | Output cap on every provider. |
+| `SCORE_MAX_OUTPUT_TOKENS` | `600` | Output cap. Claude's web search call uses at least 1600 so the tool result does not replace the answer. |
 | `SCORE_CACHE_TTL_SEC` | `86400` | How long an identical successful check is reused (24 hours). |
 | `RATE_LIMIT_MAX` | `8` | Checks per IP per window. |
 | `RATE_LIMIT_WINDOW_SEC` | `3600` | Rate-limit window. |
@@ -77,7 +82,7 @@ Claude's web search tool has to be available on the Anthropic account. Gemini gr
 | `KV_REST_API_URL` and `KV_REST_API_TOKEN` | unset | Vercel KV / Upstash Redis REST. Shared 24-hour cache and shared rate limit. |
 | `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` | unset | Same as the KV pair, if you created the database as Upstash directly. |
 
-`vercel.json` caps the function at 60 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls, fired together.
+`vercel.json` caps the function at 60 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls. ChatGPT, Gemini, and Claude fire together. Perplexity is the long pole: up to its budget, default 50 seconds, still under the cap. The page waits up to 58 seconds before it gives up on the request.
 
 ### Rough cost per check
 
