@@ -1,0 +1,12 @@
+{
+  "name": "ai-mentions",
+  "private": true,
+  "description": "Free AI visibility score. Live checks against the assistants configured with API keys.",
+  "scripts": {
+    "test": "node --test",
+    "start": "node scripts/local-server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

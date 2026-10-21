@@ -56,7 +56,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
 .nav-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;letter-spacing:-1px}
 .nav-name{font-size:17px;font-weight:600;color:var(--white);letter-spacing:-.3px}.nav-name span{color:var(--violet-soft)}
-.nav-links{display:flex;gap:24px;align-items:center}
+.nav-links{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
 .nav-links a{font-size:13px;font-weight:500;color:var(--ink-4);text-decoration:none;transition:color .2s}.nav-links a:hover{color:var(--white)}
 .hero{max-width:var(--max-w);margin:0 auto;padding:60px 28px 40px;text-align:center;position:relative}
 .hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(ellipse,var(--violet-glow) 0%,transparent 70%);pointer-events:none}
@@ -103,6 +103,23 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .results-loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--violet);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .results-loading p{font-size:14px;color:var(--ink-3)}
+.tool-note{font-size:12px;color:var(--ink-3);margin-top:10px;text-align:center;line-height:1.5}
+.results-meta{font-size:12px;color:var(--ink-3);margin-top:2px}
+.prompt-list{margin:8px 0 0 18px}
+.prompt-list li{font-size:14px;color:var(--ink-2);padding:3px 0}
+.provider-block{border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px}
+.provider-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:14px}
+.provider-model{font-size:11px;color:var(--ink-3);font-weight:500}
+.check-line{font-size:13px;color:var(--ink-2);padding:6px 0;border-bottom:1px solid #f4f4f5}
+.provider-block details{margin-top:6px}
+.provider-block summary{font-size:12px;font-weight:600;color:var(--violet);cursor:pointer}
+.excerpt{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.55}
+.source-list{font-size:12px;color:var(--ink-3);margin-top:6px;word-break:break-all}
+.source-list a{color:var(--violet)}
+.unavailable-note{background:#fef3c7;border-radius:var(--radius);padding:12px 14px;font-size:14px;color:#92400e;line-height:1.55}
+.method-copy{max-width:720px;margin:0 auto;font-size:15px;color:var(--ink-4);line-height:1.7}
+.method-copy p{margin-bottom:14px}
+.method-copy strong{color:var(--white);font-weight:600}
 .cta-box{background:linear-gradient(135deg,#f5f3ff,#ecfeff);border:1px solid #ddd6fe;border-radius:var(--radius-lg);padding:24px;margin-top:24px;display:none}
 .cta-box.visible{display:block}
 .cta-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:6px;color:var(--ink)}
@@ -160,31 +177,42 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 
 <nav class="nav">
   <a href="/" class="nav-brand"><div class="nav-icon">ai</div><div class="nav-name">AI <span>Mentions</span></div></a>
-  <div class="nav-links"><a href="#tool">Check Visibility</a><a href="#how">How It Works</a><a href="https://listicleliaison.com">Listicle Liaison</a></div>
+  <div class="nav-links"><a href="#tool">Check Visibility</a><a href="#how">How It Works</a><a href="#methodology">Methodology</a><a href="https://listicleliaison.com">Listicle Liaison</a></div>
 </nav>
 
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span> Free AI Visibility Tool</div>
   <h1>Does AI know <em>your company?</em></h1>
-  <p class="hero-sub">When someone asks ChatGPT or Claude about your industry, does your company come up? Check your AI visibility score in 30 seconds &#8212; free.</p>
+  <p class="hero-sub">When someone asks ChatGPT, Claude, Perplexity, or Gemini who to buy from, does your company come up? Run a live check &#8212; free.</p>
 </section>
 
 <div class="tool-container" id="tool">
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
-    <p class="tool-card-sub">Enter your company name and industry. We&#8217;ll analyze your AI visibility.</p>
+    <p class="tool-card-sub">Enter your company and category. We ask a few buyer-style questions of the AI assistants this site is connected to, then score the real answers.</p>
     <div class="trust-signals">
-      <span><span class="check">&#10003;</span> 1,350+ companies ranked</span>
-      <span><span class="check">&#10003;</span> 10 industry publications</span>
-      <span><span class="check">&#10003;</span> Takes 30 seconds</span>
+      <span><span class="check">&#10003;</span> Live answers only</span>
+      <span><span class="check">&#10003;</span> Same questions every time</span>
+      <span><span class="check">&#10003;</span> No guessed scores</span>
     </div>
+    <form id="checkForm" onsubmit="runCheck(event); return false;">
     <div class="form-group">
-      <label class="form-label">Company Name</label>
-      <input type="text" class="form-input" id="companyName" placeholder="e.g. HubSpot, Rippling, Aave">
+      <label class="form-label" for="companyName">Company Name</label>
+      <input type="text" class="form-input" id="companyName" maxlength="80" placeholder="e.g. HubSpot, Rippling, Aave" autocomplete="organization">
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Industry / Category</label>
+        <label class="form-label" for="website">Website</label>
+        <input type="text" class="form-input" id="website" maxlength="200" placeholder="e.g. hubspot.com" autocomplete="url">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="city">City (optional)</label>
+        <input type="text" class="form-input" id="city" maxlength="80" placeholder="e.g. Austin">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="category">Industry / Category</label>
         <select class="form-input" id="category">
           <option value="">Select category...</option>
           <optgroup label="Software"><option value="crm">CRM Software</option><option value="pm">Project Management</option><option value="cyber">Cybersecurity</option><option value="erp">ERP Software</option><option value="email">Email Marketing</option><option value="hr">HR & Payroll</option><option value="accounting">Accounting</option><option value="analytics">Analytics & BI</option></optgroup>
@@ -197,14 +225,20 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Your Email (required)</label>
-        <input type="email" class="form-input" id="userEmail" placeholder="We&#8217;ll send your full report here" required>
+        <label class="form-label" for="userEmail">Your Email (required)</label>
+        <input type="email" class="form-input" id="userEmail" maxlength="120" placeholder="We&#8217;ll send your full report here" autocomplete="email" required>
         <span class="email-note">Your detailed report is sent here. No spam, no sales calls, unsubscribe anytime.</span>
       </div>
     </div>
-    <button class="check-btn" id="checkBtn" onclick="runCheck()">Get My Free Visibility Score &rarr;</button>
-    <div class="results" id="results">
-      <div class="results-loading" id="resultsLoading"><div class="spinner"></div><p id="loadingText">Analyzing AI visibility...</p></div>
+    <div class="form-group" id="otherCategoryWrap" style="display:none">
+      <label class="form-label" for="categoryOther">Your industry</label>
+      <input type="text" class="form-input" id="categoryOther" maxlength="80" placeholder="e.g. Commercial landscaping">
+    </div>
+    <button class="check-btn" id="checkBtn" type="submit">Get My Free Visibility Score &rarr;</button>
+    <p class="tool-note">Live answers only. If the check can&#8217;t run, you&#8217;ll see &#8220;score temporarily unavailable&#8221; &#8212; we never substitute a guessed number. Your email is still submitted.</p>
+    </form>
+    <div class="results" id="results" aria-live="polite">
+      <div class="results-loading" id="resultsLoading"><div class="spinner"></div><p id="loadingText">Asking the connected AI assistants…</p></div>
       <div id="resultsContent" style="display:none"></div>
     </div>
     <div class="cta-box" id="ctaBox">
@@ -225,9 +259,19 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <section class="how" id="how">
   <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
-    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name and category. We&#8217;ll analyze how visible you are to AI assistants.</div></div>
-    <div class="how-card"><div class="how-num">2</div><div class="how-label">Get your report</div><div class="how-desc">See your visibility score, which competitors AI recommends instead, and where the gaps are.</div></div>
-    <div class="how-card"><div class="how-num">3</div><div class="how-label">Take action</div><div class="how-desc">Use your report to identify gaps. We offer services to help you get ranked, featured, and cited by AI.</div></div>
+    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name, website, and category. The website is how a citation of your domain is distinguished from a mention of your name.</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, Gemini, and Claude. Your company name is not in the question.</div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">See mentions, list position, and citations. If a live check can&#8217;t run, we say so and still take your email.</div></div>
+  </div>
+</section>
+
+<section class="how" id="methodology">
+  <div class="how-header"><h2>How the score is calculated</h2><p>A live check, not a ranking typed in ahead of time.</p></div>
+  <div class="method-copy">
+    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of the question. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, Gemini uses Google Search grounding, and Claude uses its web search tool. Assistants without a key are skipped.</p>
+    <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when it appears in the answer.</p>
+    <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
+    <p>One answer scores 70% of the mention points plus 30% of the citation points. Your visibility score is the rounded average of the answers that actually came back, from 0 to 100. Each answer counts equally. Timeouts and errors are left out. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
   </div>
 </section>
 
@@ -248,191 +292,262 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 </footer>
 
 <script>
-var db = {
-  crm: {name:'CRM Software',link:'https://softwareindustryreviews.com/pages/crm-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Salesforce','HubSpot','Microsoft Dynamics 365','Zoho CRM','Pipedrive','Freshsales','Monday CRM','Close','Copper','Insightly'],factors:'market share, enterprise adoption, G2 and Capterra review volume, industry analyst coverage, and brand recognition'},
-  pm: {name:'Project Management',link:'https://softwareindustryreviews.com/pages/pm-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Asana','Monday.com','ClickUp','Jira','Trello','Notion','Smartsheet','Wrike','Basecamp','Teamwork'],factors:'product adoption rates, integration ecosystem breadth, G2 review volume, and media coverage frequency'},
-  cyber: {name:'Cybersecurity',link:'https://softwareindustryreviews.com/pages/cyber-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['CrowdStrike','Palo Alto Networks','Fortinet','Zscaler','SentinelOne','Cloudflare','Okta','Splunk','Cisco','Trend Micro'],factors:'threat detection performance, analyst report placement (Gartner, Forrester), enterprise market share, and incident response track record'},
-  erp: {name:'ERP Software',link:'https://softwareindustryreviews.com/pages/erp-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['SAP','Oracle NetSuite','Microsoft Dynamics 365','Workday','Sage Intacct','Epicor','Infor','Acumatica','Odoo','Syspro'],factors:'enterprise deployment scale, analyst coverage, vertical specialization, and implementation partner ecosystem'},
-  email: {name:'Email Marketing',link:'https://softwareindustryreviews.com/pages/email-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Mailchimp','HubSpot','Klaviyo','Brevo','ActiveCampaign','Constant Contact','ConvertKit','Campaign Monitor','AWeber','Drip'],factors:'user base size, deliverability reputation, integration count, and content marketing presence'},
-  hr: {name:'HR & Payroll',link:'https://softwareindustryreviews.com/pages/hr-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Rippling','BambooHR','Gusto','ADP','Workday','Paylocity','Paychex','UKG','Deel','Namely'],factors:'employer adoption rates, payroll processing volume, Glassdoor visibility, and HR tech media coverage'},
-  accounting: {name:'Accounting Software',link:'https://softwareindustryreviews.com/pages/accounting-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['QuickBooks','Xero','FreshBooks','Sage','Wave','Zoho Books','NetSuite','Bill.com','Bench','ZipBooks'],factors:'small business adoption, accountant referral networks, integration ecosystem, and regulatory compliance features'},
-  analytics: {name:'Analytics & BI',link:'https://softwareindustryreviews.com/pages/analytics-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Tableau','Power BI','Looker','Domo','Sisense','ThoughtSpot','Qlik','Mode','Metabase','Databricks'],factors:'enterprise deployment, data connector breadth, Gartner Magic Quadrant placement, and developer community size'},
-  ai_chat: {name:'AI Chatbots',link:'https://aiindustryreviews.com/pages/chatbot-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['ChatGPT','Claude','Google Gemini','Perplexity','Microsoft Copilot','Meta AI','Jasper Chat','Character.AI','Poe','Pi'],factors:'user base size, benchmark performance, media coverage, developer adoption, and brand awareness'},
-  ai_code: {name:'AI Coding Tools',link:'https://aiindustryreviews.com/pages/coding-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['GitHub Copilot','Cursor','Claude Code','Replit','Tabnine','Amazon CodeWhisperer','Codeium','Windsurf','Sourcegraph Cody','Devin'],factors:'developer adoption, IDE integration breadth, code completion accuracy benchmarks, and developer community discussion'},
-  ai_image: {name:'AI Image Generators',link:'https://aiindustryreviews.com/pages/image-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['Midjourney','DALL-E 3','Stable Diffusion','Adobe Firefly','Leonardo AI','Ideogram','Flux','Runway','Canva AI','NightCafe'],factors:'image quality benchmarks, creative community adoption, commercial licensing clarity, and social media presence'},
-  ai_write: {name:'AI Writing Tools',link:'https://aiindustryreviews.com/pages/writing-rankings.html',pricing:'https://aiindustryreviews.com/pages/pricing.html',top:['Jasper','Copy.ai','Grammarly','Writesonic','Rytr','Anyword','Frase','Surfer SEO','Writer','Wordtune'],factors:'content marketing community adoption, SEO integration quality, output accuracy, and review platform ratings'},
-  crypto_ex: {name:'Crypto Exchanges',link:'https://cryptoindustryreviews.com/pages/exchange-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Coinbase','Binance','Kraken','Crypto.com','Gemini','OKX','Bybit','Robinhood Crypto','Uphold','MEXC'],factors:'trading volume, regulatory compliance, security track record, proof-of-reserves transparency, and app store ratings'},
-  defi: {name:'DeFi Platforms',link:'https://cryptoindustryreviews.com/pages/defi-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Aave','Lido','Uniswap','MakerDAO','Curve','EigenLayer','Compound','Pendle','GMX','Yearn'],factors:'total value locked, smart contract audit history, protocol longevity, governance activity, and developer documentation'},
-  wallets: {name:'Crypto Wallets',link:'https://cryptoindustryreviews.com/pages/wallet-rankings.html',pricing:'https://cryptoindustryreviews.com/pages/pricing.html',top:['Ledger','Trezor','MetaMask','Phantom','Coinbase Wallet','Trust Wallet','Exodus','Rabby','Rainbow','Tangem'],factors:'security track record, chain support breadth, user base size, app store ratings, and self-custody implementation'},
-  casino: {name:'Online Casinos',link:'https://casinoindustryreviews.com/pages/casino-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['BetMGM','DraftKings Casino','FanDuel Casino','Caesars Palace Online','bet365','BetRivers','Hard Rock Bet','Borgata','Fanatics Casino','Horseshoe'],factors:'game library size, payout speed, licensing breadth, app ratings, and brand trust in regulated markets'},
-  sports: {name:'Sportsbooks',link:'https://casinoindustryreviews.com/pages/sportsbook-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['DraftKings','FanDuel','bet365','BetMGM','Caesars','Fanatics','ESPN BET','Hard Rock Bet','BetRivers','PointsBet'],factors:'state availability, odds competitiveness, live betting quality, app ratings, and promotional offer value'},
-  casino_sw: {name:'Casino Software Providers',link:'https://casinoindustryreviews.com/pages/software-rankings.html',pricing:'https://casinoindustryreviews.com/pages/pricing.html',top:['Evolution Gaming','Pragmatic Play','Playtech','Microgaming','SoftSwiss','NetEnt','Play\'n GO','Yggdrasil','BetGames','Hacksaw'],factors:'game portfolio size, operator reach, live dealer market share, licensing jurisdictions, and innovation track record'},
-  ehr: {name:'EHR & Medical Records',link:'https://healthcareindustryreviews.com/pages/ehr-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Epic Systems','Oracle Health','MEDITECH','athenahealth','eClinicalWorks','NextGen Healthcare','DrChrono','Allscripts','Greenway Health','CureMD'],factors:'clinical functionality, interoperability, user experience, compliance, and pricing'},
-  telehealth: {name:'Telehealth Platforms',link:'https://healthcareindustryreviews.com/pages/telehealth-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Teladoc Health','Amwell','Doxy.me','Doximity','Zoom for Healthcare','MDLIVE','SimplePractice Telehealth','Vsee','Mend','Chiron Health'],factors:'video quality, clinical integration, patient experience, compliance, and pricing'},
-  medbilling: {name:'Medical Billing & RCM',link:'https://www.healthcareindustryreviews.com/#categories',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Waystar','R1 RCM','athenahealth RCM','Availity','Tebra','AdvancedMD','CareCloud','DrChrono','CollaborateMD','Inbox Health'],factors:'claims processing, coding accuracy, denial management, reporting, and integration'},
-  clinical: {name:'Clinical Trial Software',link:'https://healthcareindustryreviews.com/pages/clinical-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Medidata','Veeva Vault','Oracle Health Sciences','IQVIA','Castor','Medrio','Clinical Conductor','REDCap','OpenClinica','Ripple Science'],factors:'study management, data collection, regulatory compliance, patient engagement, and integration'},
-  wellness: {name:'Health & Wellness Apps',link:'https://healthcareindustryreviews.com/pages/wellness-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Noom','Peloton','Calm','Headspace','Whoop','Oura Ring','MyFitnessPal','Fitbit','Apple Health','Strava'],factors:'health outcomes, user engagement, clinical validation, data privacy, and pricing'},
-  pharma: {name:'Pharma & Biotech Tools',link:'https://healthcareindustryreviews.com/pages/pharma-rankings.html',pricing:'https://healthcareindustryreviews.com/pages/pricing.html',top:['Veeva Systems','IQVIA','Benchling','Certara','Dotmatics','Saama Technologies','MasterControl','TraceLink','IDBS','Schrodinger'],factors:'drug development capabilities, regulatory compliance, data management, manufacturing, and integration'},
-  banking: {name:'Banking & Core Systems',link:'https://financialindustryreviews.com/pages/banking-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['FIS','Temenos','Thought Machine','Mambu','nCino','Finastra','Jack Henry','Q2 Holdings','Backbase','Finxact'],factors:'digital capabilities, scalability, compliance, integration, and cloud architecture'},
-  wealth: {name:'Wealth Management',link:'https://financialindustryreviews.com/pages/wealth-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Addepar','Orion','Black Diamond','Envestnet Tamarac','Nitrogen','Morningstar Direct','eMoney Advisor','MoneyGuidePro','Wealthbox','Redtail'],factors:'portfolio management, client experience, automation, compliance, and reporting'},
-  insurtech: {name:'Insurance Technology',link:'https://financialindustryreviews.com/pages/insurtech-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Guidewire','Duck Creek','Majesco','EIS Group','Lemonade','Root Insurance','Hippo Insurance','Snapsheet','CCC Intelligent Solutions','Verisk'],factors:'core insurance capabilities, digital experience, data analytics, integration, and scalability'},
-  payments: {name:'Payment Platforms',link:'https://financialindustryreviews.com/pages/payments-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['Stripe','Adyen','PayPal','Square','Worldpay','Checkout.com','Braintree','Authorize.Net','Clover','Toast'],factors:'processing capabilities, merchant experience, global reach, security, and pricing'},
-  lending: {name:'Lending & Mortgage Tech',link:'https://financialindustryreviews.com/pages/lending-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['ICE Mortgage Technology','Black Knight','Blend','nCino','Finastra','Tavant','Roostify','LoanPro','Sagent','Brace'],factors:'origination capabilities, automation, compliance, borrower experience, and integration'},
-  regtech: {name:'Compliance & RegTech',link:'https://financialindustryreviews.com/pages/compliance-rankings.html',pricing:'https://financialindustryreviews.com/pages/pricing.html',top:['ComplyAdvantage','Chainalysis','Hummingbird','Sumsub','Alloy','NICE Actimize','Onfido','Sardine','Unit21','Featurespace'],factors:'regulatory coverage, automation, risk management, reporting, and integration'},
-  pr: {name:'PR & Newswire Software',link:'https://softwareindustryreviews.com/pages/pr-rankings.html',pricing:'https://softwareindustryreviews.com/pages/pricing.html',top:['Cision PR Newswire','ACCESS Newswire','Meltwater','Business Wire','Muck Rack','GlobeNewswire','Prowly','Newswire','PressRelease.com','eReleases'],factors:'distribution network reach, media database quality, analytics depth, journalist relationship tools, and pricing transparency'},
-  other: {name:'your industry',link:'https://listicleliaison.com',pricing:'https://listicleliaison.com/pages/pricing.html',top:[],factors:'brand recognition, review platform presence, media coverage, industry analyst mentions, and structured data availability'}
-};
+var categories = {"crm":{"name":"CRM Software","link":"https://softwareindustryreviews.com/pages/crm-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"pm":{"name":"Project Management","link":"https://softwareindustryreviews.com/pages/pm-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"cyber":{"name":"Cybersecurity","link":"https://softwareindustryreviews.com/pages/cyber-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"erp":{"name":"ERP Software","link":"https://softwareindustryreviews.com/pages/erp-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"email":{"name":"Email Marketing","link":"https://softwareindustryreviews.com/pages/email-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"hr":{"name":"HR & Payroll","link":"https://softwareindustryreviews.com/pages/hr-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"accounting":{"name":"Accounting Software","link":"https://softwareindustryreviews.com/pages/accounting-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"analytics":{"name":"Analytics & BI","link":"https://softwareindustryreviews.com/pages/analytics-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"ai_chat":{"name":"AI Chatbots","link":"https://aiindustryreviews.com/pages/chatbot-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_code":{"name":"AI Coding Tools","link":"https://aiindustryreviews.com/pages/coding-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_image":{"name":"AI Image Generators","link":"https://aiindustryreviews.com/pages/image-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_write":{"name":"AI Writing Tools","link":"https://aiindustryreviews.com/pages/writing-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"crypto_ex":{"name":"Crypto Exchanges","link":"https://cryptoindustryreviews.com/pages/exchange-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"defi":{"name":"DeFi Platforms","link":"https://cryptoindustryreviews.com/pages/defi-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"wallets":{"name":"Crypto Wallets","link":"https://cryptoindustryreviews.com/pages/wallet-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"casino":{"name":"Online Casinos","link":"https://casinoindustryreviews.com/pages/casino-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"sports":{"name":"Sportsbooks","link":"https://casinoindustryreviews.com/pages/sportsbook-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"casino_sw":{"name":"Casino Software Providers","link":"https://casinoindustryreviews.com/pages/software-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"ehr":{"name":"EHR & Medical Records","link":"https://healthcareindustryreviews.com/pages/ehr-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"telehealth":{"name":"Telehealth Platforms","link":"https://healthcareindustryreviews.com/pages/telehealth-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"medbilling":{"name":"Medical Billing & RCM","link":"https://www.healthcareindustryreviews.com/#categories","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"clinical":{"name":"Clinical Trial Software","link":"https://healthcareindustryreviews.com/pages/clinical-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"wellness":{"name":"Health & Wellness Apps","link":"https://healthcareindustryreviews.com/pages/wellness-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"pharma":{"name":"Pharma & Biotech Tools","link":"https://healthcareindustryreviews.com/pages/pharma-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"banking":{"name":"Banking & Core Systems","link":"https://financialindustryreviews.com/pages/banking-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"wealth":{"name":"Wealth Management","link":"https://financialindustryreviews.com/pages/wealth-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"insurtech":{"name":"Insurance Technology","link":"https://financialindustryreviews.com/pages/insurtech-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"payments":{"name":"Payment Platforms","link":"https://financialindustryreviews.com/pages/payments-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"lending":{"name":"Lending & Mortgage Tech","link":"https://financialindustryreviews.com/pages/lending-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"regtech":{"name":"Compliance & RegTech","link":"https://financialindustryreviews.com/pages/compliance-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"pr":{"name":"PR & Newswire Software","link":"https://softwareindustryreviews.com/pages/pr-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"other":{"name":"your industry","link":"https://listicleliaison.com","pricing":"https://listicleliaison.com/pages/pricing.html"}};
 
-function runCheck() {
-  var company = document.getElementById('companyName').value.trim();
-  var catKey = document.getElementById('category').value;
-  if (!company) { alert('Please enter a company name'); return; }
-  if (!catKey) { alert('Please select a category'); return; }
-  var email = document.getElementById('userEmail').value.trim();
-  if (!email || email.indexOf('@') === -1) { alert('Please enter your email to receive your visibility report'); return; }
+function esc(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
+function safeUrl(url) {
+  try {
+    var parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return '';
+    return parsed.href;
+  } catch (e) {
+    return '';
+  }
+}
+
+function scoreClass(score) {
+  if (score >= 70) return 'score-high';
+  if (score >= 40) return 'score-mid';
+  return 'score-low';
+}
+
+function scoreLabel(score) {
+  if (score >= 70) return 'Strong';
+  if (score >= 40) return 'Moderate';
+  return 'Low';
+}
+
+function formatWhen(iso) {
+  try {
+    return new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  } catch (e) {
+    return iso || '';
+  }
+}
+
+function selectedCategory() {
+  var key = document.getElementById('category').value;
+  var cat = categories[key];
+  if (!cat) return null;
+  if (key === 'other') {
+    var custom = document.getElementById('categoryOther').value.trim();
+    return { key: key, name: custom, link: cat.link, pricing: cat.pricing, custom: true };
+  }
+  return { key: key, name: cat.name, link: cat.link, pricing: cat.pricing, custom: false };
+}
+
+document.getElementById('category').addEventListener('change', function () {
+  document.getElementById('otherCategoryWrap').style.display = this.value === 'other' ? 'block' : 'none';
+});
+
+function captureLead(fields) {
   fetch('https://formspree.io/f/xqegnezp', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({_subject:'AI Visibility Check: '+company,company:company,category:catKey,email:email,source:'ai-mentions.com'})
-  });
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(fields),
+    keepalive: true
+  }).catch(function () {});
+}
 
-  // Track form fill in GA4
-  if (typeof gtag !== 'undefined') {
-    gtag('event', 'visibility_check', {
-      'company': company,
-      'category': catKey,
-      'event_category': 'engagement',
-      'event_label': company + ' - ' + catKey
-    });
-  }
+function renderUnavailable(data, company) {
+  var detail = (data && data.detail) || 'The live check did not finish. Nothing was guessed.';
+  var message = (data && data.message) || 'Score temporarily unavailable';
+  document.getElementById('resultsContent').innerHTML =
+    '<div class="results-header"><div class="results-company">' + esc(company) + '</div>' +
+    '<div class="score-badge score-low">' + esc(message) + '</div></div>' +
+    '<div class="unavailable-note">' + esc(detail) + ' Your details were still submitted.</div>';
+}
 
-  // Track form fill in Microsoft UET (Bing Ads)
-  if (typeof window.uetq !== 'undefined') {
-    window.uetq = window.uetq || [];
-    // Enhanced conversions - pass email for better attribution
-    window.uetq.push('set', { 'pid': { 'em': email } });
-    // Conversion event
-    window.uetq.push('event', 'visibility_check', {
-      'event_category': 'form_submission',
-      'event_label': company + ' - ' + catKey,
-      'event_value': 1
-    });
+function checkLine(check) {
+  if (!check.ok) return '<div class="check-line">No answer returned</div>';
+  var bits = [];
+  bits.push(check.mentioned ? 'Named' : 'Not named');
+  if (check.position) bits.push('list #' + check.position);
+  else if (check.mentioned) bits.push('no list rank');
+  bits.push(check.cited ? 'domain cited' : 'domain not cited');
+  bits.push(check.score + '/100');
+  var html = '<div class="check-line">' + esc(bits.join(' · ')) + '</div>';
+  if (check.excerpt || (check.citations && check.citations.length)) {
+    html += '<details><summary>What this assistant said</summary>';
+    if (check.excerpt) html += '<p class="excerpt">' + esc(check.excerpt) + '</p>';
+    var links = (check.citations || []).map(safeUrl).filter(Boolean);
+    if (links.length) {
+      html += '<p class="source-list">Sources: ' + links.map(function (url) {
+        return '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(url) + '</a>';
+      }).join(' ') + '</p>';
+    }
+    html += '</details>';
   }
+  return html;
+}
+
+function renderScore(data) {
+  var providers = (data.providers || []).map(function (provider) {
+    var head = '<div class="provider-head"><div><strong>' + esc(provider.label) + '</strong> ' +
+      '<span class="provider-model">' + esc(provider.model || '') + (provider.mode ? ' · ' + esc(provider.mode) : '') + '</span></div>' +
+      '<span class="comp-score">' + (provider.ok && provider.score != null ? esc(provider.score) + '/100' : 'No answer') + '</span></div>';
+    var lines = (provider.checks || []).map(checkLine).join('');
+    return '<div class="provider-block">' + head + lines + '</div>';
+  }).join('');
+  var prompts = (data.prompts || []).map(function (prompt) {
+    return '<li>' + esc(prompt) + '</li>';
+  }).join('');
+  var competitors = data.competitors || [];
+  var compHtml = competitors.length
+    ? '<ul class="competitor-list">' + competitors.map(function (row) {
+      var label = row.mentions === 1 ? ' answer' : ' answers';
+      return '<li><span>' + esc(row.name) + '</span><span class="comp-score">' + esc(row.mentions) + label + '</span></li>';
+    }).join('') + '</ul>'
+    : '<p>No other companies were named in the lists these assistants returned.</p>';
+  var summary = data.summary || {};
+  var named = summary.checks ? 'Named in ' + summary.mentions + ' of ' + summary.checks + ' answers.' : '';
+  var domainNote = data.domain
+    ? 'Citation matching used ' + data.domain + '.'
+    : 'No website was entered, so domain citations could not be counted.';
+  var when = data.cached
+    ? 'Reused from an identical check in the last 24 hours. Checked ' + formatWhen(data.timestamp) + '.'
+    : 'Checked ' + formatWhen(data.timestamp) + '.';
+  var formula = data.formula && data.formula.description ? data.formula.description : '';
+  document.getElementById('resultsContent').innerHTML =
+    '<div class="results-header"><div><div class="results-company">' + esc(data.businessName) + '</div>' +
+    '<p class="results-meta">' + esc(when) + '</p></div>' +
+    '<div class="score-badge ' + scoreClass(data.score) + '">' + esc(data.score) + '/100 — ' + esc(scoreLabel(data.score)) + '</div></div>' +
+    '<div class="report-section"><h3>Result</h3><p>' + esc(named) + ' ' + esc(domainNote) + '</p></div>' +
+    '<div class="report-section"><h3>What we asked</h3><ol class="prompt-list">' + prompts + '</ol></div>' +
+    '<div class="report-section"><h3>By assistant</h3>' + providers + '</div>' +
+    '<div class="report-section"><h3>Competitors named most often</h3>' + compHtml + '</div>' +
+    '<div class="report-section"><h3>How this number was calculated</h3><p>' + esc(formula) + '</p></div>';
+}
+
+function renderCta(cat, company, score, unavailable) {
+  var stripeLink = 'https://buy.stripe.com/cNi8wQ3Pt3s7bkXdS7d7q04';
+  var heading;
+  var intro;
+  if (unavailable) {
+    heading = 'We saved your request';
+    intro = 'There is no score to act on yet. You can still look at the public rankings or claim a profile.';
+  } else if (score >= 70) {
+    heading = company + ' is showing up in these AI answers';
+    intro = 'You appeared often in this check. A claimed profile gives buyers another page that names you.';
+  } else if (score >= 40) {
+    heading = company + ' showed up in some of these answers';
+    intro = 'You were named, but not in every answer. These are the same next steps we offer every company.';
+  } else {
+    heading = company + ' rarely appeared in these answers';
+    intro = 'In this check, the assistants usually named other companies. A public profile is one page they can cite later.';
+  }
+  document.getElementById('ctaContent').innerHTML =
+    '<h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
+    '<div class="cta-steps">' +
+    '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the public rankings</span>These pages are ours, separate from the live AI check.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +
+    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim your profile</span>Add your logo, description, and links. Starts at $99/mo.<br><a href="' + esc(stripeLink) + '">Claim profile &rarr;</a></div></div>' +
+    '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">See featured plans</span>Priority placement and cross-network syndication.<br><a href="' + esc(cat.pricing) + '">View plans &rarr;</a></div></div>' +
+    '</div>';
+  document.getElementById('ctaBox').classList.add('visible');
+}
+
+async function runCheck(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  var company = document.getElementById('companyName').value.trim();
+  var cat = selectedCategory();
+  var email = document.getElementById('userEmail').value.trim();
+  var website = document.getElementById('website').value.trim();
+  var city = document.getElementById('city').value.trim();
+  if (!company) { alert('Please enter a company name'); return; }
+  if (!cat) { alert('Please select a category'); return; }
+  if (cat.custom && cat.name.length < 2) { alert('Please enter your industry'); return; }
+  if (!email || email.indexOf('@') === -1) { alert('Please enter your email to receive your visibility report'); return; }
+  if (website && website.indexOf('.') === -1) { alert('Enter a website like example.com, or leave it blank.'); return; }
 
   var btn = document.getElementById('checkBtn');
   var results = document.getElementById('results');
   var loading = document.getElementById('resultsLoading');
   var content = document.getElementById('resultsContent');
   var ctaBox = document.getElementById('ctaBox');
-  var loadingText = document.getElementById('loadingText');
-
   btn.disabled = true;
-  btn.textContent = 'Analyzing...';
+  btn.textContent = 'Checking live answers…';
   results.classList.add('visible');
   loading.style.display = 'block';
   content.style.display = 'none';
   ctaBox.classList.remove('visible');
+  document.getElementById('loadingText').textContent = 'Asking the connected AI assistants. This is a live check.';
 
-  var cat = db[catKey];
-  var companyLower = company.toLowerCase();
-  var topLower = cat.top.map(function(c){ return c.toLowerCase(); });
-  var matchIndex = topLower.indexOf(companyLower);
-  var isPartialMatch = -1;
-  if (matchIndex === -1) {
-    for (var i = 0; i < topLower.length; i++) {
-      if (topLower[i].indexOf(companyLower) > -1 || companyLower.indexOf(topLower[i]) > -1) { isPartialMatch = i; break; }
-    }
+  if (typeof gtag !== 'undefined') {
+    gtag('event', 'visibility_check', {
+      company: company,
+      category: cat.key,
+      event_category: 'engagement',
+      event_label: company + ' - ' + cat.key
+    });
   }
-  var foundIndex = matchIndex > -1 ? matchIndex : isPartialMatch;
+  if (typeof window.uetq !== 'undefined') {
+    window.uetq = window.uetq || [];
+    window.uetq.push('set', { pid: { em: email } });
+    window.uetq.push('event', 'visibility_check', {
+      event_category: 'form_submission',
+      event_label: company + ' - ' + cat.key,
+      event_value: 1
+    });
+  }
 
-  var messages = ['Scanning AI knowledge bases...','Checking ChatGPT recommendations...','Analyzing Claude responses...','Evaluating Perplexity citations...','Comparing competitor visibility...','Generating your report...'];
-  var msgI = 0;
-  var msgInterval = setInterval(function(){ msgI++; if (msgI < messages.length) loadingText.textContent = messages[msgI]; }, 500);
+  var data = null;
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timer = setTimeout(function () { if (controller) controller.abort(); }, 45000);
+  try {
+    var response = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessName: company,
+        domain: website,
+        category: cat.name,
+        city: city
+      }),
+      signal: controller ? controller.signal : undefined
+    });
+    data = await response.json();
+  } catch (error) {
+    data = {
+      unavailable: true,
+      score: null,
+      message: 'Score temporarily unavailable',
+      detail: 'The live check did not finish. Nothing was guessed.'
+    };
+  } finally {
+    clearTimeout(timer);
+  }
 
-  setTimeout(function(){
-    clearInterval(msgInterval);
-    loading.style.display = 'none';
-    content.style.display = 'block';
+  var unavailable = !data || data.unavailable || data.score == null;
+  captureLead({
+    _subject: unavailable
+      ? 'AI Visibility Check: ' + company + ' — unavailable'
+      : 'AI Visibility Check: ' + company + ' — ' + data.score,
+    company: company,
+    category: cat.name,
+    category_key: cat.key,
+    website: website,
+    city: city,
+    email: email,
+    source: 'ai-mentions.com',
+    score: unavailable ? 'unavailable' : String(data.score),
+    score_status: (data && data.reason) ? data.reason : (unavailable ? 'unavailable' : 'ok')
+  });
 
-    var score, scoreClass, scoreLabel, likelihood, gaps, compList;
-    var positionScores = [9, 9, 8, 7, 7, 6, 5, 4, 3, 3];
-
-    if (foundIndex > -1 && foundIndex < 3) {
-      score = positionScores[foundIndex]; scoreClass = 'score-high'; scoreLabel = 'Strong';
-      likelihood = company + ' is highly likely to be mentioned by AI assistants when users ask about ' + cat.name + '. As a top-tier player in this category, ' + company + ' has strong brand recognition, extensive review coverage, and significant presence in the structured data sources that AI models reference.';
-      gaps = 'Even with strong visibility, there are opportunities to strengthen your position. Ensure your company appears on independent ranking sites with transparent methodology. Maintaining fresh reviews and publishing thought leadership content will help sustain your top-tier AI visibility.';
-    } else if (foundIndex > -1 && foundIndex < 7) {
-      score = positionScores[foundIndex]; scoreClass = 'score-mid'; scoreLabel = 'Moderate';
-      likelihood = company + ' has moderate AI visibility in ' + cat.name + '. AI assistants may mention ' + company + ' in some contexts, but it is not consistently appearing in top recommendations. The company is recognized but often overshadowed by larger competitors with stronger review profiles.';
-      gaps = 'To improve your AI visibility, focus on increasing your presence on independent ranking and review sites. Companies that appear on multiple third-party sources see significantly higher AI citation rates. Getting featured in editorial content and expert roundups will help AI models associate your brand with authority.';
-    } else if (foundIndex > -1) {
-      score = positionScores[foundIndex]; scoreClass = 'score-low'; scoreLabel = 'Low';
-      likelihood = company + ' has low AI visibility in ' + cat.name + '. While the company exists in this space, AI assistants are unlikely to mention it in standard recommendations. The brand lacks sufficient presence in the structured, well-cited sources that AI models prioritize.';
-      gaps = 'Significant improvement is needed. Start by claiming profiles on major review platforms and building review volume. Get listed on independent ranking sites that use transparent methodology. Companies that invest in third-party visibility typically see AI citation improvements within 2-3 months.';
-    } else {
-      score = 2; scoreClass = 'score-low'; scoreLabel = 'Very Low';
-      likelihood = company + ' is not appearing in AI recommendations for ' + cat.name + '. When users ask AI assistants about the best options in this category, ' + company + ' is not being mentioned. Potential customers using AI-powered search are not discovering your company.';
-      gaps = 'Your company needs immediate visibility investment. The top companies in your category appear across multiple review platforms, independent ranking sites, and editorial publications. Even a basic claimed profile on a ranking site can begin generating AI citations within weeks.';
-    }
-
-    var topCompetitors = cat.top.slice(0, 5);
-    compList = '';
-    if (topCompetitors.length > 0) {
-      for (var j = 0; j < topCompetitors.length; j++) {
-        var compScore = positionScores[j];
-        var isYou = topCompetitors[j].toLowerCase() === companyLower ? ' (You)' : '';
-        compList += '<li><span>' + topCompetitors[j] + isYou + '</span><span class="comp-score">' + compScore + '/10</span></li>';
-      }
-    }
-
-    var competitorSection = topCompetitors.length > 0 ?
-      '<div class="report-section"><h3>&#127942; Top Competitors in ' + cat.name + '</h3><p style="font-size:13px;color:#71717a;margin-bottom:8px">These companies are most likely to be recommended by AI in your category:</p><ul class="competitor-list">' + compList + '</ul></div>' :
-      '<div class="report-section"><h3>&#127942; Competitive Landscape</h3><p>We don\'t yet have detailed competitive data for your specific category. Contact us for a custom AI visibility analysis.</p></div>';
-
-    var factorsSection = '<div class="report-section"><h3>&#128202; Visibility Factors</h3><p style="font-size:13px;color:#71717a">AI visibility in ' + cat.name + ' is primarily driven by: ' + cat.factors + '.</p></div>';
-
-    content.innerHTML = '<div class="results-header"><div class="results-company">' + company + '</div><div class="score-badge ' + scoreClass + '">' + score + '/10 &#8212; ' + scoreLabel + ' AI Visibility</div></div>' +
-      '<div class="report-section"><h3>&#128270; AI Mention Likelihood</h3><p>' + likelihood + '</p></div>' +
-      competitorSection +
-      '<div class="report-section"><h3>&#128161; How to Improve</h3><p>' + gaps + '</p></div>' +
-      factorsSection;
-
-    var ctaContent = document.getElementById('ctaContent');
-    var ctaHtml = '';
-    var stripeLink = 'https://buy.stripe.com/cNi8wQ3Pt3s7bkXdS7d7q04';
-
-    if (score >= 7) {
-      ctaHtml = '<h3>&#128170; Protect your #' + (foundIndex + 1) + ' position in ' + cat.name + '</h3>' +
-        '<p>You\'re visible now, but competitors are investing to overtake you. Lock in your position with a Featured Partner placement.</p>' +
-        '<div class="cta-steps">' +
-        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See your current ranking</span>View where you stand vs competitors right now.<br><a href="' + cat.link + '">View ' + cat.name + ' Rankings &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim your profile</span>Add your logo, description, and links. Starts at $99/mo.<br><a href="' + stripeLink + '">Claim Profile &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Upgrade to Featured Partner</span>Lock the #1 position with gold badge and AI citation optimization.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
-        '</div>';
-    } else if (score >= 4) {
-      ctaHtml = '<h3>&#128200; ' + company + ' isn\'t ranked high enough in ' + cat.name + '</h3>' +
-        '<p>You\'re on the radar but not in the top recommendations. Here\'s how to move up:</p>' +
-        '<div class="cta-steps">' +
-        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See who\'s ahead of you</span>View the full ' + cat.name + ' rankings and compare your position.<br><a href="' + cat.link + '">View Rankings &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Claim and enhance your profile</span>Add branding, get priority placement, and start capturing leads. Starts at $99/mo.<br><a href="' + stripeLink + '">Claim Profile &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Get cross-network visibility</span>Appear across our 10 publications so AI models cite you more frequently.<br><a href="' + cat.pricing + '">View All Plans &rarr;</a></div></div>' +
-        '</div>';
-    } else {
-      ctaHtml = '<h3>&#128680; ' + company + ' is invisible in ' + cat.name + '</h3>' +
-        '<p>AI assistants aren\'t recommending you. Every day without visibility means lost customers. Here\'s how to fix it:</p>' +
-        '<div class="cta-steps">' +
-        '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See who AI recommends instead</span>These are the companies getting your potential customers right now.<br><a href="' + cat.link + '">View ' + cat.name + ' Rankings &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get listed immediately</span>A claimed profile gets you on the rankings page within 24 hours. $99/mo, cancel anytime.<br><a href="' + stripeLink + '">Claim Your Profile Now &rarr;</a></div></div>' +
-        '<div class="cta-step"><div class="cta-step-num">3</div><div class="cta-step-text"><span class="step-label">Accelerate with Enhanced or Featured</span>Priority placement, AI citation optimization, and cross-network syndication.<br><a href="' + cat.pricing + '">See Pricing &rarr;</a></div></div>' +
-        '</div>';
-    }
-
-    ctaContent.innerHTML = ctaHtml;
-    ctaBox.classList.add('visible');
-    btn.disabled = false;
-    btn.textContent = 'Check Another Company';
-  }, 3200);
+  loading.style.display = 'none';
+  content.style.display = 'block';
+  if (unavailable) renderUnavailable(data, company);
+  else renderScore(data);
+  renderCta(cat, company, unavailable ? null : data.score, unavailable);
+  btn.disabled = false;
+  btn.textContent = 'Check Another Company';
 }
 </script>
 
