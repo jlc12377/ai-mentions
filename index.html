@@ -111,6 +111,8 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .provider-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:14px}
 .provider-model{font-size:11px;color:var(--ink-3);font-weight:500}
 .check-line{font-size:13px;color:var(--ink-2);padding:6px 0;border-bottom:1px solid #f4f4f5}
+.check-line.failed{color:#92400e}
+.check-note{font-size:12px;color:#92400e;margin:8px 0 2px;line-height:1.45}
 .provider-block details{margin-top:6px}
 .provider-block summary{font-size:12px;font-weight:600;color:var(--violet);cursor:pointer}
 .excerpt{font-size:12px;color:var(--ink-3);margin-top:6px;line-height:1.55}
@@ -271,7 +273,7 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
     <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of the question. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, Gemini uses Google Search grounding, and Claude uses its web search tool. Assistants without a key are skipped.</p>
     <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when it appears in the answer.</p>
     <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
-    <p>One answer scores 70% of the mention points plus 30% of the citation points. Your visibility score is the rounded average of the answers that actually came back, from 0 to 100. Each answer counts equally. Timeouts and errors are left out. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
+    <p>One answer scores 70% of the mention points plus 30% of the citation points. Your visibility score is the rounded average of the answers that actually came back, from 0 to 100. Each answer counts equally. Timeouts and errors are left out of the average and shown under that assistant, so a rate limit on some questions does not look like a miss. If Claude&#8217;s web search returns no answer, that question is asked again without search and labeled. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
   </div>
 </section>
 
@@ -367,12 +369,15 @@ function renderUnavailable(data, company) {
 }
 
 function checkLine(check) {
-  if (!check.ok) return '<div class="check-line">No answer returned</div>';
+  if (!check.ok) {
+    return '<div class="check-line failed">Failed: ' + esc(check.error || 'no answer') + '</div>';
+  }
   var bits = [];
   bits.push(check.mentioned ? 'Named' : 'Not named');
   if (check.position) bits.push('list #' + check.position);
   else if (check.mentioned) bits.push('no list rank');
   bits.push(check.cited ? 'domain cited' : 'domain not cited');
+  if (check.grounded === false) bits.push('answered without web search');
   bits.push(check.score + '/100');
   var html = '<div class="check-line">' + esc(bits.join(' · ')) + '</div>';
   if (check.excerpt || (check.citations && check.citations.length)) {
@@ -391,11 +396,21 @@ function checkLine(check) {
 
 function renderScore(data) {
   var providers = (data.providers || []).map(function (provider) {
+    var checks = provider.checks || [];
+    var failed = checks.filter(function (check) { return !check.ok; }).length;
+    var badge = 'No answer';
+    if (provider.ok && provider.score != null) badge = provider.score + '/100';
+    else if (!provider.ok) badge = 'Failed';
     var head = '<div class="provider-head"><div><strong>' + esc(provider.label) + '</strong> ' +
       '<span class="provider-model">' + esc(provider.model || '') + (provider.mode ? ' · ' + esc(provider.mode) : '') + '</span></div>' +
-      '<span class="comp-score">' + (provider.ok && provider.score != null ? esc(provider.score) + '/100' : 'No answer') + '</span></div>';
-    var lines = (provider.checks || []).map(checkLine).join('');
-    return '<div class="provider-block">' + head + lines + '</div>';
+      '<span class="comp-score">' + esc(badge) + '</span></div>';
+    var note = '';
+    if (failed > 0) {
+      note = '<p class="check-note">' + failed + ' of ' + checks.length +
+        ' questions failed and were left out of this score.</p>';
+    }
+    var lines = checks.map(checkLine).join('');
+    return '<div class="provider-block">' + head + note + lines + '</div>';
   }).join('');
   var prompts = (data.prompts || []).map(function (prompt) {
     return '<li>' + esc(prompt) + '</li>';
@@ -478,7 +493,7 @@ async function runCheck(event) {
   loading.style.display = 'block';
   content.style.display = 'none';
   ctaBox.classList.remove('visible');
-  document.getElementById('loadingText').textContent = 'Asking the connected AI assistants. This is a live check.';
+  document.getElementById('loadingText').textContent = 'Asking the connected AI assistants. This is a live check and can take up to a minute.';
 
   if (typeof gtag !== 'undefined') {
     gtag('event', 'visibility_check', {
@@ -500,7 +515,7 @@ async function runCheck(event) {
 
   var data = null;
   var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  var timer = setTimeout(function () { if (controller) controller.abort(); }, 45000);
+  var timer = setTimeout(function () { if (controller) controller.abort(); }, 58000);
   try {
     var response = await fetch('/api/score', {
       method: 'POST',

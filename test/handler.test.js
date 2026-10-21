@@ -95,12 +95,14 @@ function mockFetch(calls) {
   };
 }
 
-function setup(env, fetchImpl) {
+function setup(env, fetchImpl, extra = {}) {
   return createHandler({
     env,
     fetch: fetchImpl,
     cache: createMemoryCache(),
     limiter: createMemoryLimiter(),
+    sleep: async () => {},
+    ...extra,
   });
 }
 
@@ -116,7 +118,7 @@ test('parsers read grounded provider payloads', () => {
   assert.match(openai.text, /HubSpot/);
   assert.deepEqual(openai.citations, ['https://www.hubspot.com/crm']);
 
-  const perplexity = parsePerplexity(providerPayload('https://api.perplexity.ai/v1/agent'));
+  const perplexity = parsePerplexity(providerPayload('https://api.perplexity.ai/v1/responses'));
   assert.match(perplexity.text, /HubSpot/);
   assert.ok(perplexity.citations.includes('https://www.salesforce.com'));
 
@@ -133,6 +135,53 @@ test('parsers read grounded provider payloads', () => {
 
   const claude = parseAnthropic(providerPayload('https://api.anthropic.com/v1/messages'));
   assert.ok(claude.citations.includes('https://blog.hubspot.com/a'));
+  assert.equal(claude.grounded, true);
+
+  const searched = parseAnthropic({
+    stop_reason: 'end_turn',
+    content: [
+      { type: 'server_tool_use', name: 'web_search', input: { query: 'personal injury lawyers Nashville' } },
+      {
+        type: 'web_search_tool_result',
+        content: [{ type: 'web_search_result', url: 'https://www.example.com/a', title: 'Example' }],
+      },
+      {
+        type: 'text',
+        text: '1. Firm A\n2. Morgan & Morgan',
+        citations: [{ type: 'web_search_result_location', url: 'https://www.morganandmorgan.com/' }],
+      },
+    ],
+  });
+  assert.match(searched.text, /Morgan/);
+  assert.ok(searched.citations.includes('https://www.example.com/a'));
+  assert.ok(searched.citations.includes('https://www.morganandmorgan.com/'));
+  assert.equal(searched.grounded, true);
+
+  const searchFailed = parseAnthropic({
+    stop_reason: 'end_turn',
+    content: [
+      {
+        type: 'web_search_tool_result',
+        content: { type: 'web_search_tool_result_error', error_code: 'unavailable' },
+      },
+      { type: 'text', text: '1. HubSpot' },
+    ],
+  });
+  assert.equal(searchFailed.grounded, false);
+  assert.match(searchFailed.text, /HubSpot/);
+
+  assert.throws(
+    () => parseAnthropic({
+      content: [
+        { type: 'server_tool_use', name: 'web_search', input: { query: 'crm' } },
+        {
+          type: 'web_search_tool_result',
+          content: [{ type: 'web_search_result', url: 'https://www.example.com/a', title: 'Example' }],
+        },
+      ],
+    }),
+    /empty answer/,
+  );
 });
 
 test('no provider keys returns an unavailable score and does not call anyone', async () => {
@@ -182,11 +231,12 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(openai.options.headers.Authorization, 'Bearer test-openai');
 
   const perplexity = calls.find((call) => call.url.includes('api.perplexity.ai'));
-  assert.equal(perplexity.url, 'https://api.perplexity.ai/v1/agent');
+  assert.equal(perplexity.url, 'https://api.perplexity.ai/v1/responses');
   const perplexityBody = JSON.parse(perplexity.options.body);
   assert.equal(perplexityBody.model, 'perplexity/sonar');
   assert.equal(perplexityBody.tools[0].type, 'web_search');
   assert.equal(perplexityBody.tools[0].search_type, 'fast');
+  assert.equal(perplexityBody.input.includes('HubSpot'), false);
 
   const gemini = calls.find((call) => call.url.includes('generativelanguage.googleapis.com'));
   const geminiBody = JSON.parse(gemini.options.body);
@@ -197,8 +247,11 @@ test('mocked provider answers produce a real score and grounded requests', async
   const claude = calls.find((call) => call.url.includes('api.anthropic.com'));
   const claudeBody = JSON.parse(claude.options.body);
   assert.equal(claudeBody.model, 'claude-haiku-5-5');
+  assert.equal(claudeBody.max_tokens, 1600);
   assert.equal(claudeBody.tools[0].type, 'web_search_20250305');
   assert.equal(claudeBody.tools[0].name, 'web_search');
+  assert.equal(claudeBody.tools[0].allowed_callers, undefined);
+  assert.equal(res.body.providers.every((provider) => provider.checks.every((check) => check.grounded === true)), true);
 });
 
 test('a miss is score 0 and a total failure is unavailable, not a fake number', async () => {
@@ -289,7 +342,7 @@ test('identical queries are cached and invalid or extra calls are limited', asyn
   assert.equal(calls.length, 3);
 });
 
-test('legacy sonar model uses chat completions, and bad input never calls a provider', async () => {
+test('a bare sonar model is sent to /v1/responses, and bad input never calls a provider', async () => {
   const calls = [];
   const handler = setup({
     PERPLEXITY_API_KEY: 'test-perplexity',
@@ -298,10 +351,12 @@ test('legacy sonar model uses chat completions, and bad input never calls a prov
   }, mockFetch(calls));
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
   assert.equal(res.statusCode, 200);
-  assert.ok(calls.every((call) => call.url === 'https://api.perplexity.ai/chat/completions'));
+  assert.ok(calls.every((call) => call.url === 'https://api.perplexity.ai/v1/responses'));
   const body = JSON.parse(calls[0].options.body);
-  assert.equal(body.model, 'sonar');
-  assert.equal(body.messages[1].content.includes('HubSpot'), false);
+  assert.equal(body.model, 'perplexity/sonar');
+  assert.equal(body.messages, undefined);
+  assert.equal(body.input.includes('HubSpot'), false);
+  assert.equal(res.body.providers[0].model, 'perplexity/sonar');
 
   const rejected = await invoke(handler, { body: { businessName: 'H', category: 'CRM Software' } });
   assert.equal(rejected.statusCode, 400);
@@ -311,6 +366,243 @@ test('legacy sonar model uses chat completions, and bad input never calls a prov
   const wrongMethod = await invoke(handler, { method: 'GET', body: query });
   assert.equal(wrongMethod.statusCode, 405);
   assert.equal(wrongMethod.body.score, null);
+});
+
+function jsonResponse(status, payload, headers) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    headers: headers || {},
+    async text() {
+      return typeof payload === 'string' ? payload : JSON.stringify(payload);
+    },
+  };
+}
+
+test('perplexity prompts run one at a time and a 429 is retried', async () => {
+  let perplexityInFlight = 0;
+  let perplexityMax = 0;
+  let openaiInFlight = 0;
+  let openaiMax = 0;
+  const sleeps = [];
+  const attempts = new Map();
+  const fetchImpl = async (url, options) => {
+    const href = String(url);
+    if (href.includes('api.perplexity.ai')) {
+      perplexityInFlight += 1;
+      perplexityMax = Math.max(perplexityMax, perplexityInFlight);
+      const body = JSON.parse(options.body);
+      const seen = (attempts.get(body.input) || 0) + 1;
+      attempts.set(body.input, seen);
+      await new Promise((resolve) => setImmediate(resolve));
+      perplexityInFlight -= 1;
+      if (seen === 1 && [...attempts.keys()][0] === body.input) {
+        return jsonResponse(429, { error: { message: 'Request rate limit exceeded' } }, {
+          get(name) { return String(name).toLowerCase() === 'retry-after' ? '1' : ''; },
+        });
+      }
+      return jsonResponse(200, providerPayload(href));
+    }
+    if (href.includes('api.openai.com')) {
+      openaiInFlight += 1;
+      openaiMax = Math.max(openaiMax, openaiInFlight);
+      await new Promise((resolve) => setImmediate(resolve));
+      openaiInFlight -= 1;
+    }
+    return jsonResponse(200, providerPayload(href));
+  };
+  const handler = setup({
+    OPENAI_API_KEY: 'test-openai',
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    SCORE_PROMPT_COUNT: '4',
+    PERPLEXITY_PROMPT_DELAY_MS: '0',
+    PERPLEXITY_429_RETRIES: '2',
+  }, fetchImpl, { sleep: async (ms) => { sleeps.push(ms); } });
+  const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(perplexityMax, 1);
+  assert.ok(openaiMax > 1);
+  assert.deepEqual(sleeps, [1000]);
+  const perplexity = res.body.providers.find((provider) => provider.id === 'perplexity');
+  assert.equal(perplexity.ok, true);
+  assert.equal(perplexity.score, 92);
+  assert.equal(perplexity.checks.every((check) => check.ok), true);
+});
+
+test('perplexity 429s that survive the retries are shown and left out of the score', async () => {
+  const fetchImpl = async (url, options) => {
+    const body = JSON.parse(options.body);
+    if (body.input.startsWith('What are the best')) {
+      return jsonResponse(429, { error: { message: 'Request rate limit exceeded' } });
+    }
+    return jsonResponse(200, providerPayload(url));
+  };
+  const handler = setup({
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    SCORE_PROMPT_COUNT: '4',
+    PERPLEXITY_PROMPT_DELAY_MS: '0',
+    PERPLEXITY_429_RETRIES: '2',
+  }, fetchImpl);
+  const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.score, 92);
+  const perplexity = res.body.providers[0];
+  assert.equal(perplexity.ok, true);
+  assert.equal(perplexity.score, 92);
+  const failed = perplexity.checks.filter((check) => !check.ok);
+  const succeeded = perplexity.checks.filter((check) => check.ok);
+  assert.equal(failed.length, 1);
+  assert.match(failed[0].error, /HTTP 429: Request rate limit exceeded/);
+  assert.equal(succeeded.length, 3);
+  assert.ok(succeeded.every((check) => check.score === 92));
+});
+
+test('perplexity stops prompts that do not fit in the budget', async () => {
+  let clock = 0;
+  const calls = [];
+  const fetchImpl = async (url) => {
+    clock += 400;
+    calls.push(String(url));
+    return jsonResponse(200, providerPayload(url));
+  };
+  const handler = setup({
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    SCORE_PROMPT_COUNT: '4',
+    PERPLEXITY_BUDGET_MS: '1500',
+    PERPLEXITY_PROMPT_DELAY_MS: '0',
+    PERPLEXITY_429_RETRIES: '0',
+  }, fetchImpl, { now: () => clock });
+  const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  assert.equal(calls.length, 2);
+  assert.ok(calls.every((url) => url === 'https://api.perplexity.ai/v1/responses'));
+  const checks = res.body.providers[0].checks;
+  assert.equal(checks[0].ok, true);
+  assert.equal(checks[1].ok, true);
+  assert.equal(checks[2].ok, false);
+  assert.equal(checks[2].error, 'timed out');
+  assert.equal(checks[3].error, 'timed out');
+  assert.equal(res.body.score, 92);
+  assert.equal(res.body.providers[0].ok, true);
+});
+
+test('claude uses search result urls and falls back when web search returns no text', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push(body);
+    if (body.tools) {
+      return jsonResponse(200, {
+        stop_reason: 'end_turn',
+        content: [
+          { type: 'server_tool_use', name: 'web_search', input: { query: 'crm' } },
+          {
+            type: 'web_search_tool_result',
+            content: [{ type: 'web_search_result', url: 'https://www.example.com/a', title: 'Example' }],
+          },
+        ],
+      });
+    }
+    return jsonResponse(200, {
+      content: [{ type: 'text', text: '1. HubSpot\n2. Salesforce' }],
+    });
+  };
+  const handler = setup({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, fetchImpl);
+  const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  const searches = calls.filter((body) => body.tools);
+  const plains = calls.filter((body) => !body.tools);
+  assert.equal(searches.length, 3);
+  assert.equal(plains.length, 3);
+  assert.equal(searches[0].max_tokens, 1600);
+  assert.equal(plains[0].max_tokens, 600);
+  assert.deepEqual(
+    plains.map((body) => body.messages[0].content).sort(),
+    searches.map((body) => body.messages[0].content).sort(),
+  );
+  const claude = res.body.providers[0];
+  assert.equal(claude.ok, true);
+  assert.equal(claude.score, 70);
+  assert.ok(claude.checks.every((check) => check.ok && check.grounded === false));
+});
+
+test('claude falls back when the web search tool is rejected and not when the key is rejected', async () => {
+  const rejectedTool = [];
+  const toolHandler = setup({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    ANTHROPIC_WEB_SEARCH_TOOL: 'web_search_20260318',
+    SCORE_PROMPT_COUNT: '3',
+  }, async (url, options) => {
+    const body = JSON.parse(options.body);
+    rejectedTool.push(body);
+    if (body.tools) {
+      assert.deepEqual(body.tools[0].allowed_callers, ['direct']);
+      return jsonResponse(400, { error: { message: 'web_search tool is not available for this key' } });
+    }
+    return jsonResponse(200, { content: [{ type: 'text', text: 'HubSpot is a CRM.' }] });
+  });
+  const toolRes = await invoke(toolHandler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  assert.equal(rejectedTool.length, 6);
+  assert.equal(toolRes.statusCode, 200);
+  assert.equal(toolRes.body.score, 35);
+  assert.equal(toolRes.body.providers[0].checks[0].grounded, false);
+
+  let authCalls = 0;
+  const authHandler = setup({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, async () => {
+    authCalls += 1;
+    return jsonResponse(401, { error: { message: 'invalid x-api-key' } });
+  });
+  const authRes = await invoke(authHandler, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
+  assert.equal(authCalls, 3);
+  assert.equal(authRes.body.score, null);
+  assert.match(authRes.body.providers[0].error, /HTTP 401/);
+});
+
+test('a paused claude search with a real answer is kept, and a preamble falls back', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    const body = JSON.parse(options.body);
+    calls.push(body);
+    if (body.tools && body.input == null) {
+      const prompt = body.messages[0].content;
+      if (prompt.startsWith('What are the best')) {
+        return jsonResponse(200, {
+          stop_reason: 'pause_turn',
+          content: [{ type: 'text', text: "I'll search for that." }],
+        });
+      }
+      return jsonResponse(200, {
+        stop_reason: 'pause_turn',
+        content: [
+          {
+            type: 'web_search_tool_result',
+            content: [{ type: 'web_search_result', url: 'https://www.hubspot.com/crm', title: 'HubSpot' }],
+          },
+          { type: 'text', text: '1. HubSpot is the CRM buyers shortlist first for inbound teams, agencies, and growing companies.' },
+        ],
+      });
+    }
+    return jsonResponse(200, { content: [{ type: 'text', text: '1. HubSpot' }] });
+  };
+  const handler = setup({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, fetchImpl);
+  const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
+  const searchCalls = calls.filter((body) => body.tools);
+  const plainCalls = calls.filter((body) => !body.tools);
+  assert.equal(searchCalls.length, 3);
+  assert.equal(plainCalls.length, 1);
+  assert.equal(plainCalls[0].messages[0].content.startsWith('What are the best'), true);
+  const checks = res.body.providers[0].checks;
+  assert.equal(checks[0].grounded, false);
+  assert.equal(checks[1].grounded, true);
+  assert.equal(checks[1].cited, true);
+  assert.equal(checks[2].grounded, true);
 });
 
 test('provider timeouts and empty answers are not scored as invisibility', async () => {
