@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const { PRODUCTS, classifyPaidSession } = require('../lib/products');
 const { buildRecommendations, monthChange } = require('../lib/report-build');
 const { supabaseConfig, createSupabaseStore, createPaidStore, createMemoryKv } = require('../lib/paid-store');
+const { sendReportEmail } = require('../lib/report-mail');
 const {
   createReportHandler,
   createPrivateReportHandler,
@@ -223,7 +224,10 @@ test('a paid session runs the three engines once and blocks a second business', 
 test('email failure does not discard the report, and a configured Resend send includes the private link', async () => {
   const calls = [];
   const store = memoryStore();
-  const env = providerEnv({ RESEND_API_KEY: 're_test', REPORT_FROM_EMAIL: 'reports@ai-mentions.com' });
+  const env = providerEnv({
+    RESEND_API_KEY: 're_test',
+    REPORT_FROM_EMAIL: 'AI Mentions <reports@ai-mentions.com>',
+  });
   const handler = createReportHandler({
     env,
     fetch: mockFetch(calls, {}),
@@ -235,7 +239,7 @@ test('email failure does not discard the report, and a configured Resend send in
   const emailCall = calls.find((call) => call.url.includes('api.resend.com'));
   const email = JSON.parse(emailCall.options.body);
   assert.equal(email.to[0], 'buyer@example.com');
-  assert.equal(email.from, 'reports@ai-mentions.com');
+  assert.equal(email.from, 'AI Mentions <reports@ai-mentions.com>');
   assert.match(email.html, new RegExp(created.body.url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   assert.equal(emailCall.options.headers.Authorization, 'Bearer re_test');
 
@@ -255,6 +259,28 @@ test('email failure does not discard the report, and a configured Resend send in
   assert.equal(saved.body.emailSent, false);
   assert.equal(saved.body.emailReason, 'send_failed');
   assert.ok(saved.body.url);
+});
+
+test('a quoted display-name from address is sent only to the Resend emails endpoint', async () => {
+  const calls = [];
+  const result = await sendReportEmail({
+    RESEND_API_KEY: 're_send_only',
+    REPORT_FROM_EMAIL: "'AI Mentions <reports@ai-mentions.com>'",
+  }, async (url, options) => {
+    calls.push({ url: String(url), method: options.method, body: options.body });
+    return jsonResponse(200, { id: 'email_2' });
+  }, {
+    to: 'buyer@example.com',
+    link: 'https://ai-mentions.com/r/abc',
+    record: {
+      productName: 'Full AI Visibility Report',
+      business: { businessName: 'HubSpot' },
+      view: { score: 80, summary: { checks: 12, mentions: 9 }, change: null },
+    },
+  });
+  assert.equal(result.sent, true);
+  assert.deepEqual(calls.map((call) => `${call.method} ${call.url}`), ['POST https://api.resend.com/emails']);
+  assert.equal(JSON.parse(calls[0].body).from, 'AI Mentions <reports@ai-mentions.com>');
 });
 
 test('an unpaid or unfinished checkout cannot generate a report', async () => {
@@ -306,7 +332,7 @@ test('tracking checkout stores the subscriber and the daily job reruns due activ
   };
   const env = providerEnv({
     RESEND_API_KEY: 're_test',
-    REPORT_FROM_EMAIL: 'reports@ai-mentions.com',
+    REPORT_FROM_EMAIL: 'AI Mentions <reports@ai-mentions.com>',
     CRON_SECRET: 'cron-secret',
     CRON_BUDGET_MS: '600000',
   });

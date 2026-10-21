@@ -53,7 +53,7 @@ test('deploy notes name the provider env vars and the formula', () => {
   assert.match(readme, /PERPLEXITY_429_RETRIES/);
   assert.match(readme, /STRIPE_RESTRICTED_KEY/);
   assert.match(readme, /RESEND_API_KEY/);
-  assert.match(readme, /REPORT_FROM_EMAIL/);
+  assert.match(readme, /AI Mentions <reports@ai-mentions.com>/);
   assert.match(readme, /CRON_SECRET/);
   assert.match(readme, /supabase\/schema\.sql/);
   assert.match(readme, /server/);
