@@ -33,7 +33,7 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === '/api/score') return handler(req, res);
   if (url.pathname === '/api/report') return reportHandler(req, res);
   if (url.pathname === '/api/cron/reports') return cronHandler(req, res);
-  const privateReport = url.pathname.match(/^\/r\/([A-Za-z0-9_-]{20,80})$/);
+  const privateReport = url.pathname.match(/^\/r\/([^/]+)$/);
   if (privateReport) {
     req.query = { token: privateReport[1] };
     return privateReportHandler(req, res);

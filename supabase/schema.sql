@@ -1,9 +1,13 @@
 -- AI Mentions paid reports.
--- Run this once in the Supabase SQL editor (Dashboard → SQL).
--- The Vercel integration injects SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.
--- The app uses the service role on the server only. Row level security is on
--- and there are no policies, so the anon key and the public Data API cannot read these tables.
--- The service role bypasses row level security.
+-- The Supabase project starts empty. Paste this whole file once into the
+-- Supabase SQL editor (Dashboard → SQL) and run it before the first paid report.
+-- Vercel already has SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. The key is an
+-- sb_secret_ value. The server sends it as the PostgREST apikey. It maps to
+-- service_role, which bypasses row level security. There are no policies, and
+-- anon, authenticated, and public have no grants, so the public Data API cannot
+-- read these tables.
+
+begin;
 
 create table if not exists public.reports (
   token text primary key,
@@ -83,4 +87,9 @@ grant all on table public.report_history to service_role;
 grant all on table public.checkout_sessions to service_role;
 grant all on table public.report_locks to service_role;
 
+revoke all on sequence public.report_history_id_seq from public, anon, authenticated;
 grant usage, select on sequence public.report_history_id_seq to service_role;
+
+notify pgrst, 'reload schema';
+
+commit;

@@ -404,11 +404,11 @@ test('supabase storage uses the service role on the server and keeps report hist
   assert.equal(supabaseConfig({
     SUPABASE_URL: 'https://aaa.supabase.co',
     NEXT_PUBLIC_SUPABASE_URL: 'https://bbb.supabase.co',
-    SUPABASE_SERVICE_ROLE_KEY: 'service-role-test',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
   }).url, 'https://aaa.supabase.co');
   assert.equal(supabaseConfig({
     NEXT_PUBLIC_SUPABASE_URL: 'https://bbb.supabase.co/',
-    SUPABASE_SERVICE_ROLE_KEY: 'service-role-test',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
   }).url, 'https://bbb.supabase.co');
 
   const tables = {
@@ -428,13 +428,14 @@ test('supabase storage uses the service role on the server and keeps report hist
   }
   const store = createSupabaseStore({
     NEXT_PUBLIC_SUPABASE_URL: 'https://bbb.supabase.co/',
-    SUPABASE_SERVICE_ROLE_KEY: 'service-role-test',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
   }, async (url, options) => {
     const href = String(url);
     calls.push(href);
-    assert.equal(href.includes('service-role-test'), false);
-    assert.equal(options.headers.apikey, 'service-role-test');
-    assert.equal(options.headers.Authorization, 'Bearer service-role-test');
+    assert.equal(href.includes('sb_secret_test'), false);
+    assert.equal(options.headers.apikey, 'sb_secret_test');
+    assert.equal(options.headers.Authorization, undefined);
+    assert.equal(options.headers['User-Agent'], 'ai-mentions');
     const parsed = new URL(href);
     const table = parsed.pathname.split('/').pop();
     const rows = tables[table];
@@ -487,9 +488,29 @@ test('supabase storage uses the service role on the server and keeps report hist
 
   const missing = createSupabaseStore({
     SUPABASE_URL: 'https://aaa.supabase.co',
-    SUPABASE_SERVICE_ROLE_KEY: 'service-role-test',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
   }, async () => jsonResponse(404, { code: 'PGRST205', message: 'schema cache' }));
   await assert.rejects(() => missing.getReport('missing-token'), /supabase\/schema\.sql/);
+
+  const legacyCalls = [];
+  const legacy = createSupabaseStore({
+    SUPABASE_URL: 'https://aaa.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'eyJhbGciOiJub25lIn0.e30.sig',
+  }, async (url, options) => {
+    legacyCalls.push(options.headers);
+    return jsonResponse(200, []);
+  });
+  await legacy.getReport('legacy-token');
+  assert.equal(legacyCalls[0].apikey, 'eyJhbGciOiJub25lIn0.e30.sig');
+  assert.equal(legacyCalls[0].Authorization, 'Bearer eyJhbGciOiJub25lIn0.e30.sig');
+
+  const publishable = createSupabaseStore({
+    SUPABASE_URL: 'https://aaa.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_publishable_test',
+  }, async () => {
+    throw new Error('publishable key must not be sent');
+  });
+  await assert.rejects(() => publishable.getReport('nope'), /server secret key/);
 
   await store.setSessionToken('cs_test_paidreport01', 'saved-token');
   assert.equal(await store.getSessionToken('cs_test_paidreport01'), 'saved-token');

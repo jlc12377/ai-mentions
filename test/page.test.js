@@ -64,6 +64,7 @@ test('deploy notes name the provider env vars and the formula', () => {
     assert.match(schema, new RegExp(`alter table public\\.${name} enable row level security`, 'i'));
   }
   assert.match(schema, /revoke all on table public\.reports from public, anon, authenticated/i);
+  assert.match(schema, /notify pgrst, 'reload schema'/);
   assert.equal(/create policy/i.test(schema), false);
   assert.equal(/to anon/i.test(schema.replace(/from public, anon, authenticated/gi, '')), false);
   assert.equal(page.includes('SUPABASE_SERVICE_ROLE_KEY'), false);
