@@ -111,13 +111,15 @@ test('judgeAnswer scores a real answer and does not invent a mention', () => {
 
 test('competitors are the other names that show up most often', () => {
   const checks = [1, 2, 3, 4].map(() => judgeAnswer({
-    text: '1. Salesforce\n2. HubSpot\n3. Zoho CRM\n4. Salesforce CRM',
+    text: '1. Salesforce:\n2. HubSpot:\n3. Zoho CRM\n4. Salesforce Sales Cloud\n5. HubSpot CRM\n6. Zoho',
     citations: [],
   }, { businessName: 'HubSpot', domain: 'hubspot.com' }));
   const competitors = collectCompetitors(checks, 'HubSpot', 'hubspot.com');
-  assert.deepEqual(competitors.map((row) => row.name), ['Salesforce', 'Salesforce CRM', 'Zoho CRM']);
+  assert.deepEqual(competitors.map((row) => row.name), ['Salesforce', 'Zoho']);
   assert.equal(competitors[0].mentions, 4);
+  assert.equal(competitors[1].mentions, 4);
   assert.equal(competitors.some((row) => /hubspot/i.test(row.name)), false);
+  assert.equal(competitors.some((row) => /[:]$/.test(row.name)), false);
 });
 
 test('buyer prompts do not contain the business name', () => {

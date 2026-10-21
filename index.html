@@ -451,17 +451,17 @@ function renderCta(cat, company, score, unavailable) {
   var heading;
   var intro;
   if (unavailable) {
-    heading = 'We saved your request';
-    intro = 'There is no score to act on yet. The paid report runs the same live check once ChatGPT, Perplexity, and Claude are all connected.';
+    heading = 'We could not score this one';
+    intro = 'No answer came back, so we did not invent a number. The full report asks ChatGPT, Perplexity, and Claude, lists the other businesses they name, and saves a private link for you.';
   } else if (score >= 70) {
-    heading = company + ' is showing up in these AI answers';
-    intro = 'You appeared often in this check. The full report adds the rank, the competitors, the sources, and a private link.';
+    heading = company + ' is showing up when buyers ask';
+    intro = 'Your business was named often in this check. The full report adds each assistant\'s rank, the other businesses they named, and a private link.';
   } else if (score >= 40) {
-    heading = company + ' showed up in some of these answers';
-    intro = 'You were named, but not in every answer. The full report shows which assistant said what, and what to change.';
+    heading = company + ' showed up in some answers';
+    intro = 'You were named, but not every time. The full report shows which assistant said what, and what to work on next.';
   } else {
-    heading = company + ' rarely appeared in these answers';
-    intro = 'In this check, the assistants usually named other companies. The full report lists those competitors and the sources they cited.';
+    heading = company + ' was rarely named';
+    intro = 'In this check, the assistants usually named other businesses. The full report lists those names and the sources they cited.';
   }
   document.getElementById('ctaContent').innerHTML =
     '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
@@ -471,8 +471,8 @@ function renderCta(cat, company, score, unavailable) {
     '</div>' +
     '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
     '<div class="cta-steps">' +
-    '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the public rankings</span>These pages are ours, separate from the live AI check.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +
-    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">See featured plans</span>Priority placement and cross-network syndication.<br><a href="' + esc(cat.pricing) + '">View plans &rarr;</a></div></div>' +
+    '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the Best-of lists</span>See where businesses rank on our independent Best-of lists.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +
+    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get verified and listed</span>AI Visibility Package from $299/mo.<br><a href="' + esc(cat.pricing) + '">View the package &rarr;</a></div></div>' +
     '</div>';
   document.getElementById('ctaBox').classList.add('visible');
 }
