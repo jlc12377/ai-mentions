@@ -800,7 +800,8 @@ test('the free score email is the short result and a failed send still returns t
   assert.match(email.text, /HubSpot: 92\/100/);
   assert.match(email.text, /ChatGPT: mentioned/);
   assert.match(email.text, /ChatGPT recommends Salesforce and Zoho\./);
-  assert.match(email.text, /See the full report: what AI says, the sources it trusts, and what to fix, \$150/);
+  assert.match(email.text, /Want to see more insights\? Get the full report: every answer AI gave, the sources it trusts, and what to fix\. \$150/);
+  assert.match(email.text, /Or track it monthly for \$65\/mo/);
   assert.match(email.text, /https:\/\/buy\.stripe\.com\/cNieVeclZ8MrbkX15ld7q0u/);
   assert.match(email.text, /\$65\/mo/);
   assert.match(email.text, /https:\/\/buy\.stripe\.com\/9B63cw71Fe6LfBd4hxd7q0v/);

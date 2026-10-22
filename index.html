@@ -119,6 +119,12 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 .cta-box.visible{display:block}
 .cta-box h3{font-family:var(--font-display);font-size:20px;margin-bottom:6px;color:var(--ink)}
 .cta-box p{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+.score-upsell{margin:16px 0 4px;padding:14px;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:12px}
+.score-upsell a.upsell-btn{display:block;padding:12px 16px;background:var(--violet);color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;line-height:1.45;text-align:center}
+.score-upsell a.upsell-btn:hover{background:#6d28d9}
+.upsell-track{margin:12px 0 0;text-align:center;font-size:14px;color:var(--ink-2)}
+.upsell-track a{color:var(--violet);font-weight:600;text-decoration:none}
+.upsell-track a:hover{text-decoration:underline}
 .recommend-line{font-size:14px;color:var(--ink-2);margin-top:6px;line-height:1.45}
 .how-score{font-size:13px;color:var(--ink-3);margin-top:12px}
 .how-score a{color:var(--violet);font-weight:600}
@@ -350,6 +356,15 @@ function captureLead(fields) {
   }).catch(function () {});
 }
 
+function upsellHtml() {
+  var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
+  var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
+  return '<div class="score-upsell">' +
+    '<a class="upsell-btn" href="' + esc(reportUrl) + '">Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150</a>' +
+    '<p class="upsell-track"><a href="' + esc(trackingUrl) + '">Or track it monthly for $65/mo</a></p>' +
+    '</div>';
+}
+
 function renderUnavailable(data, company) {
   var detail = (data && data.detail) || 'That check did not finish. Nothing was guessed.';
   var message = (data && data.message) || 'Score temporarily unavailable';
@@ -357,6 +372,7 @@ function renderUnavailable(data, company) {
     '<div class="results-header"><div class="results-company">' + esc(company) + '</div>' +
     '<div class="score-badge score-low">' + esc(message) + '</div></div>' +
     '<div class="unavailable-note">' + esc(detail) + ' Your email was still submitted.</div>' +
+    upsellHtml() +
     '<button type="button" class="retry-btn" onclick="runCheck()">Try again</button>';
 }
 
@@ -388,24 +404,19 @@ function renderScore(data) {
     '<div class="results-header"><div><div class="results-company">' + esc(data.businessName) + '</div>' +
     '<p class="results-meta">' + esc(when) + '</p></div>' +
     '<div class="score-badge ' + scoreClass(data.score) + '">' + esc(data.score) + '/100 — ' + esc(scoreLabel(data.score)) + '</div></div>' +
+    upsellHtml() +
     '<div class="report-section"><h3>By assistant</h3>' + providers + '</div>' +
     '<p class="how-score">How we score: mostly whether you were named, plus whether your site was cited. <a href="#methodology">How we score</a></p>' +
     mail;
 }
 
 function renderCta(cat, company, score, unavailable) {
-  var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
-  var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
   var heading = unavailable ? 'We could not score this one' : 'The full report is the next step';
   var intro = unavailable
     ? 'No answer came back, so we did not invent a number.'
     : 'This free result is the score, whether each assistant mentioned ' + company + ', and a few businesses they named.';
   document.getElementById('ctaContent').innerHTML =
     '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
-    '<div class="cta-box-links">' +
-    '<a class="cta-main" href="' + esc(reportUrl) + '">See the full report: what AI says, the sources it trusts, and what to fix, $150</a>' +
-    '<a class="outline" href="' + esc(trackingUrl) + '">AI Visibility Tracking — $65/mo</a>' +
-    '</div>' +
     '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
     '<div class="cta-steps">' +
     '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the Best-of lists</span>See where businesses rank on our independent Best-of lists.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +

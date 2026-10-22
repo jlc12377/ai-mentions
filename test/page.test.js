@@ -24,7 +24,8 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /30%/);
   assert.match(page, /by Listicle Liaison/);
   assert.match(page, /network of review sites/);
-  assert.match(page, /See the full report: what AI says, the sources it trusts, and what to fix, \$150/);
+  assert.match(page, /Want to see more insights\? Get the full report: every answer AI gave, the sources it trusts, and what to fix\. \$150/);
+  assert.match(page, /Or track it monthly for \$65\/mo/);
   assert.match(page, /Try again/);
   assert.match(page, /email this score to you/);
   assert.match(page, /Did not answer/);
