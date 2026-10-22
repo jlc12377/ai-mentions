@@ -4,7 +4,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { createHandler } = require('../lib/handler');
 const { createMemoryCache, createMemoryLimiter } = require('../lib/store');
-const { parseOpenAI, parsePerplexity, parseGemini, parseAnthropic } = require('../lib/providers');
+const { parseOpenAI, parsePerplexity, parseGemini, parseAnthropic, readConfig, runProviders } = require('../lib/providers');
+const { buildPrompts } = require('../lib/score');
+const { toPublicScore, joinAnd } = require('../lib/free-score');
+const { freeScoreEmail } = require('../lib/report-mail');
 
 function mockRes() {
   return {
@@ -213,15 +216,20 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(res.body.score, 92);
   assert.equal(res.body.cached, false);
   assert.equal(res.body.domain, 'hubspot.com');
-  assert.equal(res.body.prompts.length, 4);
-  assert.equal(res.body.prompts.some((prompt) => /hubspot/i.test(prompt)), false);
+  assert.equal(res.body.prompts, undefined);
+  assert.equal(res.body.formula, undefined);
+  assert.equal(res.body.summary, undefined);
+  assert.equal(res.body.competitors, undefined);
   assert.equal(res.body.providers.length, 4);
-  assert.deepEqual(res.body.providers.map((provider) => provider.score), [92, 92, 92, 92]);
-  assert.equal(res.body.summary.mentions, 16);
-  assert.equal(res.body.summary.citations, 16);
-  assert.equal(res.body.competitors[0].name, 'Salesforce');
+  assert.ok(res.body.providers.every((provider) => provider.answered === true && provider.mentioned === true));
+  assert.equal(res.body.providers[0].recommends[0], 'Salesforce');
+  assert.ok(res.body.providers.every((provider) => provider.recommends.length <= 3));
   assert.match(res.body.timestamp, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(calls.length, 16);
+  const hidden = JSON.stringify(res.body);
+  assert.equal(/excerpt|citations|grounded|https:\/\//.test(hidden), false);
+  assert.equal(hidden.includes('What are the best'), false);
+  assert.equal(hidden.includes('inbound'), false);
 
   const openai = calls.find((call) => call.url.includes('api.openai.com'));
   const openaiBody = JSON.parse(openai.options.body);
@@ -251,7 +259,7 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(claudeBody.tools[0].type, 'web_search_20250305');
   assert.equal(claudeBody.tools[0].name, 'web_search');
   assert.equal(claudeBody.tools[0].allowed_callers, undefined);
-  assert.equal(res.body.providers.every((provider) => provider.checks.every((check) => check.grounded === true)), true);
+  assert.ok(res.body.providers.every((provider) => provider.checks == null && provider.model == null && provider.error == null));
 });
 
 test('a miss is score 0 and a total failure is unavailable, not a fake number', async () => {
@@ -273,10 +281,12 @@ test('a miss is score 0 and a total failure is unavailable, not a fake number', 
   assert.equal(miss.statusCode, 200);
   assert.equal(miss.body.score, 0);
   assert.equal(miss.body.unavailable, false);
-  assert.equal(miss.body.summary.mentions, 0);
+  assert.equal(miss.body.summary, undefined);
   assert.equal((miss.body.skipped || []).some((row) => row.id === 'gemini' || row.label === 'Gemini'), false);
   assert.ok((miss.body.skipped || []).some((row) => row.id === 'perplexity'));
-  assert.deepEqual(miss.body.competitors.map((row) => row.name), ['Salesforce', 'Zoho']);
+  assert.equal(miss.body.providers[0].answered, true);
+  assert.equal(miss.body.providers[0].mentioned, false);
+  assert.deepEqual(miss.body.providers[0].recommends, ['Salesforce', 'Zoho']);
 
   const failing = setup({ OPENAI_API_KEY: 'test-openai' }, async () => ({
     ok: false,
@@ -289,9 +299,11 @@ test('a miss is score 0 and a total failure is unavailable, not a fake number', 
   assert.equal(failed.statusCode, 503);
   assert.equal(failed.body.score, null);
   assert.equal(failed.body.reason, 'all_failed');
-  assert.equal(failed.body.providers[0].ok, false);
-  assert.equal(failed.body.providers[0].error.includes('sk-secret'), false);
-  assert.match(failed.body.providers[0].error, /HTTP 401/);
+  assert.equal(failed.body.providers[0].answered, false);
+  assert.equal(failed.body.providers[0].mentioned, false);
+  assert.equal(failed.body.providers[0].error, undefined);
+  assert.equal(JSON.stringify(failed.body).includes('sk-secret'), false);
+  assert.equal(JSON.stringify(failed.body).includes('HTTP 401'), false);
 });
 
 test('one working provider still scores when another provider errors', async () => {
@@ -319,9 +331,11 @@ test('one working provider still scores when another provider errors', async () 
   assert.equal(res.body.score, 35);
   const claude = res.body.providers.find((provider) => provider.id === 'anthropic');
   const chatgpt = res.body.providers.find((provider) => provider.id === 'openai');
-  assert.equal(chatgpt.ok, true);
-  assert.equal(claude.ok, false);
-  assert.equal(claude.score, null);
+  assert.equal(chatgpt.answered, true);
+  assert.equal(chatgpt.mentioned, true);
+  assert.equal(claude.answered, false);
+  assert.equal(claude.mentioned, false);
+  assert.equal(claude.score, undefined);
 });
 
 test('identical queries are cached and invalid or extra calls are limited', async () => {
@@ -336,12 +350,15 @@ test('identical queries are cached and invalid or extra calls are limited', asyn
   assert.equal(second.body.cached, true);
   assert.equal(second.body.score, first.body.score);
   assert.equal(second.body.businessName, 'hubspot inc');
+  assert.equal(second.body.prompts, undefined);
+  assert.equal(JSON.stringify(second.body).includes('inbound'), false);
   assert.equal(calls.length, 3);
 
   const third = await invoke(handler, { body: query });
   assert.equal(third.statusCode, 429);
   assert.equal(third.body.score, null);
   assert.equal(third.body.reason, 'rate_limited');
+  assert.equal(third.body.prompts, undefined);
   assert.equal(calls.length, 3);
 });
 
@@ -359,7 +376,8 @@ test('a bare sonar model is sent to /v1/responses, and bad input never calls a p
   assert.equal(body.model, 'perplexity/sonar');
   assert.equal(body.messages, undefined);
   assert.equal(body.input.includes('HubSpot'), false);
-  assert.equal(res.body.providers[0].model, 'perplexity/sonar');
+  assert.equal(res.body.providers[0].model, undefined);
+  assert.equal(res.body.providers[0].answered, true);
 
   const rejected = await invoke(handler, { body: { businessName: 'H', category: 'CRM Software' } });
   assert.equal(rejected.statusCode, 400);
@@ -382,7 +400,22 @@ function jsonResponse(status, payload, headers) {
   };
 }
 
-test('perplexity prompts run one at a time and a 429 is retried', async () => {
+async function runFull(env, fetchImpl, extra = {}) {
+  const config = readConfig(env);
+  const input = {
+    businessName: 'HubSpot',
+    domain: 'hubspot.com',
+    category: 'CRM Software',
+    city: '',
+  };
+  const prompts = buildPrompts(input.category, input.city, config.promptCount);
+  return runProviders(input, prompts, config, fetchImpl, {
+    sleep: extra.sleep || (async () => {}),
+    now: extra.now,
+  });
+}
+
+test('perplexity prompts run together and a 429 is retried inside the call', async () => {
   let perplexityInFlight = 0;
   let perplexityMax = 0;
   let openaiInFlight = 0;
@@ -423,13 +456,14 @@ test('perplexity prompts run one at a time and a 429 is retried', async () => {
   }, fetchImpl, { sleep: async (ms) => { sleeps.push(ms); } });
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(perplexityMax, 1);
+  assert.equal(perplexityMax, 4);
   assert.ok(openaiMax > 1);
   assert.deepEqual(sleeps, [1000]);
   const perplexity = res.body.providers.find((provider) => provider.id === 'perplexity');
-  assert.equal(perplexity.ok, true);
-  assert.equal(perplexity.score, 92);
-  assert.equal(perplexity.checks.every((check) => check.ok), true);
+  assert.equal(perplexity.answered, true);
+  assert.equal(perplexity.mentioned, true);
+  assert.equal(perplexity.checks, undefined);
+  assert.equal(res.body.score, 92);
 });
 
 test('perplexity 429s that survive the retries are shown and left out of the score', async () => {
@@ -450,42 +484,59 @@ test('perplexity 429s that survive the retries are shown and left out of the sco
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.score, 92);
   const perplexity = res.body.providers[0];
-  assert.equal(perplexity.ok, true);
-  assert.equal(perplexity.score, 92);
-  const failed = perplexity.checks.filter((check) => !check.ok);
-  const succeeded = perplexity.checks.filter((check) => check.ok);
+  assert.equal(perplexity.answered, true);
+  assert.equal(perplexity.mentioned, true);
+  assert.equal(perplexity.checks, undefined);
+  assert.equal(JSON.stringify(res.body).includes('HTTP 429'), false);
+  const full = await runFull({
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    SCORE_PROMPT_COUNT: '4',
+    PERPLEXITY_429_RETRIES: '2',
+  }, fetchImpl);
+  const checks = full.providers[0].checks;
+  const failed = checks.filter((check) => !check.ok);
+  const succeeded = checks.filter((check) => check.ok);
   assert.equal(failed.length, 1);
   assert.match(failed[0].error, /HTTP 429: Request rate limit exceeded/);
   assert.equal(succeeded.length, 3);
   assert.ok(succeeded.every((check) => check.score === 92));
 });
 
-test('perplexity stops prompts that do not fit in the budget', async () => {
-  let clock = 0;
-  const calls = [];
-  const fetchImpl = async (url) => {
-    clock += 400;
-    calls.push(String(url));
+test('all prompts start together and a timed-out call is left out of the score', async () => {
+  let inFlight = 0;
+  let maxInFlight = 0;
+  const fetchImpl = async (url, options) => {
+    const body = JSON.parse(options.body);
+    inFlight += 1;
+    maxInFlight = Math.max(maxInFlight, inFlight);
+    await new Promise((resolve) => setImmediate(resolve));
+    inFlight -= 1;
+    if (String(body.input || '').startsWith('What are the best')) {
+      const error = new Error('aborted');
+      error.name = 'AbortError';
+      throw error;
+    }
     return jsonResponse(200, providerPayload(url));
   };
   const handler = setup({
     PERPLEXITY_API_KEY: 'test-perplexity',
     SCORE_PROMPT_COUNT: '4',
-    PERPLEXITY_BUDGET_MS: '1500',
-    PERPLEXITY_PROMPT_DELAY_MS: '0',
     PERPLEXITY_429_RETRIES: '0',
-  }, fetchImpl, { now: () => clock });
+  }, fetchImpl);
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
-  assert.equal(calls.length, 2);
-  assert.ok(calls.every((url) => url === 'https://api.perplexity.ai/v1/responses'));
-  const checks = res.body.providers[0].checks;
-  assert.equal(checks[0].ok, true);
-  assert.equal(checks[1].ok, true);
-  assert.equal(checks[2].ok, false);
-  assert.equal(checks[2].error, 'timed out');
-  assert.equal(checks[3].error, 'timed out');
+  assert.equal(maxInFlight, 4);
   assert.equal(res.body.score, 92);
-  assert.equal(res.body.providers[0].ok, true);
+  assert.equal(res.body.providers[0].answered, true);
+  assert.equal(res.body.providers[0].error, undefined);
+  const full = await runFull({
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    SCORE_PROMPT_COUNT: '4',
+    PERPLEXITY_429_RETRIES: '0',
+  }, fetchImpl);
+  const checks = full.providers[0].checks;
+  assert.equal(checks.filter((check) => check.ok).length, 3);
+  assert.equal(checks.filter((check) => check.error === 'timed out').length, 1);
+  assert.equal(full.providers[0].score, 92);
 });
 
 test('claude uses search result urls and falls back when web search returns no text', async () => {
@@ -524,10 +575,15 @@ test('claude uses search result urls and falls back when web search returns no t
     plains.map((body) => body.messages[0].content).sort(),
     searches.map((body) => body.messages[0].content).sort(),
   );
-  const claude = res.body.providers[0];
-  assert.equal(claude.ok, true);
-  assert.equal(claude.score, 70);
-  assert.ok(claude.checks.every((check) => check.ok && check.grounded === false));
+  assert.equal(res.body.score, 70);
+  assert.equal(res.body.providers[0].answered, true);
+  assert.equal(res.body.providers[0].mentioned, true);
+  assert.equal(res.body.providers[0].checks, undefined);
+  const full = await runFull({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, fetchImpl);
+  assert.ok(full.providers[0].checks.every((check) => check.ok && check.grounded === false));
 });
 
 test('claude falls back when the web search tool is rejected and not when the key is rejected', async () => {
@@ -549,7 +605,18 @@ test('claude falls back when the web search tool is rejected and not when the ke
   assert.equal(rejectedTool.length, 6);
   assert.equal(toolRes.statusCode, 200);
   assert.equal(toolRes.body.score, 35);
-  assert.equal(toolRes.body.providers[0].checks[0].grounded, false);
+  assert.equal(toolRes.body.providers[0].answered, true);
+  assert.equal(toolRes.body.providers[0].checks, undefined);
+  const toolFull = await runFull({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    ANTHROPIC_WEB_SEARCH_TOOL: 'web_search_20260318',
+    SCORE_PROMPT_COUNT: '3',
+  }, async (url, options) => {
+    const body = JSON.parse(options.body);
+    if (body.tools) return jsonResponse(400, { error: { message: 'web_search tool is not available for this key' } });
+    return jsonResponse(200, { content: [{ type: 'text', text: 'HubSpot is a CRM.' }] });
+  });
+  assert.equal(toolFull.providers[0].checks[0].grounded, false);
 
   let authCalls = 0;
   const authHandler = setup({
@@ -562,7 +629,8 @@ test('claude falls back when the web search tool is rejected and not when the ke
   const authRes = await invoke(authHandler, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
   assert.equal(authCalls, 3);
   assert.equal(authRes.body.score, null);
-  assert.match(authRes.body.providers[0].error, /HTTP 401/);
+  assert.equal(authRes.body.providers[0].answered, false);
+  assert.equal(JSON.stringify(authRes.body).includes('x-api-key'), false);
 });
 
 test('a paused claude search with a real answer is kept, and a preamble falls back', async () => {
@@ -601,7 +669,13 @@ test('a paused claude search with a real answer is kept, and a preamble falls ba
   assert.equal(searchCalls.length, 3);
   assert.equal(plainCalls.length, 1);
   assert.equal(plainCalls[0].messages[0].content.startsWith('What are the best'), true);
-  const checks = res.body.providers[0].checks;
+  assert.equal(res.body.providers[0].checks, undefined);
+  assert.equal(res.body.providers[0].mentioned, true);
+  const full = await runFull({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, fetchImpl);
+  const checks = full.providers[0].checks;
   assert.equal(checks[0].grounded, false);
   assert.equal(checks[1].grounded, true);
   assert.equal(checks[1].cited, true);
@@ -618,7 +692,9 @@ test('provider timeouts and empty answers are not scored as invisibility', async
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
   assert.equal(res.body.score, null);
   assert.equal(res.body.reason, 'all_failed');
-  assert.match(res.body.providers[0].error, /timed out/);
+  assert.equal(res.body.providers[0].answered, false);
+  assert.equal(res.body.providers[0].error, undefined);
+  assert.equal(JSON.stringify(res.body.providers).includes('timed out'), false);
 
   const empty = setup({ OPENAI_API_KEY: 'test-openai', SCORE_PROMPT_COUNT: '3' }, async () => ({
     ok: true,
@@ -628,4 +704,142 @@ test('provider timeouts and empty answers are not scored as invisibility', async
   const emptyRes = await invoke(empty, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
   assert.equal(emptyRes.body.score, null);
   assert.equal(emptyRes.body.unavailable, true);
+});
+
+test('the public score keeps three names and drops gated detail', () => {
+  assert.equal(joinAnd(['PR Newswire', 'eReleases']), 'PR Newswire and eReleases');
+  assert.equal(joinAnd(['PR Newswire', 'eReleases', 'Business Wire']), 'PR Newswire, eReleases, and Business Wire');
+  const rawChecks = [1, 2, 3, 4].map(() => ({
+    ok: true,
+    mentioned: false,
+    names: ['PR Newswire', 'eReleases', 'Business Wire', 'GlobeNewswire'],
+  }));
+  const pub = toPublicScore({
+    ok: true,
+    score: 12,
+    businessName: 'ACCESS Newswire',
+    domain: 'accessnewswire.com',
+    prompts: ['What are the best press release distribution services?'],
+    formula: { description: '70% mention' },
+    summary: { checks: 4 },
+    competitors: [{ name: 'PR Newswire' }],
+    providers: [{
+      id: 'openai',
+      label: 'ChatGPT',
+      ok: true,
+      model: 'gpt-4.1-mini',
+      score: 12,
+      error: null,
+      checks: [{ excerpt: 'a long secret answer', citations: ['https://example.com/a'], prompt: 'secret prompt' }],
+      rawChecks,
+    }],
+  });
+  assert.equal(pub.providers[0].recommends.length, 3);
+  assert.equal(pub.providers[0].recommends.includes('ACCESS Newswire'), false);
+  assert.equal(pub.prompts, undefined);
+  assert.equal(pub.formula, undefined);
+  const json = JSON.stringify(pub);
+  assert.equal(json.includes('secret'), false);
+  assert.equal(json.includes('https://'), false);
+  assert.equal(json.includes('excerpt'), false);
+  const again = toPublicScore(pub);
+  assert.deepEqual(again.providers, pub.providers);
+});
+
+test('claude search and fallback share one deadline', async () => {
+  let clock = 1000;
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    await new Promise((resolve) => setImmediate(resolve));
+    const body = JSON.parse(options.body);
+    calls.push(Boolean(body.tools));
+    if (body.tools) {
+      clock += 20000;
+      return jsonResponse(200, {
+        stop_reason: 'pause_turn',
+        content: [{ type: 'text', text: "I'll search." }],
+      });
+    }
+    return jsonResponse(200, { content: [{ type: 'text', text: '1. HubSpot' }] });
+  };
+  const full = await runFull({
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+    PROVIDER_TIMEOUT_MS: '20000',
+    SCORE_BUDGET_MS: '20000',
+  }, fetchImpl, { now: () => clock });
+  assert.equal(calls.filter(Boolean).length, 3);
+  assert.equal(calls.filter((usedSearch) => !usedSearch).length, 0);
+  assert.ok(full.providers[0].checks.every((check) => check.ok && check.grounded === false));
+});
+
+test('the free score email is the short result and a failed send still returns the score', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), options });
+    if (String(url).includes('api.resend.com')) return jsonResponse(200, { id: 'email_free_1' });
+    return jsonResponse(200, providerPayload(url));
+  };
+  const env = {
+    OPENAI_API_KEY: 'test-openai',
+    RESEND_API_KEY: 're_test',
+    REPORT_FROM_EMAIL: '"AI Mentions <reports@ai-mentions.com>"',
+    SCORE_PROMPT_COUNT: '3',
+  };
+  const handler = setup(env, fetchImpl);
+  const res = await invoke(handler, { body: { ...query, email: 'delivered@resend.dev' } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.score, 92);
+  assert.equal(res.body.emailSent, true);
+  assert.equal(res.body.emailId, 'email_free_1');
+  assert.equal(res.body.prompts, undefined);
+  const emailCall = calls.find((call) => call.url.includes('api.resend.com'));
+  const email = JSON.parse(emailCall.options.body);
+  assert.equal(email.from, 'AI Mentions <reports@ai-mentions.com>');
+  assert.equal(email.to[0], 'delivered@resend.dev');
+  assert.match(email.text, /HubSpot: 92\/100/);
+  assert.match(email.text, /ChatGPT: mentioned/);
+  assert.match(email.text, /ChatGPT recommends Salesforce and Zoho\./);
+  assert.match(email.text, /Want to see more insights\? Get the full report: every answer AI gave, the sources it trusts, and what to fix\. \$150/);
+  assert.match(email.text, /Or track it monthly for \$65\/mo/);
+  assert.match(email.text, /https:\/\/buy\.stripe\.com\/cNieVeclZ8MrbkX15ld7q0u/);
+  assert.match(email.text, /\$65\/mo/);
+  assert.match(email.text, /https:\/\/buy\.stripe\.com\/9B63cw71Fe6LfBd4hxd7q0v/);
+  assert.equal(email.text.includes('What are the best'), false);
+  assert.equal(email.text.includes('https://www.hubspot.com'), false);
+  assert.equal(email.text.includes('inbound'), false);
+  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 3);
+
+  const again = await invoke(handler, { body: { ...query, email: 'delivered@resend.dev' } });
+  assert.equal(again.body.cached, true);
+  assert.equal(again.body.emailSent, true);
+  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 3);
+  assert.equal(calls.filter((call) => call.url.includes('api.resend.com')).length, 2);
+
+  const failing = setup(env, async (url) => {
+    if (String(url).includes('api.resend.com')) return jsonResponse(500, { message: 'no' });
+    return jsonResponse(200, providerPayload(url));
+  });
+  const failedMail = await invoke(failing, { body: { businessName: 'Other Co', category: 'CRM Software', email: 'delivered@resend.dev' } });
+  assert.equal(failedMail.statusCode, 200);
+  assert.equal(failedMail.body.score, 0);
+  assert.equal(failedMail.body.emailSent, false);
+  assert.equal(failedMail.body.emailReason, 'send_failed');
+
+  const skipped = [];
+  const quiet = setup(env, async (url, options) => {
+    skipped.push(String(url));
+    return fetchImpl(url, options);
+  });
+  const noEmail = await invoke(quiet, { body: { businessName: 'Quiet Co', category: 'CRM Software', email: 'not-an-email' } });
+  assert.equal(noEmail.body.score, 0);
+  assert.equal(noEmail.body.emailSent, undefined);
+  assert.equal(skipped.some((url) => url.includes('api.resend.com')), false);
+
+  const built = freeScoreEmail({
+    to: 'delivered@resend.dev',
+    from: 'AI Mentions <reports@ai-mentions.com>',
+    score: res.body,
+  });
+  assert.equal(built.text.includes('https://www.hubspot.com'), false);
 });

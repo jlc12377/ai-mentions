@@ -42,7 +42,7 @@ Very short or generic names (for example "AI") can match ordinary words. The que
 
 `domain` and `city` are optional. Limits: company, category, and city 80 characters; website 200 characters.
 
-A hit looks like `{ "ok": true, "score": 42, "providers": [...], "prompts": [...], "competitors": [...], "timestamp": "..." }`. An outage looks like `{ "ok": false, "unavailable": true, "score": null, "message": "Score temporarily unavailable" }` with HTTP 503 (no keys or every call failed), 429 (rate limit), or 400 (bad input).
+A hit looks like `{ "ok": true, "score": 42, "businessName": "Example", "providers": [{ "id": "openai", "label": "ChatGPT", "answered": true, "mentioned": false, "recommends": ["PR Newswire", "eReleases"] }], "timestamp": "..." }`. That public JSON is the free result only: the score, whether each assistant mentioned the business, and up to three other names. It does not include the questions, answer excerpts, citation URLs, per-question scores, or the formula. An outage looks like `{ "ok": false, "unavailable": true, "score": null, "message": "Score temporarily unavailable" }` with HTTP 503 (no keys or every call failed), 429 (rate limit), or 400 (bad input). The paid report is built on the server from the full checks, not from this response.
 
 ## Deploy on Vercel
 
@@ -55,24 +55,25 @@ Leave a key unset to skip that assistant. With none set, the checker returns "sc
 | Env var | Provider | Default model | Grounding |
 | --- | --- | --- | --- |
 | `OPENAI_API_KEY` | ChatGPT | `gpt-4.1-mini` (`OPENAI_MODEL`) | Responses API `web_search`, `search_context_size: low`, tool choice required |
-| `PERPLEXITY_API_KEY` | Perplexity | `perplexity/sonar` (`PERPLEXITY_MODEL`) | `POST /v1/responses` `web_search` with `search_type: fast`, one prompt at a time |
+| `PERPLEXITY_API_KEY` | Perplexity | `perplexity/sonar` (`PERPLEXITY_MODEL`) | `POST /v1/responses` `web_search` with `search_type: fast` |
 | `GEMINI_API_KEY` | Gemini | `gemini-2.5-flash-lite` (`GEMINI_MODEL`) | `google_search` grounding |
 | `ANTHROPIC_API_KEY` | Claude | `claude-haiku-5-5` (`ANTHROPIC_MODEL`) | `web_search_20250305` (`ANTHROPIC_WEB_SEARCH_TOOL`), one search |
 
 Every Perplexity call is `POST https://api.perplexity.ai/v1/responses`. A model name without a slash, such as `sonar`, is sent as `perplexity/sonar`. The old `/chat/completions` path now returns 403 and tells callers to use `/v1/responses`.
 
-Perplexity prompts run one at a time. A new account is tier 0, which allows about one Agent API request per second, so four prompts fired together come back as HTTP 429. The checker waits `PERPLEXITY_PROMPT_DELAY_MS` (default 1100) between prompts and retries a 429 up to `PERPLEXITY_429_RETRIES` times (default 2), honoring `Retry-After` when the response includes it. The whole sequence stops at `PERPLEXITY_BUDGET_MS` (default 50 seconds) so it stays inside the 60 second function cap. Prompts that do not fit are reported as timed out. A 429 on some questions does not zero the provider: those questions are shown with the error and left out of the average.
+Every configured provider and every prompt starts at the same time. Each call is capped at `PROVIDER_TIMEOUT_MS` (default 20 seconds) and the whole check is capped at `SCORE_BUDGET_MS` (default 35 seconds), so the function can answer in about 35 seconds with whatever came back. `api/score.js` allows 45 seconds, which leaves room for the score email. The page stops waiting at 40 seconds and offers a retry. A failed assistant is left out of the average. It is not scored as zero, and the free result says "did not answer" rather than "not mentioned".
 
-Claude asks with the web search tool (`web_search_20250305` by default, one search, at least 1600 output tokens so the tool result does not crowd out the answer). The checker keeps every text block and takes source URLs from both citation objects and `web_search_tool_result` entries. If that call has no answer text, the turn was paused, or the tool is rejected, a second call without the tool is scored and labeled "answered without web search". A rejected key, a timeout, or a 429 is not retried that way. Gemini grounding has to be allowed on the Google AI key. A provider that returns an error is dropped from the average. If the others answer, their answers are still scored. Questions that fail inside an otherwise successful provider are shown on the page and left out of that provider's score.
+Perplexity can still return HTTP 429 when several prompts run together. A 429 is retried up to `PERPLEXITY_429_RETRIES` times (default 2) inside that same per-call deadline, honoring `Retry-After` when the response includes it. A retry that does not fit is a failed question. Those questions stay out of the average. The free page does not list them. The paid report does.
+
+Claude asks with the web search tool (`web_search_20250305` by default, one search, at least 1600 output tokens so the tool result does not crowd out the answer). The checker keeps every text block and takes source URLs from both citation objects and `web_search_tool_result` entries. If that call has no answer text, the turn was paused, or the tool is rejected, a second call without the tool is scored when the same deadline still has time. A rejected key, a timeout, or a 429 is not retried that way. Gemini grounding has to be allowed on the Google AI key. A provider that returns an error is dropped from the average. If the others answer, their answers are still scored. Questions that fail inside an otherwise successful provider are left out of that provider's score. The paid report shows those questions. The free result does not.
 
 ### Optional settings
 
 | Env var | Default | What it does |
 | --- | --- | --- |
-| `PROVIDER_TIMEOUT_MS` | `20000` | Per-call timeout. ChatGPT, Gemini, and Claude still run in parallel. Perplexity runs its prompts one at a time inside its own budget. |
-| `PERPLEXITY_BUDGET_MS` | `50000` | Wall-clock budget for every Perplexity prompt, including 429 retries and the delay between prompts. |
-| `PERPLEXITY_PROMPT_DELAY_MS` | `1100` | Pause between Perplexity prompts. Sized for a tier 0 limit of about one request per second. |
-| `PERPLEXITY_429_RETRIES` | `2` | Extra attempts after HTTP 429. Backoff is 1s then 2s, or the `Retry-After` header when it fits the budget. |
+| `PROVIDER_TIMEOUT_MS` | `20000` | Per-call timeout. Claude's search call and its fallback share this deadline. |
+| `SCORE_BUDGET_MS` | `35000` | Wall-clock cap for the whole check. Each call uses the shorter of this and `PROVIDER_TIMEOUT_MS`. |
+| `PERPLEXITY_429_RETRIES` | `2` | Extra attempts after HTTP 429. Backoff is 1s then 2s, or the `Retry-After` header when it fits the same per-call deadline. |
 | `SCORE_PROMPT_COUNT` | `4` | Buyer prompts per provider. Clamped to 3–5. |
 | `SCORE_MAX_OUTPUT_TOKENS` | `600` | Output cap. Claude's web search call uses at least 1600 so the tool result does not replace the answer. |
 | `SCORE_CACHE_TTL_SEC` | `86400` | How long an identical successful check is reused (24 hours). |
@@ -80,7 +81,7 @@ Claude asks with the web search tool (`web_search_20250305` by default, one sear
 | `RATE_LIMIT_WINDOW_SEC` | `3600` | Rate-limit window. |
 | `GEMINI_THINKING_BUDGET` | unset | Sent only when set. `0` disables thinking on Gemini models that accept `thinkingBudget`. |
 
-`vercel.json` caps the function at 60 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls. ChatGPT, Gemini, and Claude fire together. Perplexity is the long pole: up to its budget, default 50 seconds, still under the cap. The page waits up to 58 seconds before it gives up on the request.
+`vercel.json` caps `api/score.js` at 45 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls, all in flight together, each limited to about 20 seconds. The page waits up to 40 seconds, then shows a retry. Nothing is filled in when the check does not finish.
 
 ### Rough cost per check
 
@@ -127,7 +128,7 @@ curl -s -X POST http://127.0.0.1:3000/api/score \
 
 Unit tests cover mention detection, list position, citations, the scoring formula, mocked provider responses, the no-keys response, total failure, partial failure, validation, the rate limit, and the 24-hour cache. They do not call the real providers.
 
-The lead form still posts to the existing Formspree endpoint after the check resolves (including when the score is unavailable). The payload includes the real score, or `unavailable`. No score is sent to the provider APIs, and the email address stays on the form post.
+The lead form still posts to the existing Formspree endpoint after the check resolves (including when the score is unavailable). The payload includes the real score, or `unavailable`. When the score exists and the form included an email address, the same request also sends that score through Resend from `REPORT_FROM_EMAIL`. The message has the score, whether each assistant mentioned the business, up to three businesses that assistant recommended, one sentence on how the score works, then “Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150” and “Or track it monthly for $65/mo”. It does not include the questions, excerpts, or source URLs. The send is awaited so the serverless function can finish it, and a failed send still returns the score. `RESEND_API_KEY` is sending-only. The response may include `emailSent` and a Resend `emailId`. It never includes the answer text.
 
 ## Paid reports
 
@@ -141,7 +142,7 @@ The free score stays free. Three Stripe Payment Links take payment and return th
 
 `/report` reads `session_id` and checks the Checkout Session with `STRIPE_RESTRICTED_KEY` (read-only: Checkout Sessions, Customers, and Subscriptions). The session has to be complete and paid. A one-time payment is the $150 report. A subscription is tracking; an amount of $49 is the add-on, and any other subscription amount is the $65 plan. The buyer enters one business. The server runs ChatGPT, Perplexity, and Claude through the same scorer as `/api/score`, stores the report, and returns a private link `/r/<token>`. The same payment cannot run a second business. Opening the checkout page again, or the private link, shows the saved report.
 
-The report on screen includes each assistant's mentions and list rank, competitors named instead, source URLs, and next steps drawn from those results. Resend emails a summary and the private link to the checkout email. `RESEND_API_KEY` is a sending-only key, and the app only calls `POST https://api.resend.com/emails`. `REPORT_FROM_EMAIL` is `AI Mentions <reports@ai-mentions.com>`. The domain `ai-mentions.com` is verified in Resend. If either email variable is missing, the report is still saved and the page says to keep the link.
+The report on screen includes each assistant's mentions and list rank, answer excerpts, competitors named instead, source URLs, and a plain-English "What to do next" list drawn from those results. That detail stays on the private report. It is not in the free score or in `POST /api/score`. Resend emails a summary and the private link to the checkout email. `RESEND_API_KEY` is a sending-only key, and the app only calls `POST https://api.resend.com/emails`. `REPORT_FROM_EMAIL` is `AI Mentions <reports@ai-mentions.com>`. The domain `ai-mentions.com` is verified in Resend. If either email variable is missing, the report is still saved and the page says to keep the link.
 
 Reports, subscribers, report history, and used checkout sessions are stored in Supabase (Postgres). The Vercel project already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for production and preview. The service key is the new `sb_secret_` key. The server sends that value only in the PostgREST `apikey` header, the same place supabase-js puts a secret key, and never in `Authorization`. It is not a JWT. Supabase maps it to `service_role`. The server reads `SUPABASE_URL` first and falls back to `NEXT_PUBLIC_SUPABASE_URL` for the project URL only. The key is not read by the browser and is not written into the pages. A publishable key in `SUPABASE_SERVICE_ROLE_KEY` is rejected.
 
