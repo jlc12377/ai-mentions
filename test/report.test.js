@@ -185,7 +185,7 @@ test('a paid session runs the three engines once and blocks a second business', 
   const first = await invoke(handler, { body: business });
   assert.equal(first.statusCode, 200);
   assert.equal(first.body.ok, true);
-  assert.equal(first.body.report.score, 80);
+  assert.equal(first.body.report.score, 85);
   assert.equal(first.body.emailSent, false);
   assert.equal(first.body.emailReason, 'not_configured');
   assert.match(first.body.url, /^https:\/\/ai-mentions\.com\/r\/[A-Za-z0-9_-]{20,}$/);
@@ -193,14 +193,14 @@ test('a paid session runs the three engines once and blocks a second business', 
   assert.ok(first.body.report.recommendations.length > 0);
   assert.ok(first.body.report.competitors.some((row) => row.name === 'Salesforce'));
   const providerCalls = calls.filter((call) => /openai|perplexity|anthropic/.test(call.url));
-  assert.equal(providerCalls.length, 12);
+  assert.equal(providerCalls.length, 15);
   assert.equal(calls.some((call) => call.url.includes('generativelanguage')), false);
 
   const again = await invoke(handler, { body: business });
   assert.equal(again.statusCode, 200);
   assert.equal(again.body.alreadyGenerated, true);
   assert.equal(again.body.token, first.body.token);
-  assert.equal(calls.filter((call) => /openai|perplexity|anthropic/.test(call.url)).length, 12);
+  assert.equal(calls.filter((call) => /openai|perplexity|anthropic/.test(call.url)).length, 15);
 
   const other = await invoke(handler, { body: { ...business, businessName: 'Salesforce', domain: 'salesforce.com' } });
   assert.equal(other.statusCode, 409);
@@ -217,6 +217,8 @@ test('a paid session runs the three engines once and blocks a second business', 
   assert.match(page.text, /HubSpot/);
   assert.match(page.text, /Salesforce/);
   assert.match(page.text, /What to do next/);
+  assert.match(page.text, /Knows you: Yes/);
+  assert.match(page.text, /1\. HubSpot/);
   assert.match(page.text, /noindex/);
   assert.equal(page.headers['x-robots-tag'], 'noindex, nofollow');
 });

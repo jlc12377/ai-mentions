@@ -269,18 +269,18 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
   <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
     <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name, website, and category. The website is how a citation of your domain is distinguished from a mention of your name.</div></div>
-    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, Gemini, and Claude. Your company name is not in the question.</div></div>
-    <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">The free result is a score out of 100, whether each assistant mentioned you, and a few businesses they named. If a live check can&#8217;t run, we say so and still take your email.</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, Gemini, and Claude. Your company name is not in those questions. We also ask each assistant what it knows about your business.</div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">The free result is a score out of 100, whether each assistant knows you, whether it recommends you, and a few businesses they named. If a live check can&#8217;t run, we say so and still take your email.</div></div>
   </div>
 </section>
 
 <section class="how" id="methodology">
   <div class="how-header"><h2>How the score is calculated</h2><p>A live check, not a ranking typed in ahead of time.</p></div>
   <div class="method-copy">
-    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of the question. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, Gemini uses Google Search grounding, and Claude uses its web search tool. Assistants without a key are skipped.</p>
+    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. In the same round we also ask what the assistant knows about the business. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, Gemini uses Google Search grounding, and Claude uses its web search tool. Assistants without a key are skipped.</p>
     <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when it appears in the answer.</p>
     <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
-    <p>One answer scores 70% of the mention points plus 30% of the citation points. Your visibility score is the rounded average of the answers that actually came back, from 0 to 100. Each answer counts equally. Timeouts and errors are left out of the average, so a rate limit on some questions does not look like a miss. If Claude&#8217;s web search returns no answer, that question is asked again without search. The free result shows the score, whether each assistant mentioned you, and a few businesses they named. The full report lists each question, the answer, the sources, and what to fix. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
+    <p>One recommendation answer scores 70% of the mention points plus 30% of the citation points. Those answers are averaged. Knowing you is separate: if the assistant replies UNKNOWN, or only a generic disclaimer, it does not know you. The score on this page is three quarters that recommendation average and one quarter how many of the assistants that answered already know you. If every assistant knows you and none recommend you, the score is about 25. If fewer of them know you, that part is smaller in proportion. If none of them have heard of you and none recommend you, the score is about 0. A real recommendation still counts for most of the number. Timeouts and errors are left out, so a failed call does not look like a miss. If Claude&#8217;s web search returns no answer, that question is asked again without search. The free result shows the score, whether each assistant knows you, whether it recommends you, and a few businesses they named. It does not show the answers. The full report lists each question, the answer, what the assistant knows, the sources, and what to fix. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
   </div>
 </section>
 
@@ -356,14 +356,71 @@ function captureLead(fields) {
   }).catch(function () {});
 }
 
+var ATTR_KEY = 'aim_attribution';
+
+function cleanAttr(value, max) {
+  return String(value || '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, max);
+}
+
+function readAttribution() {
+  var params;
+  try { params = new URLSearchParams(window.location.search); }
+  catch (e) { params = { get: function () { return ''; } }; }
+  var incoming = {
+    utm_source: cleanAttr(params.get('utm_source'), 120),
+    utm_campaign: cleanAttr(params.get('utm_campaign'), 120),
+    gclid: cleanAttr(params.get('gclid'), 200)
+  };
+  var stored = {};
+  try { stored = JSON.parse(localStorage.getItem(ATTR_KEY) || '{}') || {}; }
+  catch (e) { stored = {}; }
+  var next = {
+    utm_source: incoming.utm_source || cleanAttr(stored.utm_source, 120),
+    utm_campaign: incoming.utm_campaign || cleanAttr(stored.utm_campaign, 120),
+    gclid: incoming.gclid || cleanAttr(stored.gclid, 200)
+  };
+  if (incoming.utm_source || incoming.utm_campaign || incoming.gclid) {
+    try { localStorage.setItem(ATTR_KEY, JSON.stringify(next)); } catch (e) {}
+  }
+  return next;
+}
+
+var attribution = readAttribution();
+
+function trackEvent(name, params) {
+  if (typeof gtag !== 'function') return;
+  gtag('event', name, params || {});
+}
+
+function scoreBucket(score) {
+  if (score == null || score === '') return 'unavailable';
+  var n = Number(score);
+  if (!isFinite(n)) return 'unavailable';
+  if (n >= 70) return 'strong';
+  if (n >= 40) return 'moderate';
+  return 'low';
+}
+
 function upsellHtml() {
   var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
   var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
   return '<div class="score-upsell">' +
-    '<a class="upsell-btn" href="' + esc(reportUrl) + '">Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150</a>' +
-    '<p class="upsell-track"><a href="' + esc(trackingUrl) + '">Or track it monthly for $65/mo</a></p>' +
+    '<a class="upsell-btn" data-plan="report_150" href="' + esc(reportUrl) + '">Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150</a>' +
+    '<p class="upsell-track"><a data-plan="tracking_65" href="' + esc(trackingUrl) + '">Or track it monthly for $65/mo</a></p>' +
     '</div>';
 }
+
+document.addEventListener('click', function (event) {
+  var node = event.target;
+  while (node && node !== document) {
+    if (node.getAttribute && node.getAttribute('data-plan')) {
+      var plan = node.getAttribute('data-plan');
+      if (plan === 'report_150' || plan === 'tracking_65') trackEvent('upsell_click', { plan: plan });
+      return;
+    }
+    node = node.parentNode;
+  }
+});
 
 function renderUnavailable(data, company) {
   var detail = (data && data.detail) || 'That check did not finish. Nothing was guessed.';
@@ -385,14 +442,19 @@ function joinAnd(names) {
 
 function renderScore(data) {
   var providers = (data.providers || []).map(function (provider) {
-    var status = 'Did not answer';
-    if (provider.answered) status = provider.mentioned ? 'Mentioned' : 'Not mentioned';
+    if (!provider.answered) {
+      return '<div class="provider-block"><div class="provider-head"><strong>' + esc(provider.label) +
+        '</strong><span class="comp-score">Did not answer</span></div></div>';
+    }
     var names = (provider.recommends || []).slice(0, 3);
     var line = names.length
       ? '<p class="recommend-line">' + esc(provider.label) + ' recommends ' + esc(joinAnd(names)) + '.</p>'
       : '';
     return '<div class="provider-block"><div class="provider-head"><strong>' + esc(provider.label) +
-      '</strong><span class="comp-score">' + esc(status) + '</span></div>' + line + '</div>';
+      '</strong></div>' +
+      '<p class="recommend-line">Knows you: ' + (provider.known ? 'Yes' : 'No') + '</p>' +
+      '<p class="recommend-line">Recommends you: ' + (provider.mentioned ? 'Yes' : 'No') + '</p>' +
+      line + '</div>';
   }).join('');
   var when = data.cached
     ? 'Reused from an identical check in the last 24 hours. Checked ' + formatWhen(data.timestamp) + '.'
@@ -406,7 +468,7 @@ function renderScore(data) {
     '<div class="score-badge ' + scoreClass(data.score) + '">' + esc(data.score) + '/100 — ' + esc(scoreLabel(data.score)) + '</div></div>' +
     upsellHtml() +
     '<div class="report-section"><h3>By assistant</h3>' + providers + '</div>' +
-    '<p class="how-score">How we score: mostly whether you were named, plus whether your site was cited. <a href="#methodology">How we score</a></p>' +
+    '<p class="how-score">How we score: most of the score is whether you were recommended. If an assistant knows you but does not recommend you, you still get partial credit. If none of them have heard of you, the score stays near zero. <a href="#methodology">How we score</a></p>' +
     mail;
 }
 
@@ -414,7 +476,7 @@ function renderCta(cat, company, score, unavailable) {
   var heading = unavailable ? 'We could not score this one' : 'The full report is the next step';
   var intro = unavailable
     ? 'No answer came back, so we did not invent a number.'
-    : 'This free result is the score, whether each assistant mentioned ' + company + ', and a few businesses they named.';
+    : 'This free result is the score, whether each assistant knows ' + company + ', whether it recommends ' + company + ', and a few businesses they named.';
   document.getElementById('ctaContent').innerHTML =
     '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
     '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
@@ -451,6 +513,8 @@ async function runCheck(event) {
   ctaBox.classList.remove('visible');
   document.getElementById('loadingText').textContent = 'Asking the connected AI assistants…';
 
+  trackEvent('score_started');
+  trackEvent('generate_lead');
   if (typeof gtag !== 'undefined') {
     gtag('event', 'visibility_check', {
       company: company,
@@ -481,7 +545,10 @@ async function runCheck(event) {
         domain: website,
         category: cat.name,
         city: city,
-        email: email
+        email: email,
+        utm_source: attribution.utm_source,
+        utm_campaign: attribution.utm_campaign,
+        gclid: attribution.gclid
       }),
       signal: controller ? controller.signal : undefined
     });
@@ -510,13 +577,17 @@ async function runCheck(event) {
     email: email,
     source: 'ai-mentions.com',
     score: unavailable ? 'unavailable' : String(data.score),
-    score_status: (data && data.reason) ? data.reason : (unavailable ? 'unavailable' : 'ok')
+    score_status: (data && data.reason) ? data.reason : (unavailable ? 'unavailable' : 'ok'),
+    utm_source: attribution.utm_source,
+    utm_campaign: attribution.utm_campaign,
+    gclid: attribution.gclid
   });
 
   loading.style.display = 'none';
   content.style.display = 'block';
   if (unavailable) renderUnavailable(data, company);
   else renderScore(data);
+  trackEvent('score_completed', { score_bucket: scoreBucket(data && data.score) });
   renderCta(cat, company, unavailable ? null : data.score, unavailable);
   btn.disabled = false;
   btn.textContent = 'Check Another Company';

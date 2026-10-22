@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { createHandler } = require('../lib/handler');
-const { createMemoryCache, createMemoryLimiter } = require('../lib/store');
+const { createMemoryCache, createMemoryLimiter, cacheKey } = require('../lib/store');
 const { parseOpenAI, parsePerplexity, parseGemini, parseAnthropic, readConfig, runProviders } = require('../lib/providers');
 const { buildPrompts } = require('../lib/score');
 const { toPublicScore, joinAnd } = require('../lib/free-score');
@@ -213,7 +213,7 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(res.statusCode, 200);
   assert.equal(res.body.ok, true);
   assert.equal(res.body.unavailable, false);
-  assert.equal(res.body.score, 92);
+  assert.equal(res.body.score, 94);
   assert.equal(res.body.cached, false);
   assert.equal(res.body.domain, 'hubspot.com');
   assert.equal(res.body.prompts, undefined);
@@ -221,14 +221,16 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(res.body.summary, undefined);
   assert.equal(res.body.competitors, undefined);
   assert.equal(res.body.providers.length, 4);
-  assert.ok(res.body.providers.every((provider) => provider.answered === true && provider.mentioned === true));
+  assert.ok(res.body.providers.every((provider) => provider.answered === true && provider.mentioned === true && provider.known === true));
+  assert.deepEqual(Object.keys(res.body.providers[0]).sort(), ['answered', 'id', 'known', 'label', 'mentioned', 'recommends']);
   assert.equal(res.body.providers[0].recommends[0], 'Salesforce');
   assert.ok(res.body.providers.every((provider) => provider.recommends.length <= 3));
   assert.match(res.body.timestamp, /^\d{4}-\d{2}-\d{2}T/);
-  assert.equal(calls.length, 16);
+  assert.equal(calls.length, 20);
   const hidden = JSON.stringify(res.body);
   assert.equal(/excerpt|citations|grounded|https:\/\//.test(hidden), false);
   assert.equal(hidden.includes('What are the best'), false);
+  assert.equal(hidden.includes('What do you know about'), false);
   assert.equal(hidden.includes('inbound'), false);
 
   const openai = calls.find((call) => call.url.includes('api.openai.com'));
@@ -286,6 +288,7 @@ test('a miss is score 0 and a total failure is unavailable, not a fake number', 
   assert.ok((miss.body.skipped || []).some((row) => row.id === 'perplexity'));
   assert.equal(miss.body.providers[0].answered, true);
   assert.equal(miss.body.providers[0].mentioned, false);
+  assert.equal(miss.body.providers[0].known, false);
   assert.deepEqual(miss.body.providers[0].recommends, ['Salesforce', 'Zoho']);
 
   const failing = setup({ OPENAI_API_KEY: 'test-openai' }, async () => ({
@@ -328,7 +331,7 @@ test('one working provider still scores when another provider errors', async () 
   }, fetchImpl);
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.score, 35);
+  assert.equal(res.body.score, 51);
   const claude = res.body.providers.find((provider) => provider.id === 'anthropic');
   const chatgpt = res.body.providers.find((provider) => provider.id === 'openai');
   assert.equal(chatgpt.answered, true);
@@ -352,14 +355,14 @@ test('identical queries are cached and invalid or extra calls are limited', asyn
   assert.equal(second.body.businessName, 'hubspot inc');
   assert.equal(second.body.prompts, undefined);
   assert.equal(JSON.stringify(second.body).includes('inbound'), false);
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
 
   const third = await invoke(handler, { body: query });
   assert.equal(third.statusCode, 429);
   assert.equal(third.body.score, null);
   assert.equal(third.body.reason, 'rate_limited');
   assert.equal(third.body.prompts, undefined);
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
 });
 
 test('a bare sonar model is sent to /v1/responses, and bad input never calls a provider', async () => {
@@ -382,7 +385,7 @@ test('a bare sonar model is sent to /v1/responses, and bad input never calls a p
   const rejected = await invoke(handler, { body: { businessName: 'H', category: 'CRM Software' } });
   assert.equal(rejected.statusCode, 400);
   assert.equal(rejected.body.score, null);
-  assert.equal(calls.length, 3);
+  assert.equal(calls.length, 4);
 
   const wrongMethod = await invoke(handler, { method: 'GET', body: query });
   assert.equal(wrongMethod.statusCode, 405);
@@ -456,14 +459,14 @@ test('perplexity prompts run together and a 429 is retried inside the call', asy
   }, fetchImpl, { sleep: async (ms) => { sleeps.push(ms); } });
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(perplexityMax, 4);
+  assert.equal(perplexityMax, 5);
   assert.ok(openaiMax > 1);
   assert.deepEqual(sleeps, [1000]);
   const perplexity = res.body.providers.find((provider) => provider.id === 'perplexity');
   assert.equal(perplexity.answered, true);
   assert.equal(perplexity.mentioned, true);
   assert.equal(perplexity.checks, undefined);
-  assert.equal(res.body.score, 92);
+  assert.equal(res.body.score, 94);
 });
 
 test('perplexity 429s that survive the retries are shown and left out of the score', async () => {
@@ -482,7 +485,7 @@ test('perplexity 429s that survive the retries are shown and left out of the sco
   }, fetchImpl);
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.score, 92);
+  assert.equal(res.body.score, 94);
   const perplexity = res.body.providers[0];
   assert.equal(perplexity.answered, true);
   assert.equal(perplexity.mentioned, true);
@@ -524,8 +527,8 @@ test('all prompts start together and a timed-out call is left out of the score',
     PERPLEXITY_429_RETRIES: '0',
   }, fetchImpl);
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
-  assert.equal(maxInFlight, 4);
-  assert.equal(res.body.score, 92);
+  assert.equal(maxInFlight, 5);
+  assert.equal(res.body.score, 94);
   assert.equal(res.body.providers[0].answered, true);
   assert.equal(res.body.providers[0].error, undefined);
   const full = await runFull({
@@ -567,15 +570,15 @@ test('claude uses search result urls and falls back when web search returns no t
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   const searches = calls.filter((body) => body.tools);
   const plains = calls.filter((body) => !body.tools);
-  assert.equal(searches.length, 3);
-  assert.equal(plains.length, 3);
+  assert.equal(searches.length, 4);
+  assert.equal(plains.length, 4);
   assert.equal(searches[0].max_tokens, 1600);
   assert.equal(plains[0].max_tokens, 600);
   assert.deepEqual(
     plains.map((body) => body.messages[0].content).sort(),
     searches.map((body) => body.messages[0].content).sort(),
   );
-  assert.equal(res.body.score, 70);
+  assert.equal(res.body.score, 78);
   assert.equal(res.body.providers[0].answered, true);
   assert.equal(res.body.providers[0].mentioned, true);
   assert.equal(res.body.providers[0].checks, undefined);
@@ -602,9 +605,9 @@ test('claude falls back when the web search tool is rejected and not when the ke
     return jsonResponse(200, { content: [{ type: 'text', text: 'HubSpot is a CRM.' }] });
   });
   const toolRes = await invoke(toolHandler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
-  assert.equal(rejectedTool.length, 6);
+  assert.equal(rejectedTool.length, 8);
   assert.equal(toolRes.statusCode, 200);
-  assert.equal(toolRes.body.score, 35);
+  assert.equal(toolRes.body.score, 51);
   assert.equal(toolRes.body.providers[0].answered, true);
   assert.equal(toolRes.body.providers[0].checks, undefined);
   const toolFull = await runFull({
@@ -627,7 +630,7 @@ test('claude falls back when the web search tool is rejected and not when the ke
     return jsonResponse(401, { error: { message: 'invalid x-api-key' } });
   });
   const authRes = await invoke(authHandler, { body: { businessName: 'HubSpot', category: 'CRM Software' } });
-  assert.equal(authCalls, 3);
+  assert.equal(authCalls, 4);
   assert.equal(authRes.body.score, null);
   assert.equal(authRes.body.providers[0].answered, false);
   assert.equal(JSON.stringify(authRes.body).includes('x-api-key'), false);
@@ -666,7 +669,7 @@ test('a paused claude search with a real answer is kept, and a preamble falls ba
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   const searchCalls = calls.filter((body) => body.tools);
   const plainCalls = calls.filter((body) => !body.tools);
-  assert.equal(searchCalls.length, 3);
+  assert.equal(searchCalls.length, 4);
   assert.equal(plainCalls.length, 1);
   assert.equal(plainCalls[0].messages[0].content.startsWith('What are the best'), true);
   assert.equal(res.body.providers[0].checks, undefined);
@@ -736,6 +739,7 @@ test('the public score keeps three names and drops gated detail', () => {
   });
   assert.equal(pub.providers[0].recommends.length, 3);
   assert.equal(pub.providers[0].recommends.includes('ACCESS Newswire'), false);
+  assert.equal(pub.providers[0].known, false);
   assert.equal(pub.prompts, undefined);
   assert.equal(pub.formula, undefined);
   const json = JSON.stringify(pub);
@@ -744,6 +748,82 @@ test('the public score keeps three names and drops gated detail', () => {
   assert.equal(json.includes('excerpt'), false);
   const again = toPublicScore(pub);
   assert.deepEqual(again.providers, pub.providers);
+
+  const aware = toPublicScore({
+    ok: true,
+    score: 25,
+    businessName: 'ACCESS Newswire',
+    domain: 'accessnewswire.com',
+    providers: [{
+      id: 'openai',
+      label: 'ChatGPT',
+      ok: true,
+      awareness: {
+        ok: true,
+        known: true,
+        excerpt: 'ACCESS Newswire distributes press releases to journalists.',
+      },
+      rawChecks,
+    }],
+  });
+  assert.equal(aware.providers[0].known, true);
+  assert.equal(aware.providers[0].mentioned, false);
+  assert.equal(JSON.stringify(aware).includes('journalists'), false);
+  assert.equal(JSON.stringify(aware).includes('UNKNOWN'), false);
+});
+
+test('the cache key is versioned so pre-awareness scores are not reused', () => {
+  const config = readConfig({ OPENAI_API_KEY: 'test-openai' });
+  const key = cacheKey({
+    businessName: 'ACCESS Newswire',
+    domain: 'accessnewswire.com',
+    category: 'press release distribution',
+    city: '',
+  }, config, 4);
+  assert.match(key, /^aim:score:v3:[a-f0-9]{64}$/);
+});
+
+test('known by every assistant and recommended by none scores 25', async () => {
+  let inFlight = 0;
+  let maxInFlight = 0;
+  const fetchImpl = async (url, options) => {
+    inFlight += 1;
+    maxInFlight = Math.max(maxInFlight, inFlight);
+    await new Promise((resolve) => setImmediate(resolve));
+    inFlight -= 1;
+    const body = JSON.parse(options.body);
+    const prompt = body.input || (body.messages && body.messages[0] && body.messages[0].content) || '';
+    const text = String(prompt).startsWith('What do you know about')
+      ? 'ACCESS Newswire is a press release distribution company. It sends announcements to newsrooms from accessnewswire.com.'
+      : '1. PR Newswire\n2. Business Wire\n3. GlobeNewswire';
+    const href = String(url);
+    if (href.includes('api.openai.com')) return jsonResponse(200, { output_text: text });
+    if (href.includes('api.perplexity.ai')) {
+      return jsonResponse(200, { output: [{ type: 'message', content: [{ type: 'output_text', text }] }] });
+    }
+    return jsonResponse(200, { content: [{ type: 'text', text }] });
+  };
+  const handler = setup({
+    OPENAI_API_KEY: 'test-openai',
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+  }, fetchImpl);
+  const res = await invoke(handler, {
+    body: {
+      businessName: 'ACCESS Newswire',
+      domain: 'accessnewswire.com',
+      category: 'press release distribution',
+    },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.score, 25);
+  assert.equal(maxInFlight, 12);
+  assert.ok(res.body.providers.every((provider) => provider.known === true && provider.mentioned === false && provider.answered === true));
+  const hidden = JSON.stringify(res.body);
+  assert.equal(hidden.includes('newsrooms'), false);
+  assert.equal(hidden.includes('What do you know about'), false);
+  assert.equal(hidden.includes('UNKNOWN'), false);
 });
 
 test('claude search and fallback share one deadline', async () => {
@@ -768,7 +848,7 @@ test('claude search and fallback share one deadline', async () => {
     PROVIDER_TIMEOUT_MS: '20000',
     SCORE_BUDGET_MS: '20000',
   }, fetchImpl, { now: () => clock });
-  assert.equal(calls.filter(Boolean).length, 3);
+  assert.equal(calls.filter(Boolean).length, 4);
   assert.equal(calls.filter((usedSearch) => !usedSearch).length, 0);
   assert.ok(full.providers[0].checks.every((check) => check.ok && check.grounded === false));
 });
@@ -789,7 +869,7 @@ test('the free score email is the short result and a failed send still returns t
   const handler = setup(env, fetchImpl);
   const res = await invoke(handler, { body: { ...query, email: 'delivered@resend.dev' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.score, 92);
+  assert.equal(res.body.score, 94);
   assert.equal(res.body.emailSent, true);
   assert.equal(res.body.emailId, 'email_free_1');
   assert.equal(res.body.prompts, undefined);
@@ -797,8 +877,8 @@ test('the free score email is the short result and a failed send still returns t
   const email = JSON.parse(emailCall.options.body);
   assert.equal(email.from, 'AI Mentions <reports@ai-mentions.com>');
   assert.equal(email.to[0], 'delivered@resend.dev');
-  assert.match(email.text, /HubSpot: 92\/100/);
-  assert.match(email.text, /ChatGPT: mentioned/);
+  assert.match(email.text, /HubSpot: 94\/100/);
+  assert.match(email.text, /ChatGPT: Knows you: Yes\. Recommends you: Yes\./);
   assert.match(email.text, /ChatGPT recommends Salesforce and Zoho\./);
   assert.match(email.text, /Want to see more insights\? Get the full report: every answer AI gave, the sources it trusts, and what to fix\. \$150/);
   assert.match(email.text, /Or track it monthly for \$65\/mo/);
@@ -808,12 +888,12 @@ test('the free score email is the short result and a failed send still returns t
   assert.equal(email.text.includes('What are the best'), false);
   assert.equal(email.text.includes('https://www.hubspot.com'), false);
   assert.equal(email.text.includes('inbound'), false);
-  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 3);
+  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 4);
 
   const again = await invoke(handler, { body: { ...query, email: 'delivered@resend.dev' } });
   assert.equal(again.body.cached, true);
   assert.equal(again.body.emailSent, true);
-  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 3);
+  assert.equal(calls.filter((call) => call.url.includes('api.openai.com')).length, 4);
   assert.equal(calls.filter((call) => call.url.includes('api.resend.com')).length, 2);
 
   const failing = setup(env, async (url) => {
@@ -842,4 +922,91 @@ test('the free score email is the short result and a failed send still returns t
     score: res.body,
   });
   assert.equal(built.text.includes('https://www.hubspot.com'), false);
+});
+
+test('an emailed free score is stored as a lead and a failed insert still returns the score', async () => {
+  const calls = [];
+  const fetchImpl = async (url, options) => {
+    calls.push({ url: String(url), options });
+    const href = String(url);
+    if (href.includes('supabase.co')) return jsonResponse(201, []);
+    if (href.includes('api.resend.com')) return jsonResponse(200, { id: 'email_lead_1' });
+    return jsonResponse(200, providerPayload(href));
+  };
+  const env = {
+    OPENAI_API_KEY: 'test-openai',
+    SUPABASE_URL: 'https://aaa.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
+    RESEND_API_KEY: 're_test',
+    REPORT_FROM_EMAIL: 'AI Mentions <reports@ai-mentions.com>',
+    SCORE_PROMPT_COUNT: '3',
+  };
+  const handler = setup(env, fetchImpl);
+  const res = await invoke(handler, {
+    body: {
+      ...query,
+      email: 'buyer@example.com',
+      utm_source: 'google',
+      utm_campaign: 'brand',
+      gclid: 'CjwKtestGclid123',
+    },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.score, 94);
+  assert.equal(res.body.emailSent, true);
+  assert.equal(JSON.stringify(res.body).includes('CjwKtestGclid123'), false);
+  assert.equal(JSON.stringify(res.body).includes('utm_source'), false);
+  const insert = calls.find((call) => call.url.includes('/rest/v1/free_scores'));
+  assert.equal(insert.url, 'https://aaa.supabase.co/rest/v1/free_scores');
+  assert.equal(insert.options.headers.apikey, 'sb_secret_test');
+  assert.equal(insert.options.headers.Authorization, undefined);
+  assert.equal(insert.options.headers.Prefer, 'return=minimal');
+  const row = JSON.parse(insert.options.body);
+  assert.equal(row.email, 'buyer@example.com');
+  assert.equal(row.business_name, 'HubSpot');
+  assert.equal(row.domain, 'hubspot.com');
+  assert.equal(row.category, 'CRM Software');
+  assert.equal(row.city, 'Austin');
+  assert.equal(row.score, 94);
+  assert.equal(row.utm_source, 'google');
+  assert.equal(row.utm_campaign, 'brand');
+  assert.equal(row.gclid, 'CjwKtestGclid123');
+  assert.equal(row.email_sent, true);
+  assert.match(row.created_at, /^\d{4}-\d{2}-\d{2}T/);
+  assert.equal(row.providers[0].known, true);
+  assert.equal(row.providers[0].mentioned, true);
+  assert.equal(row.providers[0].recommends[0], 'Salesforce');
+  assert.equal(JSON.stringify(row).includes('inbound'), false);
+  assert.equal(JSON.stringify(row).includes('What do you know'), false);
+
+  const broken = setup(env, async (url) => {
+    if (String(url).includes('supabase.co')) return jsonResponse(500, { message: 'db down' });
+    return jsonResponse(200, providerPayload(url));
+  });
+  const still = await invoke(broken, {
+    body: { businessName: 'Other Co', category: 'CRM Software', email: 'buyer@example.com', gclid: 'CjwKtestGclid123' },
+  });
+  assert.equal(still.statusCode, 200);
+  assert.equal(still.body.score, 0);
+  assert.equal(JSON.stringify(still.body).includes('db down'), false);
+
+  const quietCalls = [];
+  const quiet = setup(env, async (url, options) => {
+    quietCalls.push(String(url));
+    return fetchImpl(url, options);
+  });
+  const noEmail = await invoke(quiet, { body: { businessName: 'Quiet Co', category: 'CRM Software' } });
+  assert.equal(noEmail.statusCode, 200);
+  assert.equal(quietCalls.some((url) => url.includes('supabase.co')), false);
+
+  const invalid = await invoke(handler, {
+    body: { businessName: 'H', category: 'CRM Software', email: 'buyer@example.com' },
+  });
+  assert.equal(invalid.statusCode, 400);
+  const invalidInserts = calls.filter((call) => call.url.includes('/rest/v1/free_scores'));
+  assert.equal(invalidInserts.length, 2);
+  const rejected = JSON.parse(invalidInserts[1].options.body);
+  assert.equal(rejected.email, 'buyer@example.com');
+  assert.equal(rejected.score, null);
+  assert.equal(rejected.email_sent, false);
 });

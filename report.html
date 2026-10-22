@@ -105,7 +105,7 @@ function formHtml(data) {
     '<div class="form-group"><label for="city">City (optional)</label><input id="city" maxlength="80" placeholder="Nashville"></div></div>' +
     '<div class="form-group"><label for="category">Category</label><input id="category" maxlength="80" required placeholder="personal injury lawyers"></div>' +
     '<button id="runBtn" type="submit">Run the report</button>' +
-    '<p class="note">This asks the three assistants live and can take about a minute. The questions do not include the company name.</p>' +
+    '<p class="note">This asks the three assistants live and can take about a minute. The buyer questions do not include the company name. Each assistant is also asked what it already knows about the business.</p>' +
     '</form><div id="formError"></div>';
 }
 function reportHtml(data) {
@@ -138,7 +138,15 @@ function reportHtml(data) {
       return '<div class="check">' + esc(parts.join(' · ')) + '</div>' + excerpt;
     }).join('');
     var note = failed ? '<p class="warn">' + failed + ' of ' + checks.length + ' questions failed and were left out of this score.</p>' : '';
-    return '<section class="engine"><div class="engine-head"><strong>' + esc(provider.label) + '</strong><span>' + esc(provider.model || '') + '</span><b>' + (provider.ok && provider.score != null ? esc(provider.score) + '/100' : 'Failed') + '</b></div><p>' + (best ? 'Best list rank #' + best + '. ' : '') + 'Named in ' + mentions + ' of ' + good.length + ' answers. Domain cited in ' + citations + '.</p>' + note + lines + '</section>';
+    var awareness = provider.awareness;
+    var awarenessHtml = '';
+    if (awareness && awareness.ok) {
+      awarenessHtml = '<div class="check">' + (awareness.known ? 'Knows you: Yes' : 'Knows you: No') + '</div>' +
+        (awareness.excerpt ? '<p class="excerpt">' + esc(awareness.excerpt) + '</p>' : '');
+    } else if (awareness) {
+      awarenessHtml = '<p class="warn">The question about what this assistant knows did not return an answer.</p>';
+    }
+    return '<section class="engine"><div class="engine-head"><strong>' + esc(provider.label) + '</strong><span>' + esc(provider.model || '') + '</span><b>' + (provider.ok && provider.score != null ? esc(provider.score) + '/100' : 'Failed') + '</b></div><p>' + (best ? 'Best list rank #' + best + '. ' : '') + 'Named in ' + mentions + ' of ' + good.length + ' answers. Domain cited in ' + citations + '.</p>' + awarenessHtml + note + lines + '</section>';
   }).join('');
   var competitors = (view.competitors || []).length
     ? '<ul>' + view.competitors.map(function (row) { return '<li>' + esc(row.name) + ' — ' + esc(row.mentions) + '</li>'; }).join('') + '</ul>'

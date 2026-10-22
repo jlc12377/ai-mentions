@@ -2,11 +2,11 @@
 
 Free AI visibility check for [ai-mentions.com](https://www.ai-mentions.com/). A visitor enters a company, website, category, and optional city. The site asks a few buyer-style questions of each AI assistant that has an API key configured, then scores the real answers.
 
-The business name is not included in the questions. If no assistants are connected, or every call fails, the page says **score temporarily unavailable** and still submits the lead form. It does not invent a score.
+The business name is not included in the buyer questions. A separate awareness question does include it. If no assistants are connected, or every call fails, the page says **score temporarily unavailable** and still submits the lead form. It does not invent a score.
 
 ## How the score is calculated
 
-Formula version 1. Each successful answer is scored from 0 to 100:
+Formula version 2. A recommendation answer is still scored from 0 to 100:
 
 **Mention (70%)**
 
@@ -23,7 +23,11 @@ Position 2 is 88, position 3 is 76, and position 8 or lower is 20. Matching is c
 
 100 if a source URL uses the company's domain (including a subdomain), otherwise 0. `blog.hubspot.com` counts for `hubspot.com`. `nothubspot.com` does not. Citations come from the provider's source list (OpenAI URL citations, Perplexity search results, Gemini grounding chunks, Claude citation objects and web search result URLs) and from URLs written in the answer. This part stays 0 when the visitor leaves the website blank.
 
-One answer is `round(0.70 × mention points + 0.30 × citation points)`. The visibility score is the rounded average of every answer that actually came back. Each answer counts equally. Calls that time out, return an error, or come back empty are left out — an empty or failed call is not treated as "not mentioned". If none succeed, `score` is `null`.
+One recommendation answer is `round(0.70 × mention points + 0.30 × citation points)`. R is the rounded average of every recommendation answer that actually came back. Each of those answers counts equally. The awareness question is not included in R.
+
+Each provider is also asked, in the same parallel batch, `What do you know about <business> (<domain>)?` and told to reply `UNKNOWN` if it does not know the business. That reply is **known** only when it is not `UNKNOWN` and it plausibly refers to the business (the name or domain matches, and the reply is not only a generic disclaimer). A is `100 × known / awareness answers that came back`. A timed-out awareness call is left out of A. If no awareness answer came back, the visibility score is R. Otherwise it is `round(0.75 × R + 0.25 × A)`.
+
+Recommendation mentions stay the dominant weight. Known by every assistant that answered, and recommended by none, is 25 (the 20–30 band). Known by 2 of 3 is 17. Known by 1 of 3 is 8. Unknown everywhere, with no recommendation, is 0 (the 0–5 band). Calls that time out, return an error, or come back empty are left out — an empty or failed call is not treated as "not mentioned" or "never heard of you". If no recommendation answer succeeds, `score` is `null`.
 
 Very short or generic names (for example "AI") can match ordinary words. The questions also ask the model to use a numbered list, which is disclosed on the page, so list position is easier to read. That nudge is small, but it is not a raw consumer chat transcript.
 
@@ -42,7 +46,7 @@ Very short or generic names (for example "AI") can match ordinary words. The que
 
 `domain` and `city` are optional. Limits: company, category, and city 80 characters; website 200 characters.
 
-A hit looks like `{ "ok": true, "score": 42, "businessName": "Example", "providers": [{ "id": "openai", "label": "ChatGPT", "answered": true, "mentioned": false, "recommends": ["PR Newswire", "eReleases"] }], "timestamp": "..." }`. That public JSON is the free result only: the score, whether each assistant mentioned the business, and up to three other names. It does not include the questions, answer excerpts, citation URLs, per-question scores, or the formula. An outage looks like `{ "ok": false, "unavailable": true, "score": null, "message": "Score temporarily unavailable" }` with HTTP 503 (no keys or every call failed), 429 (rate limit), or 400 (bad input). The paid report is built on the server from the full checks, not from this response.
+A hit looks like `{ "ok": true, "score": 25, "businessName": "Example", "providers": [{ "id": "openai", "label": "ChatGPT", "answered": true, "mentioned": false, "known": true, "recommends": ["PR Newswire", "eReleases"] }], "timestamp": "..." }`. That public JSON is the free result only: the score, whether each assistant knows the business (`known`), whether it recommended the business (`mentioned`), and up to three other names. It does not include the questions, awareness answers, answer excerpts, citation URLs, per-question scores, or the formula. An outage looks like `{ "ok": false, "unavailable": true, "score": null, "message": "Score temporarily unavailable" }` with HTTP 503 (no keys or every call failed), 429 (rate limit), or 400 (bad input). The paid report is built on the server from the full checks, including the awareness answers, not from this response.
 
 ## Deploy on Vercel
 
@@ -61,7 +65,7 @@ Leave a key unset to skip that assistant. With none set, the checker returns "sc
 
 Every Perplexity call is `POST https://api.perplexity.ai/v1/responses`. A model name without a slash, such as `sonar`, is sent as `perplexity/sonar`. The old `/chat/completions` path now returns 403 and tells callers to use `/v1/responses`.
 
-Every configured provider and every prompt starts at the same time. Each call is capped at `PROVIDER_TIMEOUT_MS` (default 20 seconds) and the whole check is capped at `SCORE_BUDGET_MS` (default 35 seconds), so the function can answer in about 35 seconds with whatever came back. `api/score.js` allows 45 seconds, which leaves room for the score email. The page stops waiting at 40 seconds and offers a retry. A failed assistant is left out of the average. It is not scored as zero, and the free result says "did not answer" rather than "not mentioned".
+Every configured provider, every buyer prompt, and the awareness prompt start at the same time. Each call is capped at `PROVIDER_TIMEOUT_MS` (default 20 seconds) and the whole check is capped at `SCORE_BUDGET_MS` (default 35 seconds), so the extra question does not add a round trip. `api/score.js` allows 45 seconds, which leaves room for the score email. The page stops waiting at 40 seconds and offers a retry. A failed assistant is left out of the average. It is not scored as zero, and the free result says "Did not answer" rather than "Recommends you: No".
 
 Perplexity can still return HTTP 429 when several prompts run together. A 429 is retried up to `PERPLEXITY_429_RETRIES` times (default 2) inside that same per-call deadline, honoring `Retry-After` when the response includes it. A retry that does not fit is a failed question. Those questions stay out of the average. The free page does not list them. The paid report does.
 
@@ -81,7 +85,7 @@ Claude asks with the web search tool (`web_search_20250305` by default, one sear
 | `RATE_LIMIT_WINDOW_SEC` | `3600` | Rate-limit window. |
 | `GEMINI_THINKING_BUDGET` | unset | Sent only when set. `0` disables thinking on Gemini models that accept `thinkingBudget`. |
 
-`vercel.json` caps `api/score.js` at 45 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four prompts times four providers is 16 calls, all in flight together, each limited to about 20 seconds. The page waits up to 40 seconds, then shows a retry. Nothing is filled in when the check does not finish.
+`vercel.json` caps `api/score.js` at 45 seconds. The platform default is longer; the cap is there so a stuck call cannot run for minutes. Four buyer prompts plus one awareness prompt, times four providers, is 20 calls, all in flight together, each limited to about 20 seconds. The page waits up to 40 seconds, then shows a retry. Nothing is filled in when the check does not finish.
 
 ### Rough cost per check
 
@@ -107,7 +111,7 @@ The Gemini free-tier API can also ground searches, with a smaller daily cap, and
 
 ### Rate limit and cache
 
-The free-score limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap. Only successful scores are cached. An outage is not cached. The cache key is a hash of the normalized name, domain, category, city, prompt count, formula version, and the configured model names.
+The free-score limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap. Only successful scores are cached. An outage is not cached. The cache key is `aim:score:v3:` plus a hash of the normalized name, domain, category, city, prompt count, formula version, awareness prompt version, and the configured model names. Formula version 2 and the v3 prefix mean scores cached before the awareness credit are not reused.
 
 The limiter reads the first address in `x-forwarded-for`, which Vercel sets. It is per IP, default 8 requests per hour, including cache hits.
 
@@ -128,7 +132,11 @@ curl -s -X POST http://127.0.0.1:3000/api/score \
 
 Unit tests cover mention detection, list position, citations, the scoring formula, mocked provider responses, the no-keys response, total failure, partial failure, validation, the rate limit, and the 24-hour cache. They do not call the real providers.
 
-The lead form still posts to the existing Formspree endpoint after the check resolves (including when the score is unavailable). The payload includes the real score, or `unavailable`. When the score exists and the form included an email address, the same request also sends that score through Resend from `REPORT_FROM_EMAIL`. The message has the score, whether each assistant mentioned the business, up to three businesses that assistant recommended, one sentence on how the score works, then “Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150” and “Or track it monthly for $65/mo”. It does not include the questions, excerpts, or source URLs. The send is awaited so the serverless function can finish it, and a failed send still returns the score. `RESEND_API_KEY` is sending-only. The response may include `emailSent` and a Resend `emailId`. It never includes the answer text.
+The page keeps `utm_source`, `utm_campaign`, and `gclid` in `localStorage` under `aim_attribution` and sends them with `POST /api/score`. Payment Links cannot take that metadata, so the checkout URLs are unchanged. GA4 is already on the page as measurement ID `G-P8P36G6MZV`. The free check fires `score_started` when the form is submitted, `generate_lead` when that submit includes an accepted email, `score_completed` with `score_bucket` (`low`, `moderate`, `strong`, or `unavailable`) and no business name when the result renders, and `upsell_click` with `plan` of `report_150` or `tracking_65` on the report and tracking links under the score.
+
+The lead form still posts to the existing Formspree endpoint after the check resolves (including when the score is unavailable). The payload includes the real score, or `unavailable`, plus the stored utm and gclid values. When the score exists and the form included an email address, the same request also sends that score through Resend from `REPORT_FROM_EMAIL`. The message has the score, whether each assistant knows the business, whether it recommends the business, up to three businesses that assistant recommended, one sentence on how the score works, then “Want to see more insights? Get the full report: every answer AI gave, the sources it trusts, and what to fix. $150” and “Or track it monthly for $65/mo”. It does not include the questions, awareness answers, excerpts, or source URLs. The send is awaited so the serverless function can finish it, and a failed send still returns the score. `RESEND_API_KEY` is sending-only. The response may include `emailSent` and a Resend `emailId`. It never includes the answer text.
+
+Every free-score request with an email that passes the same check as the score email is inserted into Supabase `public.free_scores`: email, business name, domain, category, city, score, each assistant's `known` / `mentioned` / `recommends`, `utm_source`, `utm_campaign`, `gclid`, `email_sent`, and `created_at`. The insert is awaited with an 8 second cap. A missing Supabase config, a timeout, or an insert error is logged and does not change the score response. Rows are not cached with the score, so a repeat check from another visitor is a new lead. A project that already ran `supabase/schema.sql` should run `supabase/migrations/free_scores.sql` once. A fresh setup gets the table from `supabase/schema.sql`.
 
 ## Paid reports
 
@@ -142,11 +150,11 @@ The free score stays free. Three Stripe Payment Links take payment and return th
 
 `/report` reads `session_id` and checks the Checkout Session with `STRIPE_RESTRICTED_KEY` (read-only: Checkout Sessions, Customers, and Subscriptions). The session has to be complete and paid. A one-time payment is the $150 report. A subscription is tracking; an amount of $49 is the add-on, and any other subscription amount is the $65 plan. The buyer enters one business. The server runs ChatGPT, Perplexity, and Claude through the same scorer as `/api/score`, stores the report, and returns a private link `/r/<token>`. The same payment cannot run a second business. Opening the checkout page again, or the private link, shows the saved report.
 
-The report on screen includes each assistant's mentions and list rank, answer excerpts, competitors named instead, source URLs, and a plain-English "What to do next" list drawn from those results. That detail stays on the private report. It is not in the free score or in `POST /api/score`. Resend emails a summary and the private link to the checkout email. `RESEND_API_KEY` is a sending-only key, and the app only calls `POST https://api.resend.com/emails`. `REPORT_FROM_EMAIL` is `AI Mentions <reports@ai-mentions.com>`. The domain `ai-mentions.com` is verified in Resend. If either email variable is missing, the report is still saved and the page says to keep the link.
+The report on screen includes each assistant's mentions and list rank, answer excerpts, what that assistant knows about the business, competitors named instead, source URLs, and a plain-English "What to do next" list drawn from those results. That detail stays on the private report. It is not in the free score or in `POST /api/score`. Resend emails a summary and the private link to the checkout email. `RESEND_API_KEY` is a sending-only key, and the app only calls `POST https://api.resend.com/emails`. `REPORT_FROM_EMAIL` is `AI Mentions <reports@ai-mentions.com>`. The domain `ai-mentions.com` is verified in Resend. If either email variable is missing, the report is still saved and the page says to keep the link.
 
 Reports, subscribers, report history, and used checkout sessions are stored in Supabase (Postgres). The Vercel project already has `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for production and preview. The service key is the new `sb_secret_` key. The server sends that value only in the PostgREST `apikey` header, the same place supabase-js puts a secret key, and never in `Authorization`. It is not a JWT. Supabase maps it to `service_role`. The server reads `SUPABASE_URL` first and falls back to `NEXT_PUBLIC_SUPABASE_URL` for the project URL only. The key is not read by the browser and is not written into the pages. A publishable key in `SUPABASE_SERVICE_ROLE_KEY` is rejected.
 
-The Supabase project is empty. Before the first paid report, open the SQL editor and paste `supabase/schema.sql` once. That file is the whole setup: `reports`, `subscribers`, `report_history`, `checkout_sessions`, and a short-lived `report_locks` table. Row level security is enabled and forced, grants for `anon` and `authenticated` are revoked, and there are no policies, so the public Data API cannot read the rows. `service_role` bypasses row level security, which is why the secret key stays on the server. If the tables are missing, the paid endpoints say to run that file and do not pretend a report was saved.
+Before the first paid report, open the SQL editor and paste `supabase/schema.sql` once. That file is the whole setup: `reports`, `subscribers`, `report_history`, `checkout_sessions`, a short-lived `report_locks` table, and `free_scores` for free-score leads. If `schema.sql` was already applied, run `supabase/migrations/free_scores.sql` once instead of pasting the whole file again. Row level security is enabled and forced, grants for `anon` and `authenticated` are revoked, and there are no policies, so the public Data API cannot read the rows. `service_role` bypasses row level security, which is why the secret key stays on the server. If the tables are missing, the paid endpoints say to run that file and do not pretend a report was saved.
 
 These six names are set on the ai-mentions Vercel project: `STRIPE_RESTRICTED_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `REPORT_FROM_EMAIL`, and `CRON_SECRET`. The app reads those names and no aliases.
 

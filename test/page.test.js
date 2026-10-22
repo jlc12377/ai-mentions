@@ -30,6 +30,23 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /email this score to you/);
   assert.match(page, /Did not answer/);
   assert.match(page, /recommends /);
+  assert.match(page, /Knows you: /);
+  assert.match(page, /Recommends you: /);
+  assert.match(page, /partial credit/);
+  assert.match(page, /about 25/);
+  assert.match(page, /G-P8P36G6MZV/);
+  assert.match(page, /score_started/);
+  assert.match(page, /generate_lead/);
+  assert.match(page, /score_completed',\s*\{\s*score_bucket:/);
+  assert.match(page, /upsell_click/);
+  assert.match(page, /data-plan="report_150"/);
+  assert.match(page, /data-plan="tracking_65"/);
+  assert.match(page, /aim_attribution/);
+  assert.match(page, /utm_source/);
+  assert.match(page, /utm_campaign/);
+  assert.match(page, /gclid/);
+  assert.equal(page.includes("score_completed', { company"), false);
+  assert.equal(page.includes('score_completed\', { businessName'), false);
   assert.equal(page.includes('Failed:'), false);
   assert.equal(page.includes('questions failed and were left out of this score'), false);
   assert.equal(page.includes('answered without web search'), false);
@@ -79,11 +96,18 @@ test('deploy notes name the provider env vars and the formula', () => {
   assert.match(readme, /server/);
   assert.match(readme, /3-month minimum/);
   const schema = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'schema.sql'), 'utf8');
-  for (const name of ['reports', 'subscribers', 'report_history', 'checkout_sessions']) {
+  for (const name of ['reports', 'subscribers', 'report_history', 'checkout_sessions', 'free_scores']) {
     assert.match(schema, new RegExp(`table if not exists public\\.${name}`));
     assert.match(schema, new RegExp(`alter table public\\.${name} enable row level security`, 'i'));
   }
   assert.match(schema, /revoke all on table public\.reports from public, anon, authenticated/i);
+  assert.match(schema, /revoke all on table public\.free_scores from public, anon, authenticated/i);
+  assert.match(readme, /supabase\/migrations\/free_scores\.sql/);
+  assert.match(readme, /G-P8P36G6MZV/);
+  assert.match(readme, /score_started/);
+  assert.match(readme, /score_completed/);
+  assert.match(readme, /generate_lead/);
+  assert.match(readme, /upsell_click/);
   assert.match(schema, /notify pgrst, 'reload schema'/);
   assert.equal(/create policy/i.test(schema), false);
   assert.equal(/to anon/i.test(schema.replace(/from public, anon, authenticated/gi, '')), false);
