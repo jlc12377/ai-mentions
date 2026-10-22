@@ -20,6 +20,12 @@ const {
   METHODOLOGY,
   MENTION_WEIGHT,
   CITATION_WEIGHT,
+  RECOMMENDATION_WEIGHT,
+  AWARENESS_WEIGHT,
+  FORMULA_VERSION,
+  awarenessPrompt,
+  classifyKnown,
+  scoreVisibility,
 } = require('../lib/score');
 
 test('name normalization ignores case, punctuation, and company suffixes', () => {
@@ -67,9 +73,13 @@ test('list position is the earliest matching item', () => {
 });
 
 test('score formula weights mention position and citations', () => {
+  assert.equal(FORMULA_VERSION, 2);
   assert.equal(MENTION_WEIGHT, 0.7);
   assert.equal(CITATION_WEIGHT, 0.3);
+  assert.equal(RECOMMENDATION_WEIGHT, 0.75);
+  assert.equal(AWARENESS_WEIGHT, 0.25);
   assert.match(METHODOLOGY, /70%/);
+  assert.match(METHODOLOGY, /0\.75/);
   assert.match(METHODOLOGY, /unavailable/);
 
   assert.equal(mentionPoints({ mentioned: false, position: null }), 0);
@@ -151,4 +161,45 @@ test('input limits reject oversized or empty fields and normalize the domain', (
   assert.throws(() => validateInput({ businessName: 'A'.repeat(81), category: 'CRM' }), InputError);
   assert.throws(() => validateInput({ businessName: 'Acme', category: 'CRM', domain: 'not a domain' }), InputError);
   assert.throws(() => normalizeDomain('https://nothubspot'), InputError);
+});
+
+test('awareness is partial credit and a disclaimer is not knowledge', () => {
+  const input = { businessName: 'ACCESS Newswire', domain: 'accessnewswire.com' };
+  assert.equal(
+    awarenessPrompt(input),
+    "What do you know about ACCESS Newswire (accessnewswire.com)? Answer in 2-3 sentences. If you don't know this business, reply exactly: UNKNOWN.",
+  );
+  assert.equal(awarenessPrompt({ businessName: 'ACCESS Newswire', domain: '' }).includes('()'), false);
+
+  assert.equal(classifyKnown('UNKNOWN', input), false);
+  assert.equal(classifyKnown('unknown.', input), false);
+  assert.equal(classifyKnown('UNKNOWN!', input), false);
+  assert.equal(classifyKnown("I don't know this business.", input), false);
+  assert.equal(classifyKnown("I don't have information about ACCESS Newswire (accessnewswire.com).", input), false);
+  assert.equal(classifyKnown("I'm not familiar with ACCESS Newswire.", input), false);
+  assert.equal(classifyKnown('As an AI language model, I cannot find ACCESS Newswire.', input), false);
+  assert.equal(classifyKnown('What do you know about ACCESS Newswire (accessnewswire.com)? UNKNOWN', input), false);
+  assert.equal(classifyKnown('1. PR Newswire\n2. Business Wire', input), false);
+  assert.equal(classifyKnown(
+    'ACCESS Newswire is a press release distribution service. Companies use accessnewswire.com to send announcements to journalists.',
+    input,
+  ), true);
+  assert.equal(classifyKnown(
+    "I don't have live browsing, but ACCESS Newswire distributes press releases to newsrooms.",
+    input,
+  ), true);
+  assert.equal(classifyKnown('1. HubSpot\n2. Salesforce', { businessName: 'HubSpot', domain: 'hubspot.com' }), true);
+
+  const known = { ok: true, known: true };
+  const unknown = { ok: true, known: false };
+  const failed = { ok: false, known: false };
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, known]), 25);
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, unknown]), 17);
+  assert.equal(scoreVisibility([0, 0, 0], [known, unknown, unknown]), 8);
+  assert.equal(scoreVisibility([0, 0, 0], [unknown, unknown, unknown]), 0);
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, failed]), 25);
+  assert.equal(scoreVisibility([92, 92, 92], [known, known, known]), 94);
+  assert.equal(scoreVisibility([100], [known]), 100);
+  assert.equal(scoreVisibility([70], []), 70);
+  assert.equal(scoreVisibility([], [known]), null);
 });

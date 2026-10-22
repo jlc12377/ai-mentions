@@ -59,36 +59,62 @@ create table if not exists public.report_locks (
   expires_at timestamptz not null
 );
 
+-- One row per free-score request that included an email. The score response
+-- does not wait on this insert beyond a short timeout, and a failed insert
+-- does not change the score the visitor sees.
+create table if not exists public.free_scores (
+  id bigint generated always as identity primary key,
+  email text not null,
+  business_name text,
+  domain text,
+  category text,
+  city text,
+  score integer,
+  providers jsonb not null default '[]'::jsonb,
+  utm_source text,
+  utm_campaign text,
+  gclid text,
+  email_sent boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists reports_subscription_idx on public.reports (subscription_id);
 create index if not exists subscribers_due_idx on public.subscribers (status, last_report_at);
 create index if not exists report_history_sub_idx on public.report_history (subscription_id, created_at);
+create index if not exists free_scores_email_idx on public.free_scores (email, created_at desc);
 
 alter table public.reports enable row level security;
 alter table public.subscribers enable row level security;
 alter table public.report_history enable row level security;
 alter table public.checkout_sessions enable row level security;
 alter table public.report_locks enable row level security;
+alter table public.free_scores enable row level security;
 
 alter table public.reports force row level security;
 alter table public.subscribers force row level security;
 alter table public.report_history force row level security;
 alter table public.checkout_sessions force row level security;
 alter table public.report_locks force row level security;
+alter table public.free_scores force row level security;
 
 revoke all on table public.reports from public, anon, authenticated;
 revoke all on table public.subscribers from public, anon, authenticated;
 revoke all on table public.report_history from public, anon, authenticated;
 revoke all on table public.checkout_sessions from public, anon, authenticated;
 revoke all on table public.report_locks from public, anon, authenticated;
+revoke all on table public.free_scores from public, anon, authenticated;
 
 grant all on table public.reports to service_role;
 grant all on table public.subscribers to service_role;
 grant all on table public.report_history to service_role;
 grant all on table public.checkout_sessions to service_role;
 grant all on table public.report_locks to service_role;
+grant all on table public.free_scores to service_role;
 
 revoke all on sequence public.report_history_id_seq from public, anon, authenticated;
 grant usage, select on sequence public.report_history_id_seq to service_role;
+revoke all on sequence public.free_scores_id_seq from public, anon, authenticated;
+grant usage, select on sequence public.free_scores_id_seq to service_role;
 
 notify pgrst, 'reload schema';
 
