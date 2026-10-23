@@ -21,6 +21,7 @@ const types = {
   '.txt': 'text/plain; charset=utf-8',
   '.xml': 'application/xml',
   '.json': 'application/json; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
 };
 
 const server = http.createServer(async (req, res) => {

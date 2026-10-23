@@ -68,6 +68,12 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /we did not invent a number/);
   assert.match(page, /See where businesses rank on our independent Best-of lists/);
   assert.match(page, /Get verified and listed/);
+  assert.match(page, /src="\/lists\.js"/);
+  assert.match(page, /id="categorySearch"/);
+  assert.match(page, /id="listCta"/);
+  assert.match(page, /There is no matching list for this category and city/);
+  assert.match(page, /https:\/\/localsmallbusinessreviews\.com/);
+  assert.match(page, /listDestination/);
   assert.match(page, /AI Visibility Package from \$299\/mo/);
   assert.equal(page.includes('cNi8wQ3Pt3s7bkXdS7d7q04'), false);
 });
