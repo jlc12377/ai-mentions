@@ -79,7 +79,17 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .form-input{width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--white);transition:border-color .2s;outline:none}
 .form-input:focus{border-color:var(--violet)}
 .form-input::placeholder{color:var(--ink-4)}
-select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+select.form-input,.combo-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer}
+.combo{position:relative}
+.combo-input{padding-right:36px;cursor:text}
+.combo-panel{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:40;background:#fff;border:1.5px solid #ddd6fe;border-radius:8px;max-height:280px;overflow:auto;box-shadow:0 16px 40px rgba(9,9,11,.16)}
+.combo-panel[hidden]{display:none}
+.combo-label{position:sticky;top:0;z-index:1;background:#f5f3ff;color:#5b21b6;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px}
+.combo-sub{font-size:11px;font-weight:600;color:#71717a;padding:8px 12px 2px}
+.combo-option{display:block;width:100%;text-align:left;border:0;background:#fff;padding:8px 12px 8px 16px;font-family:var(--font-body);font-size:14px;color:#09090b;cursor:pointer}
+.combo-option:hover,.combo-option.active{background:#f5f3ff}
+.combo-option[aria-selected="true"]{font-weight:600}
+.combo-empty{padding:12px;font-size:13px;color:#71717a}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .email-note{font-size:11px;color:#a1a1aa;margin-top:4px;display:block}
 .check-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:-.2px}
@@ -217,27 +227,21 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <div class="form-group">
         <label class="form-label" for="city">City (optional)</label>
         <input type="text" class="form-input" id="city" maxlength="80" placeholder="e.g. Austin">
+        <span class="email-note">For a local service, your city picks the metro list when we have one.</span>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" for="category">Industry / Category</label>
-        <select class="form-input" id="category">
-          <option value="">Select category...</option>
-          <optgroup label="Software"><option value="crm">CRM Software</option><option value="pm">Project Management</option><option value="cyber">Cybersecurity</option><option value="erp">ERP Software</option><option value="email">Email Marketing</option><option value="hr">HR & Payroll</option><option value="accounting">Accounting</option><option value="analytics">Analytics & BI</option></optgroup>
-          <optgroup label="AI Tools"><option value="ai_chat">AI Chatbots</option><option value="ai_code">AI Coding Tools</option><option value="ai_image">AI Image Generators</option><option value="ai_write">AI Writing Tools</option></optgroup>
-          <optgroup label="Crypto & Web3"><option value="crypto_ex">Crypto Exchanges</option><option value="defi">DeFi Platforms</option><option value="wallets">Crypto Wallets</option></optgroup>
-          <optgroup label="Casino & Gaming"><option value="casino">Online Casinos</option><option value="sports">Sportsbooks</option><option value="casino_sw">Casino Software</option></optgroup>
-          <optgroup label="Healthcare"><option value="ehr">EHR & Medical Records</option><option value="telehealth">Telehealth Platforms</option><option value="medbilling">Medical Billing & RCM</option><option value="clinical">Clinical Trial Software</option><option value="wellness">Health & Wellness Apps</option><option value="pharma">Pharma & Biotech Tools</option></optgroup>
-          <optgroup label="Financial Services"><option value="banking">Banking & Core Systems</option><option value="wealth">Wealth Management</option><option value="insurtech">Insurance Technology</option><option value="payments">Payment Platforms</option><option value="lending">Lending & Mortgage Tech</option><option value="regtech">Compliance & RegTech</option></optgroup>
-          <optgroup label="Other Industries"><option value="pr">PR & Newswire Software</option><option value="other">Other / Not Listed</option></optgroup>
-        </select>
+    <div class="form-group">
+      <label class="form-label" for="categorySearch">Industry / Category</label>
+      <div class="combo" id="categoryCombo">
+        <input type="text" class="form-input combo-input" id="categorySearch" role="combobox" aria-expanded="false" aria-controls="categoryList" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search categories…">
+        <input type="hidden" id="category" value="">
+        <div class="combo-panel" id="categoryList" role="listbox" hidden></div>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="userEmail">Your Email (required)</label>
-        <input type="email" class="form-input" id="userEmail" maxlength="120" placeholder="We&#8217;ll email this score to you" autocomplete="email" required>
-        <span class="email-note">We&#8217;ll email this score. The full report is a separate purchase.</span>
-      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="userEmail">Your Email (required)</label>
+      <input type="email" class="form-input" id="userEmail" maxlength="120" placeholder="We&#8217;ll email this score to you" autocomplete="email" required>
+      <span class="email-note">We&#8217;ll email this score. The full report is a separate purchase.</span>
     </div>
     <div class="form-group" id="otherCategoryWrap" style="display:none">
       <label class="form-label" for="categoryOther">Your industry</label>
@@ -293,15 +297,15 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
 <footer class="footer">
   <div class="footer-inner">
     <div><div class="footer-brand">AI <span>Mentions</span></div><p class="footer-desc">Free tool to check if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. By Listicle Liaison, part of a network of review sites.</p></div>
-    <div class="footer-col"><div class="footer-col-title">Review sites</div><a href="https://softwareindustryreviews.com">Software Industry Reviews</a><a href="https://aiindustryreviews.com">AI Industry Reviews</a><a href="https://healthcareindustryreviews.com">Healthcare Industry Reviews</a><a href="https://financialindustryreviews.com">Financial Industry Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Industry Reviews</a><a href="https://casinoindustryreviews.com">Casino Industry Reviews</a><a href="https://miningindustryreviews.com">Mining Industry Reviews</a></div>
+    <div class="footer-col"><div class="footer-col-title">Review sites</div><a href="https://softwareindustryreviews.com">Software Industry Reviews</a><a href="https://aiindustryreviews.com">AI Industry Reviews</a><a href="https://healthcareindustryreviews.com">Healthcare Industry Reviews</a><a href="https://financialindustryreviews.com">Financial Industry Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Industry Reviews</a><a href="https://casinoindustryreviews.com">Casino Industry Reviews</a><a href="https://miningindustryreviews.com">Mining Industry Reviews</a><a href="https://localsmallbusinessreviews.com">Local Small Business Reviews</a></div>
     <div class="footer-col"><div class="footer-col-title">Media</div><a href="https://smbnewsroom.com">SMB Newsroom</a><a href="https://listicleliaison.com">Listicle Liaison</a><a href="https://listicleliaison.com/pages/pricing.html">Get Featured</a><a href="https://listicleliaison.com/pages/partners.html">Affiliate Program</a><a href="mailto:partnerships@listicleliaison.com">Contact Us</a></div>
     <div class="footer-col"><div class="footer-col-title">Company</div><a href="https://listicleliaison.com/pages/about.html">About Us</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a><a href="mailto:partnerships@listicleliaison.com">Email Us</a></div>
   </div>
   <div class="footer-bottom"><span>&copy; 2026 AI Mentions. By Listicle Liaison.</span><span><a href="https://listicleliaison.com/pages/privacy.html">Privacy</a><a href="https://listicleliaison.com/pages/terms.html">Terms</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a></span></div>
 </footer>
 
+<script src="/lists.js"></script>
 <script>
-var categories = {"crm":{"name":"CRM Software","link":"https://softwareindustryreviews.com/pages/crm-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"pm":{"name":"Project Management","link":"https://softwareindustryreviews.com/pages/pm-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"cyber":{"name":"Cybersecurity","link":"https://softwareindustryreviews.com/pages/cyber-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"erp":{"name":"ERP Software","link":"https://softwareindustryreviews.com/pages/erp-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"email":{"name":"Email Marketing","link":"https://softwareindustryreviews.com/pages/email-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"hr":{"name":"HR & Payroll","link":"https://softwareindustryreviews.com/pages/hr-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"accounting":{"name":"Accounting Software","link":"https://softwareindustryreviews.com/pages/accounting-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"analytics":{"name":"Analytics & BI","link":"https://softwareindustryreviews.com/pages/analytics-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"ai_chat":{"name":"AI Chatbots","link":"https://aiindustryreviews.com/pages/chatbot-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_code":{"name":"AI Coding Tools","link":"https://aiindustryreviews.com/pages/coding-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_image":{"name":"AI Image Generators","link":"https://aiindustryreviews.com/pages/image-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"ai_write":{"name":"AI Writing Tools","link":"https://aiindustryreviews.com/pages/writing-rankings.html","pricing":"https://aiindustryreviews.com/pages/pricing.html"},"crypto_ex":{"name":"Crypto Exchanges","link":"https://cryptoindustryreviews.com/pages/exchange-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"defi":{"name":"DeFi Platforms","link":"https://cryptoindustryreviews.com/pages/defi-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"wallets":{"name":"Crypto Wallets","link":"https://cryptoindustryreviews.com/pages/wallet-rankings.html","pricing":"https://cryptoindustryreviews.com/pages/pricing.html"},"casino":{"name":"Online Casinos","link":"https://casinoindustryreviews.com/pages/casino-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"sports":{"name":"Sportsbooks","link":"https://casinoindustryreviews.com/pages/sportsbook-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"casino_sw":{"name":"Casino Software Providers","link":"https://casinoindustryreviews.com/pages/software-rankings.html","pricing":"https://casinoindustryreviews.com/pages/pricing.html"},"ehr":{"name":"EHR & Medical Records","link":"https://healthcareindustryreviews.com/pages/ehr-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"telehealth":{"name":"Telehealth Platforms","link":"https://healthcareindustryreviews.com/pages/telehealth-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"medbilling":{"name":"Medical Billing & RCM","link":"https://www.healthcareindustryreviews.com/#categories","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"clinical":{"name":"Clinical Trial Software","link":"https://healthcareindustryreviews.com/pages/clinical-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"wellness":{"name":"Health & Wellness Apps","link":"https://healthcareindustryreviews.com/pages/wellness-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"pharma":{"name":"Pharma & Biotech Tools","link":"https://healthcareindustryreviews.com/pages/pharma-rankings.html","pricing":"https://healthcareindustryreviews.com/pages/pricing.html"},"banking":{"name":"Banking & Core Systems","link":"https://financialindustryreviews.com/pages/banking-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"wealth":{"name":"Wealth Management","link":"https://financialindustryreviews.com/pages/wealth-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"insurtech":{"name":"Insurance Technology","link":"https://financialindustryreviews.com/pages/insurtech-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"payments":{"name":"Payment Platforms","link":"https://financialindustryreviews.com/pages/payments-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"lending":{"name":"Lending & Mortgage Tech","link":"https://financialindustryreviews.com/pages/lending-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"regtech":{"name":"Compliance & RegTech","link":"https://financialindustryreviews.com/pages/compliance-rankings.html","pricing":"https://financialindustryreviews.com/pages/pricing.html"},"pr":{"name":"PR & Newswire Software","link":"https://softwareindustryreviews.com/pages/pr-rankings.html","pricing":"https://softwareindustryreviews.com/pages/pricing.html"},"other":{"name":"your industry","link":"https://listicleliaison.com","pricing":"https://listicleliaison.com/pages/pricing.html"}};
 
 function esc(value) {
   return String(value == null ? '' : value)
@@ -334,17 +338,153 @@ function formatWhen(iso) {
 
 function selectedCategory() {
   var key = document.getElementById('category').value;
-  var cat = categories[key];
+  var cat = window.AiLists ? AiLists.category(key) : null;
   if (!cat) return null;
   if (key === 'other') {
     var custom = document.getElementById('categoryOther').value.trim();
-    return { key: key, name: custom, link: cat.link, pricing: cat.pricing, custom: true };
+    return { key: key, name: custom, pricing: cat.pricing, custom: true };
   }
-  return { key: key, name: cat.name, link: cat.link, pricing: cat.pricing, custom: false };
+  return { key: key, name: cat.name, pricing: cat.pricing, custom: false };
 }
 
-document.getElementById('category').addEventListener('change', function () {
-  document.getElementById('otherCategoryWrap').style.display = this.value === 'other' ? 'block' : 'none';
+var categoryInput = document.getElementById('categorySearch');
+var categoryValue = document.getElementById('category');
+var categoryPanel = document.getElementById('categoryList');
+
+function categorySections(group) {
+  if (group.sections && group.sections.length) return group.sections;
+  return [{ label: '', ids: group.ids || [] }];
+}
+
+function renderCategoryPanel(query) {
+  var terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  var html = '';
+  var count = 0;
+  AiLists.groups.forEach(function (group) {
+    var groupHtml = '';
+    categorySections(group).forEach(function (section) {
+      var options = (section.ids || []).map(function (id) { return AiLists.category(id); }).filter(function (cat) {
+        if (!cat) return false;
+        if (!terms.length) return true;
+        var hay = (cat.label + ' ' + cat.name + ' ' + cat.keywords + ' ' + group.label + ' ' + (section.label || '')).toLowerCase();
+        return terms.every(function (term) { return hay.indexOf(term) !== -1; });
+      });
+      if (!options.length) return;
+      if (section.label) groupHtml += '<div class="combo-sub" role="presentation">' + esc(section.label) + '</div>';
+      options.forEach(function (cat) {
+        count += 1;
+        var selected = cat.key === categoryValue.value;
+        groupHtml += '<button type="button" class="combo-option' + (selected ? ' active' : '') + '" role="option" data-key="' + esc(cat.key) + '" aria-selected="' + (selected ? 'true' : 'false') + '">' + esc(cat.label) + '</button>';
+      });
+    });
+    if (groupHtml) html += '<div class="combo-group" role="presentation"><div class="combo-label">' + esc(group.label) + '</div>' + groupHtml + '</div>';
+  });
+  categoryPanel.innerHTML = count ? html : '<div class="combo-empty">No matching category</div>';
+}
+
+function setCategoryOpen(open) {
+  categoryPanel.hidden = !open;
+  categoryInput.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function openCategoryPanel() {
+  var filtering = categoryInput.getAttribute('data-filtering') === '1';
+  renderCategoryPanel(filtering ? categoryInput.value : '');
+  setCategoryOpen(true);
+}
+
+function closeCategoryPanel() {
+  setCategoryOpen(false);
+}
+
+function applyCategory(key) {
+  var cat = AiLists.category(key);
+  categoryValue.value = cat ? key : '';
+  categoryInput.value = cat ? cat.label : '';
+  categoryInput.setAttribute('data-filtering', '0');
+  document.getElementById('otherCategoryWrap').style.display = key === 'other' ? 'block' : 'none';
+  closeCategoryPanel();
+}
+
+function commitCategoryInput() {
+  var typed = categoryInput.value.trim();
+  var current = AiLists.category(categoryValue.value);
+  if (current && typed.toLowerCase() === current.label.toLowerCase()) return;
+  var found = AiLists.findByName(typed);
+  if (found) {
+    categoryValue.value = found.key;
+    categoryInput.value = found.label;
+    categoryInput.setAttribute('data-filtering', '0');
+    document.getElementById('otherCategoryWrap').style.display = found.key === 'other' ? 'block' : 'none';
+    return;
+  }
+  if (categoryInput.getAttribute('data-filtering') === '1' || !typed) {
+    categoryValue.value = '';
+    document.getElementById('otherCategoryWrap').style.display = 'none';
+  } else if (current) {
+    categoryInput.value = current.label;
+  }
+}
+
+categoryInput.addEventListener('focus', function () {
+  categoryInput.setAttribute('data-filtering', '0');
+  openCategoryPanel();
+  var input = categoryInput;
+  setTimeout(function () { input.select(); }, 0);
+});
+
+categoryInput.addEventListener('input', function () {
+  categoryInput.setAttribute('data-filtering', '1');
+  openCategoryPanel();
+});
+
+categoryInput.addEventListener('blur', function () {
+  closeCategoryPanel();
+  commitCategoryInput();
+});
+
+categoryInput.addEventListener('keydown', function (event) {
+  var options = categoryPanel.querySelectorAll('.combo-option');
+  var active = categoryPanel.querySelector('.combo-option.active');
+  var index = Array.prototype.indexOf.call(options, active);
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    if (categoryPanel.hidden) openCategoryPanel();
+    options = categoryPanel.querySelectorAll('.combo-option');
+    if (!options.length) return;
+    var next = event.key === 'ArrowDown' ? index + 1 : index - 1;
+    if (next < 0) next = options.length - 1;
+    if (next >= options.length) next = 0;
+    Array.prototype.forEach.call(options, function (option) { option.classList.remove('active'); });
+    options[next].classList.add('active');
+    if (options[next].scrollIntoView) options[next].scrollIntoView({ block: 'nearest' });
+    return;
+  }
+  if (event.key === 'Enter' && !categoryPanel.hidden) {
+    options = categoryPanel.querySelectorAll('.combo-option');
+    active = categoryPanel.querySelector('.combo-option.active');
+    var pick = active || (options.length === 1 ? options[0] : null);
+    if (pick) {
+      event.preventDefault();
+      applyCategory(pick.getAttribute('data-key'));
+    }
+    return;
+  }
+  if (event.key === 'Escape') {
+    closeCategoryPanel();
+    commitCategoryInput();
+  }
+});
+
+categoryPanel.addEventListener('mousedown', function (event) { event.preventDefault(); });
+categoryPanel.addEventListener('click', function (event) {
+  var option = event.target.closest ? event.target.closest('.combo-option') : null;
+  if (!option) return;
+  applyCategory(option.getAttribute('data-key'));
+});
+
+document.addEventListener('mousedown', function (event) {
+  if (!document.getElementById('categoryCombo').contains(event.target)) closeCategoryPanel();
 });
 
 function captureLead(fields) {
@@ -472,7 +612,15 @@ function renderScore(data) {
     mail;
 }
 
-function renderCta(cat, company, score, unavailable) {
+function listStepHtml(dest) {
+  if (dest.kind === 'verified') {
+    return '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">Get verified</span>There is no matching list for this category and city.<br><a id="listCta" data-list-kind="verified" href="' + esc(dest.href) + '">Get verified &rarr;</a></div></div>';
+  }
+  return '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the Best-of lists</span>See where businesses rank on our independent Best-of lists.<br><a id="listCta" data-list-kind="' + esc(dest.kind) + '" href="' + esc(dest.href) + '">View rankings &rarr;</a></div></div>';
+}
+
+function renderCta(cat, company, score, unavailable, city) {
+  var dest = AiLists.listDestination(cat.key, city);
   var heading = unavailable ? 'We could not score this one' : 'The full report is the next step';
   var intro = unavailable
     ? 'No answer came back, so we did not invent a number.'
@@ -481,7 +629,7 @@ function renderCta(cat, company, score, unavailable) {
     '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
     '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
     '<div class="cta-steps">' +
-    '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">See the Best-of lists</span>See where businesses rank on our independent Best-of lists.<br><a href="' + esc(cat.link) + '">View rankings &rarr;</a></div></div>' +
+    listStepHtml(dest) +
     '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get verified and listed</span>AI Visibility Package from $299/mo.<br><a href="' + esc(cat.pricing) + '">View the package &rarr;</a></div></div>' +
     '</div>';
   document.getElementById('ctaBox').classList.add('visible');
@@ -490,10 +638,11 @@ function renderCta(cat, company, score, unavailable) {
 async function runCheck(event) {
   if (event && event.preventDefault) event.preventDefault();
   var company = document.getElementById('companyName').value.trim();
-  var cat = selectedCategory();
   var email = document.getElementById('userEmail').value.trim();
   var website = document.getElementById('website').value.trim();
   var city = document.getElementById('city').value.trim();
+  commitCategoryInput();
+  var cat = selectedCategory();
   if (!company) { alert('Please enter a company name'); return; }
   if (!cat) { alert('Please select a category'); return; }
   if (cat.custom && cat.name.length < 2) { alert('Please enter your industry'); return; }
@@ -588,7 +737,7 @@ async function runCheck(event) {
   if (unavailable) renderUnavailable(data, company);
   else renderScore(data);
   trackEvent('score_completed', { score_bucket: scoreBucket(data && data.score) });
-  renderCta(cat, company, unavailable ? null : data.score, unavailable);
+  renderCta(cat, company, unavailable ? null : data.score, unavailable, city);
   btn.disabled = false;
   btn.textContent = 'Check Another Company';
 }
