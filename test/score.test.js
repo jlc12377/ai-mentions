@@ -40,6 +40,10 @@ test('brand mentions use word boundaries', () => {
   assert.equal(mentionsBrand('asap delivery and saplings', 'SAP'), false);
   assert.equal(mentionsBrand('SAP S/4HANA is common.', 'SAP'), true);
   assert.equal(mentionsBrand('Xerox is a printer brand', 'Xero'), false);
+  assert.equal(mentionsBrand("Hattie B's is a Nashville restaurant.", "Hattie B's Hot Chicken"), true);
+  assert.equal(mentionsBrand('Hattie Bs Hot Chicken is in Nashville.', "Hattie B's Hot Chicken"), true);
+  assert.equal(mentionsBrand('Hattie went home.', "Hattie B's Hot Chicken"), false);
+  assert.equal(mentionsBrand('The best hot chicken in Nashville.', "Hattie B's Hot Chicken"), false);
   assert.equal(isMentioned('See https://www.hubspot.com/crm', 'Example Co', 'hubspot.com'), true);
   assert.equal(isMentioned('nothubspot.com is unrelated', 'Example', 'hubspot.com'), false);
 });
@@ -234,4 +238,62 @@ test('awareness is partial credit and a disclaimer is not knowledge', () => {
   assert.equal(scoreVisibility([100], [known]), 100);
   assert.equal(scoreVisibility([70], []), 70);
   assert.equal(scoreVisibility([], [known]), null);
+});
+
+test('a shorter name or a domain citation counts as knowing the business', () => {
+  const hattie = { businessName: "Hattie B's Hot Chicken", domain: 'hattieb.com' };
+  assert.equal(classifyKnown("Hattie B's is a hot chicken restaurant in Nashville.", hattie), true);
+  assert.equal(classifyKnown(
+    "I don't have specific information in my training data, but Hattie B's is a popular hot chicken restaurant in Nashville.",
+    hattie,
+  ), true);
+  assert.equal(classifyKnown(
+    "I don't have specific information about Hattie B's Hot Chicken, which is a Nashville hot chicken restaurant with several locations.",
+    hattie,
+  ), true);
+  assert.equal(classifyKnown(
+    'A Nashville hot chicken restaurant with several locations, known for spicy heat levels.',
+    hattie,
+    ['https://www.hattieb.com/menu'],
+  ), true);
+  assert.equal(classifyKnown(
+    "Hattie B's Hot Chicken operates restaurants in Nashville. It serves hot chicken at hattieb.com.",
+    hattie,
+  ), true);
+
+  const named = judgeAnswer({
+    text: "1. Hattie B's\n2. Prince's Hot Chicken",
+    citations: ['https://hattieb.com/'],
+  }, hattie);
+  assert.equal(named.mentioned, true);
+  assert.equal(named.position, 1);
+  assert.equal(named.cited, true);
+
+  const fake = {
+    businessName: 'Zzqx Test Brow Studio QA',
+    domain: 'zzqx-test-brow-studio-qa.example',
+  };
+  const denial = 'I couldn\'t find any reliable information about "Zzqx Test Brow Studio QA" or the website zzqx-test-brow-studio-qa.example.';
+  assert.equal(classifyKnown(denial, fake, [`https://${fake.domain}/`]), false);
+  assert.equal(classifyKnown(
+    'I searched for Zzqx Test Brow Studio QA and did not find a business by that name.',
+    fake,
+    ['https://zzqx-test-brow-studio-qa.example/'],
+  ), false);
+  assert.equal(classifyKnown(
+    'Zzqx Test Brow Studio QA does not appear to be a real studio. Nashville has many brow studios such as Amalie Aesthetics.',
+    fake,
+    [`https://${fake.domain}/`],
+  ), false);
+  const denied = judgeAnswer({
+    text: denial,
+    citations: [`https://${fake.domain}/`],
+  }, fake);
+  assert.equal(denied.mentioned, false);
+  assert.equal(denied.score, 0);
+  assert.equal(scoreVisibility([0, 0, 0], [
+    { ok: true, known: false },
+    { ok: true, known: false },
+    { ok: true, known: false },
+  ]), 0);
 });
