@@ -74,7 +74,25 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /There is no matching list for this category and city/);
   assert.match(page, /https:\/\/localsmallbusinessreviews\.com/);
   assert.match(page, /listDestination/);
-  assert.match(page, /AI Visibility Package from \$299\/mo/);
+  assert.match(page, /Plans from \$99\/mo/);
+  assert.match(page, /Basic \$99\/mo/);
+  assert.match(page, /Enhanced \$299\/mo/);
+  assert.match(page, /Optimal \$699\/mo/);
+  assert.match(page, /id="pricingCta"/);
+  assert.match(page, /https:\/\/listicleliaison\.com\/pages\/pricing\.html/);
+  assert.equal(page.includes('AI Visibility Package'), false);
+  assert.equal(page.includes('View the package'), false);
+  assert.equal(page.includes('softwareindustryreviews.com/pages/pricing'), false);
+  assert.equal(page.includes('Gemini'), false);
+  assert.equal(/you.?re invisible/i.test(page), false);
+  assert.equal(/first-mover/i.test(page), false);
+  assert.equal(page.includes('Millions of people'), false);
+  assert.equal(/capturing demand/i.test(page), false);
+  assert.match(page, /about 10 seconds/i);
+  assert.match(page, /id="tool"/);
+  assert.match(page, /id="how"/);
+  assert.match(page, /Which state\?/);
+  assert.match(page, /id="cityChoices"/);
   assert.equal(page.includes('cNi8wQ3Pt3s7bkXdS7d7q04'), false);
 });
 

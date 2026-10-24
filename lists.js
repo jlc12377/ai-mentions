@@ -11,6 +11,7 @@
  * 4. Anything else (unknown city, blank city, Other): Get verified.
  *    https://listicleliaison.com/pages/pricing.html
  * A local category never falls through to an unrelated national list.
+ * A town name in two metros asks for the state. It does not guess a list.
  */
 (function (root, factory) {
   var api = factory();
@@ -27,187 +28,187 @@
     "label": "CRM Software",
     "name": "CRM Software",
     "link": "https://softwareindustryreviews.com/pages/crm-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "pm": {
     "label": "Project Management",
     "name": "Project Management",
     "link": "https://softwareindustryreviews.com/pages/pm-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "cyber": {
     "label": "Cybersecurity",
     "name": "Cybersecurity",
     "link": "https://softwareindustryreviews.com/pages/cyber-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "erp": {
     "label": "ERP Software",
     "name": "ERP Software",
     "link": "https://softwareindustryreviews.com/pages/erp-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "email": {
     "label": "Email Marketing",
     "name": "Email Marketing",
     "link": "https://softwareindustryreviews.com/pages/email-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "hr": {
     "label": "HR & Payroll",
     "name": "HR & Payroll",
     "link": "https://softwareindustryreviews.com/pages/hr-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "accounting": {
     "label": "Accounting",
     "name": "Accounting Software",
     "link": "https://softwareindustryreviews.com/pages/accounting-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "analytics": {
     "label": "Analytics & BI",
     "name": "Analytics & BI",
     "link": "https://softwareindustryreviews.com/pages/analytics-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "ai_chat": {
     "label": "AI Chatbots",
     "name": "AI Chatbots",
     "link": "https://aiindustryreviews.com/pages/chatbot-rankings.html",
-    "pricing": "https://aiindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "ai_code": {
     "label": "AI Coding Tools",
     "name": "AI Coding Tools",
     "link": "https://aiindustryreviews.com/pages/coding-rankings.html",
-    "pricing": "https://aiindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "ai_image": {
     "label": "AI Image Generators",
     "name": "AI Image Generators",
     "link": "https://aiindustryreviews.com/pages/image-rankings.html",
-    "pricing": "https://aiindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "ai_write": {
     "label": "AI Writing Tools",
     "name": "AI Writing Tools",
     "link": "https://aiindustryreviews.com/pages/writing-rankings.html",
-    "pricing": "https://aiindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "crypto_ex": {
     "label": "Crypto Exchanges",
     "name": "Crypto Exchanges",
     "link": "https://cryptoindustryreviews.com/pages/exchange-rankings.html",
-    "pricing": "https://cryptoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "defi": {
     "label": "DeFi Platforms",
     "name": "DeFi Platforms",
     "link": "https://cryptoindustryreviews.com/pages/defi-rankings.html",
-    "pricing": "https://cryptoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "wallets": {
     "label": "Crypto Wallets",
     "name": "Crypto Wallets",
     "link": "https://cryptoindustryreviews.com/pages/wallet-rankings.html",
-    "pricing": "https://cryptoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "casino": {
     "label": "Online Casinos",
     "name": "Online Casinos",
     "link": "https://casinoindustryreviews.com/pages/casino-rankings.html",
-    "pricing": "https://casinoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "sports": {
     "label": "Sportsbooks",
     "name": "Sportsbooks",
     "link": "https://casinoindustryreviews.com/pages/sportsbook-rankings.html",
-    "pricing": "https://casinoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "casino_sw": {
     "label": "Casino Software",
     "name": "Casino Software Providers",
     "link": "https://casinoindustryreviews.com/pages/software-rankings.html",
-    "pricing": "https://casinoindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "ehr": {
     "label": "EHR & Medical Records",
     "name": "EHR & Medical Records",
     "link": "https://healthcareindustryreviews.com/pages/ehr-rankings.html",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "telehealth": {
     "label": "Telehealth Platforms",
     "name": "Telehealth Platforms",
     "link": "https://healthcareindustryreviews.com/pages/telehealth-rankings.html",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "medbilling": {
     "label": "Medical Billing & RCM",
     "name": "Medical Billing & RCM",
-    "link": "https://www.healthcareindustryreviews.com/#categories",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "link": "https://www.healthcareindustryreviews.com/pages/billing-rankings.html",
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "clinical": {
     "label": "Clinical Trial Software",
     "name": "Clinical Trial Software",
     "link": "https://healthcareindustryreviews.com/pages/clinical-rankings.html",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "wellness": {
     "label": "Health & Wellness Apps",
     "name": "Health & Wellness Apps",
     "link": "https://healthcareindustryreviews.com/pages/wellness-rankings.html",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "pharma": {
     "label": "Pharma & Biotech Tools",
     "name": "Pharma & Biotech Tools",
     "link": "https://healthcareindustryreviews.com/pages/pharma-rankings.html",
-    "pricing": "https://healthcareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "banking": {
     "label": "Banking & Core Systems",
     "name": "Banking & Core Systems",
     "link": "https://financialindustryreviews.com/pages/banking-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "wealth": {
     "label": "Wealth Management",
     "name": "Wealth Management",
     "link": "https://financialindustryreviews.com/pages/wealth-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "insurtech": {
     "label": "Insurance Technology",
     "name": "Insurance Technology",
     "link": "https://financialindustryreviews.com/pages/insurtech-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "payments": {
     "label": "Payment Platforms",
     "name": "Payment Platforms",
     "link": "https://financialindustryreviews.com/pages/payments-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "lending": {
     "label": "Lending & Mortgage Tech",
     "name": "Lending & Mortgage Tech",
     "link": "https://financialindustryreviews.com/pages/lending-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "regtech": {
     "label": "Compliance & RegTech",
     "name": "Compliance & RegTech",
     "link": "https://financialindustryreviews.com/pages/compliance-rankings.html",
-    "pricing": "https://financialindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "pr": {
     "label": "PR & Newswire Software",
     "name": "PR & Newswire Software",
     "link": "https://softwareindustryreviews.com/pages/pr-rankings.html",
-    "pricing": "https://softwareindustryreviews.com/pages/pricing.html"
+    "pricing": "https://listicleliaison.com/pages/pricing.html"
   },
   "other": {
     "label": "Other / Not Listed",
@@ -248,7 +249,7 @@
     "link": "",
     "pricing": "https://listicleliaison.com/pages/pricing.html",
     "localSlug": "estate-planning-attorneys",
-    "keywords": "wills, trusts, probate",
+    "keywords": "wills, trusts, probate, estate planning lawyer, lawyer",
     "section": "Legal"
   },
   "local_criminal": {
@@ -284,7 +285,7 @@
     "link": "",
     "pricing": "https://listicleliaison.com/pages/pricing.html",
     "localSlug": "aesthetics-injectors",
-    "keywords": "brows, brow, lashes, lash, permanent makeup, microblading, lip blush, lip artist, botox, filler, injector, dermatology",
+    "keywords": "brows, brow, lashes, lash, eyelash, eyelashes, lash extensions, brow lamination, pmu, pmu artist, permanent makeup, microblading, lip blush, lip artist, botox, filler, injector, dermatology",
     "section": "Aesthetics"
   },
   "local_medspa": {
@@ -526,6 +527,16 @@
     'new york': 'ny'
   };
   var STATE_ABBR = { tn: 'tn', fl: 'fl', tx: 'tx', ca: 'ca', il: 'il', ny: 'ny', nj: 'nj', ct: 'ct' };
+  var STATE_LABELS = {
+    tn: 'Tennessee',
+    fl: 'Florida',
+    tx: 'Texas',
+    ca: 'California',
+    il: 'Illinois',
+    ny: 'New York',
+    nj: 'New Jersey',
+    ct: 'Connecticut'
+  };
 
   function normalize(raw) {
     return String(raw || '')
@@ -660,19 +671,75 @@
     return LOCAL_ORIGIN + '/' + metro + '/';
   }
 
+  function destinationForMetro(cat, metro) {
+    if (unpublished[metro + '|' + cat.localSlug]) {
+      return { href: metroHubUrl(metro), kind: 'metro', metro: metro };
+    }
+    return { href: localListUrl(metro, cat.localSlug), kind: 'local', metro: metro };
+  }
+
+  // Town names that sit in two covered metros (Brentwood, Orange, Addison).
+  // A state on the city picks one. Without a state, return every match so
+  // the page can ask, instead of sending the visitor to the pricing page.
+  function ambiguousHits(city) {
+    var parsed = parsePlace(city);
+    if (!parsed.city || parsed.state) return [];
+    var hits = byName[parsed.city] || [];
+    var found = [];
+    hits.forEach(function (hit) {
+      if (found.some(function (row) { return row.metro === hit.metro; })) return;
+      found.push(hit);
+    });
+    return found.length > 1 ? found : [];
+  }
+
   function listDestination(key, city) {
     var cat = category(key);
     if (!cat) return { href: VERIFIED_URL, kind: 'verified', metro: null };
     if (cat.localSlug) {
+      var ambiguous = ambiguousHits(city);
+      if (ambiguous.length > 1) {
+        return {
+          href: '',
+          kind: 'choose',
+          metro: null,
+          choices: ambiguous.map(function (hit) {
+            var picked = destinationForMetro(cat, hit.metro);
+            return {
+              metro: hit.metro,
+              state: hit.state,
+              label: STATE_LABELS[hit.state] || hit.state.toUpperCase(),
+              href: picked.href,
+              kind: picked.kind
+            };
+          })
+        };
+      }
       var metro = matchMetro(city);
       if (!metro) return { href: VERIFIED_URL, kind: 'verified', metro: null };
-      if (unpublished[metro + '|' + cat.localSlug]) {
-        return { href: metroHubUrl(metro), kind: 'metro', metro: metro };
-      }
-      return { href: localListUrl(metro, cat.localSlug), kind: 'local', metro: metro };
+      return destinationForMetro(cat, metro);
     }
     if (key === 'other' || !cat.link) return { href: VERIFIED_URL, kind: 'verified', metro: null };
     return { href: cat.link, kind: 'category', metro: null };
+  }
+
+  function search(query) {
+    var terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    var results = [];
+    groups.forEach(function (group) {
+      var sections = group.sections && group.sections.length ? group.sections : [{ label: '', ids: group.ids || [] }];
+      sections.forEach(function (section) {
+        (section.ids || []).forEach(function (id) {
+          var cat = category(id);
+          if (!cat) return;
+          var hay = (cat.label + ' ' + cat.name + ' ' + cat.keywords + ' ' + group.label + ' ' + (section.label || '')).toLowerCase();
+          if (terms.every(function (term) { return hay.indexOf(term) !== -1; })) {
+            results.push({ key: id, group: group.label, section: section.label || '' });
+          }
+        });
+      });
+    });
+    return results;
   }
 
   return {
@@ -682,7 +749,8 @@
     category: category,
     findByName: findByName,
     matchMetro: matchMetro,
-    listDestination: listDestination
+    listDestination: listDestination,
+    search: search
   };
 });
 

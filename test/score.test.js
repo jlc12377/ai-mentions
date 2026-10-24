@@ -190,6 +190,38 @@ test('awareness is partial credit and a disclaimer is not knowledge', () => {
   ), true);
   assert.equal(classifyKnown('1. HubSpot\n2. Salesforce', { businessName: 'HubSpot', domain: 'hubspot.com' }), true);
 
+  const fake = {
+    businessName: 'Zzqx Test Brow Studio QA',
+    domain: 'zzqx-test-brow-studio-qa.example',
+  };
+  const denial = 'I couldn\'t find any reliable information about "Zzqx Test Brow Studio QA" or the website zzqx-test-brow-studio-qa.example. It does not show up as a real aesthetics studio in Nashville.';
+  assert.equal(classifyKnown(denial, fake), false);
+  assert.equal(classifyKnown('I searched for Zzqx Test Brow Studio QA and did not find a business by that name.', fake), false);
+  assert.equal(classifyKnown('There is no evidence that Zzqx Test Brow Studio QA (zzqx-test-brow-studio-qa.example) exists.', fake), false);
+  assert.equal(classifyKnown('UNKNOWN. I have no record of Zzqx Test Brow Studio QA.', fake), false);
+  assert.equal(classifyKnown('Zzqx Test Brow Studio QA (zzqx-test-brow-studio-qa.example) — I wasn\'t able to find a verified listing for this name.', fake), false);
+  const denied = judgeAnswer({
+    text: 'I couldn\'t find any reliable information about "Zzqx Test Brow Studio QA" at https://zzqx-test-brow-studio-qa.example/.',
+    citations: [],
+  }, fake);
+  assert.equal(denied.mentioned, false);
+  assert.equal(denied.position, null);
+  assert.equal(denied.cited, false);
+  assert.equal(denied.score, 0);
+  const site = judgeAnswer({
+    text: 'HubSpot sells CRM software at https://www.hubspot.com/crm.',
+    citations: [],
+  }, { businessName: 'HubSpot', domain: 'hubspot.com' });
+  assert.equal(site.mentioned, true);
+  assert.equal(site.cited, true);
+  const listed = judgeAnswer({
+    text: '1. HubSpot — inbound CRM\n2. Salesforce',
+    citations: ['https://www.hubspot.com/crm'],
+  }, { businessName: 'HubSpot', domain: 'hubspot.com' });
+  assert.equal(listed.mentioned, true);
+  assert.equal(listed.position, 1);
+  assert.equal(listed.cited, true);
+
   const known = { ok: true, known: true };
   const unknown = { ok: true, known: false };
   const failed = { ok: false, known: false };

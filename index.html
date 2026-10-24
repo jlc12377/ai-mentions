@@ -92,6 +92,10 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 .combo-empty{padding:12px;font-size:13px;color:#71717a}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .email-note{font-size:11px;color:#a1a1aa;margin-top:4px;display:block}
+.city-choices{margin-top:8px;font-size:13px;color:var(--ink-2);line-height:1.45}
+.city-choices[hidden]{display:none}
+.city-choice{margin:6px 6px 0 0;padding:6px 10px;border:1.5px solid #ddd6fe;background:#fff;color:var(--violet);border-radius:8px;font-family:var(--font-body);font-weight:600;font-size:13px;cursor:pointer}
+.city-choice:hover{background:#f5f3ff}
 .check-btn{width:100%;padding:14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:-.2px}
 .check-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(124,58,237,.3)}
 .check-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
@@ -202,7 +206,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span> Free AI Visibility Tool</div>
   <h1>Does AI know <em>your company?</em></h1>
-  <p class="hero-sub">When someone asks ChatGPT, Claude, Perplexity, or Gemini who to buy from, does your company come up? Run a live check &#8212; free.</p>
+  <p class="hero-sub">When someone asks ChatGPT, Claude, or Perplexity who to buy from, does your company come up? Run a live check &#8212; free.</p>
 </section>
 
 <div class="tool-container" id="tool">
@@ -227,7 +231,8 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
       <div class="form-group">
         <label class="form-label" for="city">City (optional)</label>
         <input type="text" class="form-input" id="city" maxlength="80" placeholder="e.g. Austin">
-        <span class="email-note">For a local service, your city picks the metro list when we have one.</span>
+        <span class="email-note">For a local service, your city picks the metro list when we have one. Add a state if the town name is shared.</span>
+        <div class="city-choices" id="cityChoices" hidden></div>
       </div>
     </div>
     <div class="form-group">
@@ -261,11 +266,11 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 </div>
 
 <section class="features">
-  <div class="features-header"><h2>Why AI visibility matters</h2><p>AI assistants are becoming the new search engine. If they don&#8217;t mention your company, you&#8217;re invisible to a growing audience.</p></div>
+  <div class="features-header"><h2>Why AI visibility matters</h2><p>Buyers ask AI assistants who to hire and what to buy. This check shows whether your company is present in those answers.</p></div>
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">AI is the new search</div><div class="feature-desc">Millions of people ask ChatGPT, Claude, and Perplexity for product recommendations every day instead of Googling. If AI doesn&#8217;t know you, those customers never find you.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">First-mover advantage</div><div class="feature-desc">Companies that appear in AI recommendations now build compounding advantages. AI models learn from the sources that cite you &#8212; more citations lead to more recommendations.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Your competitors are already there</div><div class="feature-desc">Ask AI about your category and see who comes up. If your competitors appear and you don&#8217;t, they&#8217;re capturing demand you&#8217;ll never see in your analytics.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">Presence in the answer</div><div class="feature-desc">When someone asks ChatGPT, Claude, or Perplexity for a recommendation, the score shows whether your company is named.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">Proof from a live check</div><div class="feature-desc">The result is a live reading of the assistants this site queries. You get a score out of 100 and whether each assistant knows you.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">About 10 seconds</div><div class="feature-desc">Enter your company and category. The same buyer questions go out together, and the score comes back in about 10 seconds.</div></div>
   </div>
 </section>
 
@@ -273,7 +278,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
   <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
     <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name, website, and category. The website is how a citation of your domain is distinguished from a mention of your name.</div></div>
-    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, Gemini, and Claude. Your company name is not in those questions. We also ask each assistant what it knows about your business.</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, and Claude. Your company name is not in those questions. We also ask each assistant what it knows about your business.</div></div>
     <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">The free result is a score out of 100, whether each assistant knows you, whether it recommends you, and a few businesses they named. If a live check can&#8217;t run, we say so and still take your email.</div></div>
   </div>
 </section>
@@ -281,10 +286,10 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 <section class="how" id="methodology">
   <div class="how-header"><h2>How the score is calculated</h2><p>A live check, not a ranking typed in ahead of time.</p></div>
   <div class="method-copy">
-    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. In the same round we also ask what the assistant knows about the business. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, Gemini uses Google Search grounding, and Claude uses its web search tool. Assistants without a key are skipped.</p>
-    <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when it appears in the answer.</p>
+    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. In the same round we also ask what the assistant knows about the business. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, and Claude uses its web search tool. Assistants without a key are skipped. The score comes back in about 10 seconds.</p>
+    <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when the answer identifies your business with it. A sentence that only repeats the name or domain while saying you were not found does not count.</p>
     <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
-    <p>One recommendation answer scores 70% of the mention points plus 30% of the citation points. Those answers are averaged. Knowing you is separate: if the assistant replies UNKNOWN, or only a generic disclaimer, it does not know you. The score on this page is three quarters that recommendation average and one quarter how many of the assistants that answered already know you. If every assistant knows you and none recommend you, the score is about 25. If fewer of them know you, that part is smaller in proportion. If none of them have heard of you and none recommend you, the score is about 0. A real recommendation still counts for most of the number. Timeouts and errors are left out, so a failed call does not look like a miss. If Claude&#8217;s web search returns no answer, that question is asked again without search. The free result shows the score, whether each assistant knows you, whether it recommends you, and a few businesses they named. It does not show the answers. The full report lists each question, the answer, what the assistant knows, the sources, and what to fix. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
+    <p>One recommendation answer scores 70% of the mention points plus 30% of the citation points. Those answers are averaged. Knowing you is separate: an assistant counts only when its answer identifies your business by name or domain. UNKNOWN, a disclaimer, or a sentence that only repeats the name while saying you were not found does not count. The score on this page is three quarters that recommendation average and one quarter how many of the assistants that answered already know you. If every assistant knows you and none recommend you, the score is about 25. If fewer of them know you, that part is smaller in proportion. If none of them have heard of you and none recommend you, the score is about 0. A real recommendation still counts for most of the number. Timeouts and errors are left out, so a failed call does not look like a miss. If Claude&#8217;s web search returns no answer, that question is asked again without search. The free result shows the score, whether each assistant knows you, whether it recommends you, and a few businesses they named. It does not show the answers. The full report lists each question, the answer, what the assistant knows, the sources, and what to fix. If every assistant fails, or none are connected, the page says <strong>score temporarily unavailable</strong> and does not fill in a number. Identical checks are reused for 24 hours. Very short or generic names can match more often than a distinctive brand.</p>
   </div>
 </section>
 
@@ -357,17 +362,15 @@ function categorySections(group) {
 }
 
 function renderCategoryPanel(query) {
-  var terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  var allowed = {};
+  AiLists.search(query).forEach(function (row) { allowed[row.key] = true; });
   var html = '';
   var count = 0;
   AiLists.groups.forEach(function (group) {
     var groupHtml = '';
     categorySections(group).forEach(function (section) {
       var options = (section.ids || []).map(function (id) { return AiLists.category(id); }).filter(function (cat) {
-        if (!cat) return false;
-        if (!terms.length) return true;
-        var hay = (cat.label + ' ' + cat.name + ' ' + cat.keywords + ' ' + group.label + ' ' + (section.label || '')).toLowerCase();
-        return terms.every(function (term) { return hay.indexOf(term) !== -1; });
+        return cat && allowed[cat.key];
       });
       if (!options.length) return;
       if (section.label) groupHtml += '<div class="combo-sub" role="presentation">' + esc(section.label) + '</div>';
@@ -485,6 +488,35 @@ categoryPanel.addEventListener('click', function (event) {
 
 document.addEventListener('mousedown', function (event) {
   if (!document.getElementById('categoryCombo').contains(event.target)) closeCategoryPanel();
+});
+
+function clearCityChoices() {
+  var box = document.getElementById('cityChoices');
+  if (!box) return;
+  box.hidden = true;
+  box.innerHTML = '';
+}
+
+function renderCityChoices(city, choices) {
+  var box = document.getElementById('cityChoices');
+  var place = city || 'That town';
+  var buttons = (choices || []).map(function (choice) {
+    return '<button type="button" class="city-choice" data-state="' + esc(choice.state) + '">' + esc(choice.label) + '</button>';
+  }).join('');
+  box.innerHTML = esc(place) + ' is in more than one area we cover. Choose a state to see that list. ' + buttons;
+  box.hidden = false;
+}
+
+document.getElementById('city').addEventListener('input', clearCityChoices);
+
+document.getElementById('cityChoices').addEventListener('click', function (event) {
+  var button = event.target.closest ? event.target.closest('.city-choice') : null;
+  if (!button) return;
+  var state = button.getAttribute('data-state') || '';
+  var input = document.getElementById('city');
+  var base = input.value.replace(/(?:,|\s)\s*(tennessee|florida|texas|california|illinois|new jersey|connecticut|new york|[a-z]{2})$/i, '').trim();
+  input.value = base + ', ' + state.toUpperCase();
+  runCheck();
 });
 
 function captureLead(fields) {
@@ -612,7 +644,14 @@ function renderScore(data) {
     mail;
 }
 
-function listStepHtml(dest) {
+function listStepHtml(dest, city) {
+  if (dest.kind === 'choose') {
+    var place = city || 'That town';
+    var links = (dest.choices || []).map(function (choice) {
+      return '<a data-list-kind="' + esc(choice.kind) + '" href="' + esc(choice.href) + '">' + esc(choice.label) + ' &rarr;</a>';
+    }).join('<br>');
+    return '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">Which state?</span>' + esc(place) + ' is in more than one area we cover. Choose a state to see that list.<br>' + links + '</div></div>';
+  }
   if (dest.kind === 'verified') {
     return '<div class="cta-step"><div class="cta-step-num">1</div><div class="cta-step-text"><span class="step-label">Get verified</span>There is no matching list for this category and city.<br><a id="listCta" data-list-kind="verified" href="' + esc(dest.href) + '">Get verified &rarr;</a></div></div>';
   }
@@ -629,8 +668,8 @@ function renderCta(cat, company, score, unavailable, city) {
     '<div class="upgrade"><h3>' + esc(heading) + '</h3><p>' + esc(intro) + '</p>' +
     '<p class="upgrade-note">Tracking is $65 a month with a 3-month minimum. After payment you come back here to run the report for one business. The free score stays free.</p></div>' +
     '<div class="cta-steps">' +
-    listStepHtml(dest) +
-    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get verified and listed</span>AI Visibility Package from $299/mo.<br><a href="' + esc(cat.pricing) + '">View the package &rarr;</a></div></div>' +
+    listStepHtml(dest, city) +
+    '<div class="cta-step"><div class="cta-step-num">2</div><div class="cta-step-text"><span class="step-label">Get verified and listed</span>Plans from $99/mo on Listicle Liaison: Basic $99/mo, Enhanced $299/mo, and Optimal $699/mo.<br><a id="pricingCta" href="https://listicleliaison.com/pages/pricing.html">View plans &rarr;</a></div></div>' +
     '</div>';
   document.getElementById('ctaBox').classList.add('visible');
 }
@@ -648,6 +687,14 @@ async function runCheck(event) {
   if (cat.custom && cat.name.length < 2) { alert('Please enter your industry'); return; }
   if (!email || email.indexOf('@') === -1) { alert('Please enter your email so we can send this score'); return; }
   if (website && website.indexOf('.') === -1) { alert('Enter a website like example.com, or leave it blank.'); return; }
+  clearCityChoices();
+  if (!cat.custom && window.AiLists) {
+    var earlyDest = AiLists.listDestination(cat.key, city);
+    if (earlyDest && earlyDest.kind === 'choose') {
+      renderCityChoices(city, earlyDest.choices);
+      return;
+    }
+  }
 
   var btn = document.getElementById('checkBtn');
   var results = document.getElementById('results');
