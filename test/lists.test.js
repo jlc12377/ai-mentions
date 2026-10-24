@@ -28,7 +28,7 @@ const NATIONAL = {
   casino_sw: ['Casino Software', 'Casino Software Providers', 'https://casinoindustryreviews.com/pages/software-rankings.html'],
   ehr: ['EHR & Medical Records', 'EHR & Medical Records', 'https://healthcareindustryreviews.com/pages/ehr-rankings.html'],
   telehealth: ['Telehealth Platforms', 'Telehealth Platforms', 'https://healthcareindustryreviews.com/pages/telehealth-rankings.html'],
-  medbilling: ['Medical Billing & RCM', 'Medical Billing & RCM', 'https://www.healthcareindustryreviews.com/#categories'],
+  medbilling: ['Medical Billing & RCM', 'Medical Billing & RCM', 'https://www.healthcareindustryreviews.com/pages/billing-rankings.html'],
   clinical: ['Clinical Trial Software', 'Clinical Trial Software', 'https://healthcareindustryreviews.com/pages/clinical-rankings.html'],
   wellness: ['Health & Wellness Apps', 'Health & Wellness Apps', 'https://healthcareindustryreviews.com/pages/wellness-rankings.html'],
   pharma: ['Pharma & Biotech Tools', 'Pharma & Biotech Tools', 'https://healthcareindustryreviews.com/pages/pharma-rankings.html'],
@@ -89,8 +89,9 @@ test('national categories keep their names and rankings pages', () => {
     assert.equal(cat.link, link);
     assert.equal(cat.localSlug, '');
   }
-  assert.equal(lists.category('accounting').pricing, 'https://softwareindustryreviews.com/pages/pricing.html');
-  assert.equal(lists.category('wellness').pricing, 'https://healthcareindustryreviews.com/pages/pricing.html');
+  for (const key of Object.keys(NATIONAL)) {
+    assert.equal(lists.category(key).pricing, VERIFIED);
+  }
 });
 
 test('every localsmallbusinessreviews.com category is in Local services', () => {
@@ -187,6 +188,52 @@ test('covered towns resolve to the right metro, and shared names do not guess', 
   assert.equal(lists.matchMetro('Orange, NJ'), 'new-york');
   assert.equal(lists.matchMetro('Orange, CA'), 'los-angeles');
   assert.equal(lists.listDestination('local_plumbers', 'Plano').href, 'https://localsmallbusinessreviews.com/dallas-fort-worth/best-plumbers-dallas-fort-worth.html');
+});
+
+test('shared town names ask for a state instead of the pricing page', () => {
+  for (const city of ['Brentwood', 'Orange', 'Addison']) {
+    const dest = lists.listDestination('local_aesthetics', city);
+    assert.equal(dest.kind, 'choose');
+    assert.equal(dest.href, '');
+    assert.equal(dest.metro, null);
+    assert.equal(dest.choices.length, 2);
+    for (const choice of dest.choices) {
+      assert.equal(choice.href.includes('listicleliaison.com'), false);
+      assert.equal(choice.href.includes('healthcareindustryreviews'), false);
+    }
+  }
+  const brentwood = lists.listDestination('local_aesthetics', 'Brentwood');
+  const tn = brentwood.choices.find((choice) => choice.state === 'tn');
+  const ca = brentwood.choices.find((choice) => choice.state === 'ca');
+  assert.equal(tn.label, 'Tennessee');
+  assert.equal(tn.href, 'https://localsmallbusinessreviews.com/nashville/best-aesthetics-injectors-nashville.html');
+  assert.equal(ca.label, 'California');
+  assert.equal(ca.href, 'https://localsmallbusinessreviews.com/los-angeles/best-aesthetics-injectors-los-angeles.html');
+  const orange = lists.listDestination('local_plumbers', 'Orange');
+  assert.equal(orange.choices.find((choice) => choice.state === 'nj').metro, 'new-york');
+  assert.equal(orange.choices.find((choice) => choice.state === 'ca').metro, 'los-angeles');
+  const addison = lists.listDestination('local_plumbers', 'Addison');
+  assert.equal(addison.choices.find((choice) => choice.state === 'tx').metro, 'dallas-fort-worth');
+  assert.equal(addison.choices.find((choice) => choice.state === 'il').metro, 'chicago');
+  const laMedspa = lists.listDestination('local_medspa', 'Orange').choices.find((choice) => choice.state === 'ca');
+  assert.equal(laMedspa.kind, 'metro');
+  assert.equal(laMedspa.href, 'https://localsmallbusinessreviews.com/los-angeles/');
+  assert.equal(lists.listDestination('crm', 'Brentwood').href, 'https://softwareindustryreviews.com/pages/crm-rankings.html');
+  assert.equal(lists.listDestination('local_aesthetics', 'Brentwood, TN').kind, 'local');
+});
+
+test('category search finds aesthetics aliases and estate planning for lawyer', () => {
+  function keys(query) {
+    return lists.search(query).map((row) => row.key);
+  }
+  for (const query of ['pmu', 'PMU artist', 'eyelash', 'lash extensions', 'brow lamination']) {
+    assert.ok(keys(query).includes('local_aesthetics'), query);
+  }
+  const lawyer = keys('lawyer');
+  assert.ok(lawyer.includes('local_estate'));
+  assert.ok(lawyer.includes('local_pi'));
+  assert.ok(lawyer.includes('local_law_firms'));
+  assert.equal(lawyer.includes('local_aesthetics'), false);
 });
 
 test('local category names still go through the score prompts', () => {
