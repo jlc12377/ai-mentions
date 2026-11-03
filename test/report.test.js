@@ -25,9 +25,20 @@ function jsonResponse(status, payload) {
   };
 }
 
-function answerFor(url) {
+function answerFor(url, options) {
   const href = String(url);
-  const text = '1. HubSpot\n2. Salesforce';
+  let text = '1. HubSpot\n2. Salesforce';
+  try {
+    const body = options && options.body ? JSON.parse(options.body) : {};
+    const prompt = body.input
+      || (body.messages && body.messages[0] && body.messages[0].content)
+      || '';
+    if (/what do you know about/i.test(prompt)) {
+      text = 'HubSpot is CRM software for sales and marketing teams. Buyers in Austin use it to manage a pipeline.';
+    }
+  } catch {
+    text = '1. HubSpot\n2. Salesforce';
+  }
   if (href.includes('api.openai.com')) return { output_text: text };
   if (href.includes('api.perplexity.ai')) {
     return { output: [{ type: 'message', content: [{ type: 'output_text', text }] }] };
@@ -89,7 +100,7 @@ function mockFetch(calls, sessions) {
     if (href.includes('generativelanguage.googleapis.com')) {
       throw new Error('gemini is not part of the paid report');
     }
-    return jsonResponse(200, answerFor(href));
+    return jsonResponse(200, answerFor(href, options));
   };
 }
 

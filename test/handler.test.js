@@ -41,7 +41,7 @@ const ANSWER = [
   '3. Zoho CRM',
 ].join('\n');
 
-function providerPayload(url) {
+function providerPayload(url, text = ANSWER) {
   const href = String(url);
   if (href.includes('api.openai.com')) {
     return {
@@ -49,7 +49,7 @@ function providerPayload(url) {
         type: 'message',
         content: [{
           type: 'output_text',
-          text: ANSWER,
+          text,
           annotations: [{ type: 'url_citation', url: 'https://www.hubspot.com/crm' }],
         }],
       }],
@@ -59,14 +59,14 @@ function providerPayload(url) {
     return {
       output: [
         { type: 'search_results', results: [{ url: 'https://www.salesforce.com' }, { url: 'https://www.hubspot.com/crm' }] },
-        { type: 'message', content: [{ type: 'output_text', text: ANSWER }] },
+        { type: 'message', content: [{ type: 'output_text', text }] },
       ],
     };
   }
   if (href.includes('generativelanguage.googleapis.com')) {
     return {
       candidates: [{
-        content: { parts: [{ text: ANSWER }] },
+        content: { parts: [{ text }] },
         groundingMetadata: {
           groundingChunks: [{ web: { uri: 'https://vertexaisearch.cloud.google.com/grounding/redirect', domain: 'hubspot.com' } }],
         },
@@ -77,12 +77,28 @@ function providerPayload(url) {
     return {
       content: [{
         type: 'text',
-        text: ANSWER,
+        text,
         citations: [{ type: 'web_search_result_location', url: 'https://blog.hubspot.com/a' }],
       }],
     };
   }
   throw new Error(`unexpected URL ${href}`);
+}
+
+function promptOf(options) {
+  if (!options || !options.body) return '';
+  const body = JSON.parse(options.body);
+  return body.input
+    || (body.messages && body.messages[0] && body.messages[0].content)
+    || (body.contents && body.contents[0] && body.contents[0].parts && body.contents[0].parts[0] && body.contents[0].parts[0].text)
+    || '';
+}
+
+const AWARENESS_ANSWER = 'HubSpot is CRM software for sales and marketing teams. Buyers in Austin use it to manage a pipeline.';
+
+function payloadFor(url, options) {
+  if (/what do you know about/i.test(promptOf(options))) return providerPayload(url, AWARENESS_ANSWER);
+  return providerPayload(url);
 }
 
 function mockFetch(calls) {
@@ -92,7 +108,7 @@ function mockFetch(calls) {
       ok: true,
       status: 200,
       async text() {
-        return JSON.stringify(providerPayload(url));
+        return JSON.stringify(payloadFor(url, options));
       },
     };
   };
@@ -262,6 +278,18 @@ test('mocked provider answers produce a real score and grounded requests', async
   assert.equal(claudeBody.tools[0].name, 'web_search');
   assert.equal(claudeBody.tools[0].allowed_callers, undefined);
   assert.ok(res.body.providers.every((provider) => provider.checks == null && provider.model == null && provider.error == null));
+
+  const awarenessCalls = calls.filter((call) => /what do you know about/i.test(promptOf(call.options)));
+  assert.equal(awarenessCalls.length, 4);
+  for (const call of awarenessCalls) {
+    const body = JSON.parse(call.options.body);
+    const prompt = promptOf(call.options);
+    assert.equal(body.tools, undefined);
+    assert.equal(body.tool_choice, undefined);
+    assert.equal(/hubspot\.com/i.test(prompt), false);
+    assert.match(prompt, /CRM Software/);
+    assert.match(prompt, /Austin/);
+  }
 });
 
 test('a miss is score 0 and a total failure is unavailable, not a fake number', async () => {
@@ -317,7 +345,7 @@ test('one working provider still scores when another provider errors', async () 
         status: 200,
         async text() {
           return JSON.stringify({
-            output_text: 'HubSpot is the one I would pick.',
+            output_text: 'HubSpot is CRM software that Austin buyers pick for inbound teams.',
           });
         },
       };
@@ -331,13 +359,15 @@ test('one working provider still scores when another provider errors', async () 
   }, fetchImpl);
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   assert.equal(res.statusCode, 200);
-  assert.equal(res.body.score, 51);
+  assert.equal(res.body.score, 39);
   const claude = res.body.providers.find((provider) => provider.id === 'anthropic');
   const chatgpt = res.body.providers.find((provider) => provider.id === 'openai');
   assert.equal(chatgpt.answered, true);
   assert.equal(chatgpt.mentioned, true);
+  assert.equal(chatgpt.known, true);
   assert.equal(claude.answered, false);
   assert.equal(claude.mentioned, false);
+  assert.equal(claude.known, false);
   assert.equal(claude.score, undefined);
 });
 
@@ -570,15 +600,13 @@ test('claude uses search result urls and falls back when web search returns no t
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   const searches = calls.filter((body) => body.tools);
   const plains = calls.filter((body) => !body.tools);
-  assert.equal(searches.length, 4);
+  assert.equal(searches.length, 3);
   assert.equal(plains.length, 4);
   assert.equal(searches[0].max_tokens, 1600);
   assert.equal(plains[0].max_tokens, 600);
-  assert.deepEqual(
-    plains.map((body) => body.messages[0].content).sort(),
-    searches.map((body) => body.messages[0].content).sort(),
-  );
-  assert.equal(res.body.score, 78);
+  assert.ok(plains.some((body) => /what do you know about/i.test(body.messages[0].content)));
+  assert.ok(searches.every((body) => !/what do you know about/i.test(body.messages[0].content)));
+  assert.equal(res.body.score, 53);
   assert.equal(res.body.providers[0].answered, true);
   assert.equal(res.body.providers[0].mentioned, true);
   assert.equal(res.body.providers[0].checks, undefined);
@@ -605,9 +633,9 @@ test('claude falls back when the web search tool is rejected and not when the ke
     return jsonResponse(200, { content: [{ type: 'text', text: 'HubSpot is a CRM.' }] });
   });
   const toolRes = await invoke(toolHandler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
-  assert.equal(rejectedTool.length, 8);
+  assert.equal(rejectedTool.length, 7);
   assert.equal(toolRes.statusCode, 200);
-  assert.equal(toolRes.body.score, 51);
+  assert.equal(toolRes.body.score, 26);
   assert.equal(toolRes.body.providers[0].answered, true);
   assert.equal(toolRes.body.providers[0].checks, undefined);
   const toolFull = await runFull({
@@ -669,9 +697,10 @@ test('a paused claude search with a real answer is kept, and a preamble falls ba
   const res = await invoke(handler, { body: { businessName: 'HubSpot', category: 'CRM Software', domain: 'hubspot.com' } });
   const searchCalls = calls.filter((body) => body.tools);
   const plainCalls = calls.filter((body) => !body.tools);
-  assert.equal(searchCalls.length, 4);
-  assert.equal(plainCalls.length, 1);
-  assert.equal(plainCalls[0].messages[0].content.startsWith('What are the best'), true);
+  assert.equal(searchCalls.length, 3);
+  assert.equal(plainCalls.length, 2);
+  assert.ok(plainCalls.some((body) => body.messages[0].content.startsWith('What are the best')));
+  assert.ok(plainCalls.some((body) => /what do you know about/i.test(body.messages[0].content) && body.tools == null));
   assert.equal(res.body.providers[0].checks, undefined);
   assert.equal(res.body.providers[0].mentioned, true);
   const full = await runFull({
@@ -780,7 +809,7 @@ test('the cache key is versioned so pre-awareness scores are not reused', () => 
     category: 'press release distribution',
     city: '',
   }, config, 4);
-  assert.match(key, /^aim:score:v3:[a-f0-9]{64}$/);
+  assert.match(key, /^aim:score:v4:[a-f0-9]{64}$/);
 });
 
 test('known by every assistant and recommended by none scores 25', async () => {
@@ -826,6 +855,48 @@ test('known by every assistant and recommended by none scores 25', async () => {
   assert.equal(hidden.includes('UNKNOWN'), false);
 });
 
+test('a failed awareness call counts as not known and does not raise the score', async () => {
+  const fetchImpl = async (url, options) => {
+    const href = String(url);
+    const prompt = promptOf(options);
+    const awareness = /what do you know about/i.test(prompt);
+    if (href.includes('api.perplexity.ai') && awareness) {
+      return jsonResponse(429, { error: { message: 'Request rate limit exceeded' } });
+    }
+    const text = awareness
+      ? 'ACCESS Newswire is a press release distribution company in Austin. It sends announcements to newsrooms.'
+      : '1. PR Newswire\n2. Business Wire';
+    if (href.includes('api.openai.com')) return jsonResponse(200, { output_text: text });
+    if (href.includes('api.perplexity.ai')) {
+      return jsonResponse(200, { output: [{ type: 'message', content: [{ type: 'output_text', text }] }] });
+    }
+    return jsonResponse(200, { content: [{ type: 'text', text }] });
+  };
+  const handler = setup({
+    OPENAI_API_KEY: 'test-openai',
+    PERPLEXITY_API_KEY: 'test-perplexity',
+    ANTHROPIC_API_KEY: 'test-anthropic',
+    SCORE_PROMPT_COUNT: '3',
+    PERPLEXITY_429_RETRIES: '0',
+  }, fetchImpl);
+  const res = await invoke(handler, {
+    body: {
+      businessName: 'ACCESS Newswire',
+      domain: 'accessnewswire.com',
+      category: 'press release distribution',
+      city: 'Austin',
+    },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.score, 17);
+  const byId = Object.fromEntries(res.body.providers.map((provider) => [provider.id, provider]));
+  assert.equal(byId.openai.known, true);
+  assert.equal(byId.openai.mentioned, false);
+  assert.equal(byId.anthropic.known, true);
+  assert.equal(byId.perplexity.known, false);
+  assert.equal(byId.perplexity.answered, true);
+});
+
 test('claude search and fallback share one deadline', async () => {
   let clock = 1000;
   const calls = [];
@@ -848,8 +919,8 @@ test('claude search and fallback share one deadline', async () => {
     PROVIDER_TIMEOUT_MS: '20000',
     SCORE_BUDGET_MS: '20000',
   }, fetchImpl, { now: () => clock });
-  assert.equal(calls.filter(Boolean).length, 4);
-  assert.equal(calls.filter((usedSearch) => !usedSearch).length, 0);
+  assert.equal(calls.filter(Boolean).length, 3);
+  assert.equal(calls.filter((usedSearch) => !usedSearch).length, 1);
   assert.ok(full.providers[0].checks.every((check) => check.ok && check.grounded === false));
 });
 
@@ -858,7 +929,7 @@ test('the free score email is the short result and a failed send still returns t
   const fetchImpl = async (url, options) => {
     calls.push({ url: String(url), options });
     if (String(url).includes('api.resend.com')) return jsonResponse(200, { id: 'email_free_1' });
-    return jsonResponse(200, providerPayload(url));
+    return jsonResponse(200, payloadFor(url, options));
   };
   const env = {
     OPENAI_API_KEY: 'test-openai',
@@ -931,7 +1002,7 @@ test('an emailed free score is stored as a lead and a failed insert still return
     const href = String(url);
     if (href.includes('supabase.co')) return jsonResponse(201, []);
     if (href.includes('api.resend.com')) return jsonResponse(200, { id: 'email_lead_1' });
-    return jsonResponse(200, providerPayload(href));
+    return jsonResponse(200, payloadFor(href, options));
   };
   const env = {
     OPENAI_API_KEY: 'test-openai',
