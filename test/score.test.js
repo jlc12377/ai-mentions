@@ -168,11 +168,17 @@ test('input limits reject oversized or empty fields and normalize the domain', (
 });
 
 test('awareness is partial credit and a disclaimer is not knowledge', () => {
-  const input = { businessName: 'ACCESS Newswire', domain: 'accessnewswire.com' };
-  assert.equal(
-    awarenessPrompt(input),
-    "What do you know about ACCESS Newswire (accessnewswire.com)? Answer in 2-3 sentences. If you don't know this business, reply exactly: UNKNOWN.",
-  );
+  const input = {
+    businessName: 'ACCESS Newswire',
+    domain: 'accessnewswire.com',
+    category: 'press release distribution',
+    city: 'Austin',
+  };
+  const prompt = awarenessPrompt(input);
+  assert.match(prompt, /^What do you know about ACCESS Newswire, a press release distribution in Austin\?/);
+  assert.match(prompt, /without looking it up/);
+  assert.match(prompt, /UNKNOWN/);
+  assert.equal(prompt.includes('accessnewswire.com'), false);
   assert.equal(awarenessPrompt({ businessName: 'ACCESS Newswire', domain: '' }).includes('()'), false);
 
   assert.equal(classifyKnown('UNKNOWN', input), false);
@@ -182,16 +188,25 @@ test('awareness is partial credit and a disclaimer is not knowledge', () => {
   assert.equal(classifyKnown("I don't have information about ACCESS Newswire (accessnewswire.com).", input), false);
   assert.equal(classifyKnown("I'm not familiar with ACCESS Newswire.", input), false);
   assert.equal(classifyKnown('As an AI language model, I cannot find ACCESS Newswire.', input), false);
-  assert.equal(classifyKnown('What do you know about ACCESS Newswire (accessnewswire.com)? UNKNOWN', input), false);
-  assert.equal(classifyKnown('1. PR Newswire\n2. Business Wire', input), false);
+  assert.equal(classifyKnown(`${prompt} UNKNOWN`, input), false);
+  const named = { businessName: 'ACCESS Newswire', domain: 'accessnewswire.com' };
+  assert.equal(classifyKnown('1. PR Newswire\n2. Business Wire', named), false);
   assert.equal(classifyKnown(
     'ACCESS Newswire is a press release distribution service. Companies use accessnewswire.com to send announcements to journalists.',
-    input,
+    named,
   ), true);
   assert.equal(classifyKnown(
     "I don't have live browsing, but ACCESS Newswire distributes press releases to newsrooms.",
+    named,
+  ), true);
+  assert.equal(classifyKnown(
+    'ACCESS Newswire is a press release distribution service in Austin. Companies use it to send announcements to journalists.',
     input,
   ), true);
+  assert.equal(classifyKnown(
+    'ACCESS Newswire is a press release distribution service in Chicago. Companies use it to send announcements to journalists.',
+    input,
+  ), false);
   assert.equal(classifyKnown('1. HubSpot\n2. Salesforce', { businessName: 'HubSpot', domain: 'hubspot.com' }), true);
 
   const fake = {
@@ -233,14 +248,18 @@ test('awareness is partial credit and a disclaimer is not knowledge', () => {
   assert.equal(scoreVisibility([0, 0, 0], [known, known, unknown]), 17);
   assert.equal(scoreVisibility([0, 0, 0], [known, unknown, unknown]), 8);
   assert.equal(scoreVisibility([0, 0, 0], [unknown, unknown, unknown]), 0);
-  assert.equal(scoreVisibility([0, 0, 0], [known, known, failed]), 25);
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, failed]), 17);
+  assert.equal(scoreVisibility([0, 0, 0], [known, failed, failed]), 8);
+  assert.equal(scoreVisibility([92], [failed, failed, failed]), 69);
   assert.equal(scoreVisibility([92, 92, 92], [known, known, known]), 94);
   assert.equal(scoreVisibility([100], [known]), 100);
   assert.equal(scoreVisibility([70], []), 70);
   assert.equal(scoreVisibility([], [known]), null);
+  assert.match(METHODOLOGY, /cannot raise the score/);
+  assert.match(METHODOLOGY, /does not use web search/);
 });
 
-test('a shorter name or a domain citation counts as knowing the business', () => {
+test('a shorter name counts as knowing the business and a domain citation alone does not', () => {
   const hattie = { businessName: "Hattie B's Hot Chicken", domain: 'hattieb.com' };
   assert.equal(classifyKnown("Hattie B's is a hot chicken restaurant in Nashville.", hattie), true);
   assert.equal(classifyKnown(
@@ -255,7 +274,7 @@ test('a shorter name or a domain citation counts as knowing the business', () =>
     'A Nashville hot chicken restaurant with several locations, known for spicy heat levels.',
     hattie,
     ['https://www.hattieb.com/menu'],
-  ), true);
+  ), false);
   assert.equal(classifyKnown(
     "Hattie B's Hot Chicken operates restaurants in Nashville. It serves hot chicken at hattieb.com.",
     hattie,
@@ -296,4 +315,58 @@ test('a shorter name or a domain citation counts as knowing the business', () =>
     { ok: true, known: false },
     { ok: true, known: false },
   ]), 0);
+});
+
+test('scripted checks spread scores instead of clustering at 25', () => {
+  const hattie = {
+    businessName: "Hattie B's Hot Chicken",
+    domain: 'hattieb.com',
+    category: 'hot chicken',
+    city: 'Nashville',
+  };
+  const remembered = "Hattie B's is a hot chicken restaurant in Nashville, known for spicy heat levels and several locations.";
+  assert.equal(classifyKnown(remembered, hattie), true);
+  assert.equal(awarenessPrompt(hattie).includes('hattieb.com'), false);
+  assert.match(awarenessPrompt(hattie), /hot chicken/);
+  assert.match(awarenessPrompt(hattie), /Nashville/);
+
+  const recommended = scoreCheck({ mentioned: true, position: 1, cited: true });
+  const known = { ok: true, known: true };
+  assert.equal(recommended, 100);
+  assert.equal(scoreVisibility([recommended, recommended, recommended], [known, known, known]), 100);
+
+  const invented = {
+    businessName: 'Zzqx Test Brow Studio QA',
+    domain: 'zzqx-test-brow-studio-qa.example',
+    category: 'brow studio',
+    city: 'Nashville',
+  };
+  assert.equal(classifyKnown('UNKNOWN', invented), false);
+  assert.equal(classifyKnown(
+    'I have no record of Zzqx Test Brow Studio QA. It does not appear to be a brow studio in Nashville.',
+    invented,
+  ), false);
+  const unknown = { ok: true, known: false };
+  assert.equal(scoreVisibility([0, 0, 0], [unknown, unknown, unknown]), 0);
+
+  const websiteOnly = 'According to their website, Zzqx Plumbing is a plumber in Austin. The site lists drain cleaning and emergency visits.';
+  const plumber = {
+    businessName: 'Zzqx Plumbing',
+    domain: 'zzqx-plumbing.example',
+    category: 'plumber',
+    city: 'Austin',
+  };
+  assert.equal(classifyKnown(websiteOnly, plumber, [`https://${plumber.domain}/`]), false);
+  assert.equal(classifyKnown(
+    "Joe's Pizza is a pizza restaurant in New York with a coal oven.",
+    { businessName: "Joe's Pizza", category: 'pizza', city: 'Austin' },
+  ), false);
+  assert.equal(classifyKnown(
+    "Joe's Pizza is a pizza restaurant in Austin with a coal oven and late hours.",
+    { businessName: "Joe's Pizza", category: 'pizza', city: 'Austin' },
+  ), true);
+
+  const failed = { ok: false, known: false, error: 'HTTP 429' };
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, failed]), 17);
+  assert.equal(scoreVisibility([0, 0, 0], [known, known, known]), 25);
 });

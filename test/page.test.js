@@ -33,7 +33,11 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /Knows you: /);
   assert.match(page, /Recommends you: /);
   assert.match(page, /partial credit/);
-  assert.match(page, /about 25/);
+  assert.match(page, /does not recommend you yet/);
+  assert.match(page, /does not use web search/);
+  assert.match(page, /cannot raise the score/);
+  assert.match(page, /score-meaning/);
+  assert.match(page, /0–5/);
   assert.match(page, /G-P8P36G6MZV/);
   assert.match(page, /score_started/);
   assert.match(page, /generate_lead/);
