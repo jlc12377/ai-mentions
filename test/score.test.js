@@ -25,8 +25,10 @@ const {
   FORMULA_VERSION,
   awarenessPrompt,
   classifyKnown,
+  categoryNeedles,
   scoreVisibility,
 } = require('../lib/score');
+const lists = require('../lists');
 
 test('name normalization ignores case, punctuation, and company suffixes', () => {
   assert.equal(normalizeName('HubSpot, Inc.'), 'hubspot');
@@ -369,4 +371,99 @@ test('scripted checks spread scores instead of clustering at 25', () => {
   const failed = { ok: false, known: false, error: 'HTTP 429' };
   assert.equal(scoreVisibility([0, 0, 0], [known, known, failed]), 17);
   assert.equal(scoreVisibility([0, 0, 0], [known, known, known]), 25);
+});
+
+test('category and city wording from real answers still counts as knowing the business', () => {
+  const katz = {
+    businessName: "Katz's Delicatessen",
+    domain: 'katzsdelicatessen.com',
+    category: 'Delis',
+    city: 'New York NY',
+  };
+  const lowerEast = "Katz's Delicatessen is a classic delicatessen on the Lower East Side, famous for hand-carved pastrami.";
+  const manhattan = "Katz's is the deli in Manhattan that people line up for, especially the pastrami.";
+  const nyc = "Katz's Delicatessen is a New York deli in NYC, known for sandwiches piled with pastrami.";
+  assert.equal(classifyKnown(lowerEast, katz), true);
+  assert.equal(classifyKnown(manhattan, katz), true);
+  assert.equal(classifyKnown(nyc, { ...katz, category: 'Deli' }), true);
+  assert.equal(classifyKnown(
+    "Katz's Delicatessen is a famous delicatessen in Chicago, known for pastrami.",
+    katz,
+  ), false);
+  assert.equal(classifyKnown(
+    "According to their website, Katz's Delicatessen is a deli on the Lower East Side famous for pastrami.",
+    katz,
+  ), false);
+  assert.equal(classifyKnown('UNKNOWN', katz), false);
+
+  const block = {
+    businessName: 'Block 16',
+    domain: 'block16omaha.com',
+    category: 'Restaurants',
+    city: 'Omaha NE',
+  };
+  assert.equal(classifyKnown(
+    'Block 16 is a food hall and restaurant in Omaha with a rotating lineup of local vendors.',
+    block,
+  ), true);
+  assert.equal(classifyKnown(
+    'Block 16 is a restaurant in Lincoln with a rotating lineup of local vendors.',
+    block,
+  ), false);
+
+  assert.equal(classifyKnown(
+    'Roto-Rooter is a plumbing company in Nashville that clears drains and handles emergency leaks.',
+    { businessName: 'Roto-Rooter', category: 'Plumbers', city: 'Nashville TN' },
+  ), true);
+  assert.equal(classifyKnown(
+    'Baker Donelson is a law firm in Nashville. Its attorneys handle business litigation for local companies.',
+    { businessName: 'Baker Donelson', category: 'Law Firms', city: 'Nashville, TN' },
+  ), true);
+  assert.equal(classifyKnown(
+    'Morgan & Morgan is a personal injury law firm in Nashville known for large trial verdicts.',
+    { businessName: 'Morgan & Morgan', category: 'Personal Injury Lawyers', city: 'Nashville TN' },
+  ), true);
+
+  const recommended = scoreCheck({ mentioned: true, position: 1, cited: false });
+  assert.equal(recommended, 70);
+  const unknown = { ok: true, known: false };
+  const aware = { ok: true, known: true };
+  assert.equal(scoreVisibility([recommended, recommended, recommended], [unknown, unknown, unknown]), 53);
+  assert.equal(scoreVisibility([recommended, recommended, recommended], [aware, aware, aware]), 78);
+
+  const fox = judgeAnswer({
+    text: '1. Fox — Rothschild LLP\n2. Baker Donelson',
+    citations: [],
+  }, { businessName: 'Example Co', domain: 'example.com' });
+  assert.ok(fox.names.includes('Fox Rothschild LLP'));
+  const wrapped = judgeAnswer({
+    text: '1. Fox\nRothschild LLP\n2. Baker Donelson',
+    citations: [],
+  }, { businessName: 'Example Co', domain: 'example.com' });
+  assert.ok(wrapped.names.includes('Fox Rothschild LLP'));
+  const described = judgeAnswer({
+    text: '1. Fox — a steakhouse in Omaha',
+    citations: [],
+  }, { businessName: 'Example Co', domain: 'example.com' });
+  assert.deepEqual(described.names, ['Fox']);
+});
+
+test('every dropdown category can match a normal wording of that trade', () => {
+  for (const group of lists.groups) {
+    const sections = group.sections && group.sections.length ? group.sections : [{ ids: group.ids || [] }];
+    for (const section of sections) {
+      for (const id of section.ids || []) {
+        const cat = lists.category(id);
+        const needles = categoryNeedles(cat.label);
+        if (cat.label === 'Other / Not Listed') {
+          assert.deepEqual(needles, []);
+          continue;
+        }
+        assert.ok(needles.length > 0, cat.label);
+        const input = { businessName: 'Example Co', category: cat.label, city: 'Nashville' };
+        const text = `Example Co is known for ${needles[0]} in Nashville and has served clients for years.`;
+        assert.equal(classifyKnown(text, input), true, `${cat.label} via ${needles[0]}`);
+      }
+    }
+  }
 });

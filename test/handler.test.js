@@ -809,7 +809,7 @@ test('the cache key is versioned so pre-awareness scores are not reused', () => 
     category: 'press release distribution',
     city: '',
   }, config, 4);
-  assert.match(key, /^aim:score:v4:[a-f0-9]{64}$/);
+  assert.match(key, /^aim:score:v5:[a-f0-9]{64}$/);
 });
 
 test('known by every assistant and recommended by none scores 25', async () => {
@@ -856,6 +856,9 @@ test('known by every assistant and recommended by none scores 25', async () => {
 });
 
 test('a failed awareness call counts as not known and does not raise the score', async () => {
+  const logs = [];
+  const original = console.error;
+  console.error = (...args) => logs.push(args.join(' '));
   const fetchImpl = async (url, options) => {
     const href = String(url);
     const prompt = promptOf(options);
@@ -879,22 +882,28 @@ test('a failed awareness call counts as not known and does not raise the score',
     SCORE_PROMPT_COUNT: '3',
     PERPLEXITY_429_RETRIES: '0',
   }, fetchImpl);
-  const res = await invoke(handler, {
-    body: {
-      businessName: 'ACCESS Newswire',
-      domain: 'accessnewswire.com',
-      category: 'press release distribution',
-      city: 'Austin',
-    },
-  });
-  assert.equal(res.statusCode, 200);
-  assert.equal(res.body.score, 17);
-  const byId = Object.fromEntries(res.body.providers.map((provider) => [provider.id, provider]));
-  assert.equal(byId.openai.known, true);
-  assert.equal(byId.openai.mentioned, false);
-  assert.equal(byId.anthropic.known, true);
-  assert.equal(byId.perplexity.known, false);
-  assert.equal(byId.perplexity.answered, true);
+  try {
+    const res = await invoke(handler, {
+      body: {
+        businessName: 'ACCESS Newswire',
+        domain: 'accessnewswire.com',
+        category: 'press release distribution',
+        city: 'Austin',
+      },
+    });
+    assert.equal(res.statusCode, 200);
+    assert.equal(res.body.score, 17);
+    const byId = Object.fromEntries(res.body.providers.map((provider) => [provider.id, provider]));
+    assert.equal(byId.openai.known, true);
+    assert.equal(byId.openai.mentioned, false);
+    assert.equal(byId.anthropic.known, true);
+    assert.equal(byId.perplexity.known, false);
+    assert.equal(byId.perplexity.answered, true);
+    assert.ok(logs.some((line) => /perplexity awareness failed/i.test(line)));
+    assert.equal(logs.some((line) => /awareness failed:.*not known/i.test(line)), false);
+  } finally {
+    console.error = original;
+  }
 });
 
 test('claude search and fallback share one deadline', async () => {
