@@ -446,6 +446,67 @@ test('category and city wording from real answers still counts as knowing the bu
     citations: [],
   }, { businessName: 'Example Co', domain: 'example.com' });
   assert.deepEqual(described.names, ['Fox']);
+  const firm = judgeAnswer({
+    text: '1. Fox — Rothschild LLP, a national law firm',
+    citations: [],
+  }, { businessName: 'Example Co', domain: 'example.com' });
+  assert.ok(firm.names.includes('Fox Rothschild LLP'));
+});
+
+test('Perplexity list formats still yield the other business names', () => {
+  const perplexity = [
+    'Here are standout delis in New York:',
+    '',
+    '1. **Katz\'s Delicatessen** [1][2] — Famous for its pastrami sandwiches piled high on rye.',
+    '2. **2nd Ave Deli** [3] — A classic Jewish deli in Midtown.',
+    '- **Mile End** [4]: Known for smoked meat.',
+    '**4. Sarge\'s Delicatessen** [5] — Late-night sandwiches.',
+    '',
+    'People also mention **Pastrami Queen** and **Russ & Daughters** for smoked fish.',
+    '',
+    '| Name | Note |',
+    '| --- | --- |',
+    '| **Barney Greengrass** | Upper West Side appetizing shop |',
+  ].join('\n');
+  const answer = judgeAnswer({ text: perplexity, citations: [] }, {
+    businessName: "Katz's Delicatessen",
+    domain: 'katzsdelicatessen.com',
+  });
+  assert.ok(answer.mentioned);
+  assert.deepEqual(answer.names, [
+    "Katz's Delicatessen",
+    '2nd Ave Deli',
+    'Mile End',
+    "Sarge's Delicatessen",
+    'Pastrami Queen',
+    'Russ & Daughters',
+    'Barney Greengrass',
+  ]);
+  const competitors = collectCompetitors([answer], "Katz's Delicatessen", 'katzsdelicatessen.com');
+  assert.deepEqual(competitors.map((row) => row.name), [
+    '2nd Ave Deli',
+    'Barney Greengrass',
+    'Mile End',
+    'Pastrami Queen',
+    'Russ & Daughters',
+    "Sarge's Delicatessen",
+  ]);
+
+  const bullets = judgeAnswer({
+    text: [
+      '- **Block 16** [1] — A food hall in Omaha.',
+      '* **Anthony\'s** [2] — A long-running steakhouse.',
+      '• **The Drover** [3] — Known for its burgers.',
+    ].join('\n'),
+    citations: [],
+  }, { businessName: 'Block 16', domain: 'block16omaha.com' });
+  assert.deepEqual(bullets.names, ['Block 16', "Anthony's", 'The Drover']);
+
+  const chatgpt = judgeAnswer({
+    text: '1. Salesforce\n2. HubSpot — inbound CRM\n3. Zoho CRM',
+    citations: [],
+  }, { businessName: 'HubSpot', domain: 'hubspot.com' });
+  assert.deepEqual(chatgpt.names, ['Salesforce', 'HubSpot', 'Zoho CRM']);
 });
 
 test('every dropdown category can match a normal wording of that trade', () => {
