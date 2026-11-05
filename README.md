@@ -111,7 +111,7 @@ The Gemini free-tier API can also ground searches, with a smaller daily cap, and
 
 ### Rate limit and cache
 
-The free-score limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap. Only successful scores are cached. An outage is not cached. The cache key is `aim:score:v5:` plus a hash of the normalized name, domain, category, city, prompt count, formula version, awareness prompt version, and the configured model names. The v5 prefix means scores cached when the category and city had to match the exact wording are not reused.
+The free-score limit and the 24-hour cache live in the function instance's memory. On Vercel that memory is not shared across instances, and it disappears when the instance goes cold. A visitor who lands on another instance gets a fresh limit and a fresh check. Treat the in-memory limiter as a basic brake, not a hard global cap. Only successful scores are cached. An outage is not cached. The cache key is `aim:score:v6:` plus a hash of the normalized name, domain, category, city, prompt count, formula version, awareness prompt version, and the configured model names. The v6 prefix means scores cached when Perplexity's other-business list came back empty are not reused.
 
 The limiter reads the first address in `x-forwarded-for`, which Vercel sets. It is per IP, default 8 requests per hour, including cache hits.
 

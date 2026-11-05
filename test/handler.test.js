@@ -809,7 +809,7 @@ test('the cache key is versioned so pre-awareness scores are not reused', () => 
     category: 'press release distribution',
     city: '',
   }, config, 4);
-  assert.match(key, /^aim:score:v5:[a-f0-9]{64}$/);
+  assert.match(key, /^aim:score:v6:[a-f0-9]{64}$/);
 });
 
 test('known by every assistant and recommended by none scores 25', async () => {
