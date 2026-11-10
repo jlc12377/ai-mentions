@@ -71,6 +71,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .tool-card{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px;color:var(--ink);box-shadow:0 0 80px rgba(124,58,237,.08),0 20px 60px rgba(0,0,0,.3)}
 .tool-card h2{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:4px;color:var(--ink)}
 .tool-card-sub{font-size:14px;color:var(--ink-3);margin-bottom:8px}
+.tool-scope{font-size:13px;color:var(--ink-2);line-height:1.5;margin:2px 0 16px}
 .trust-signals{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
 .trust-signals span{font-size:12px;color:#71717a;display:flex;align-items:center;gap:4px}
 .trust-signals .check{color:#22c55e}
@@ -216,6 +217,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
     <p class="tool-card-sub">Enter your company and category. We ask a few buyer-style questions of the AI assistants this site is connected to, then score the real answers.</p>
+    <p class="tool-scope">This is for business owners checking whether ChatGPT, Claude, and Perplexity recommend their business. It is not a checker for AI-written text.</p>
     <div class="trust-signals">
       <span><span class="check">&#10003;</span> Live answers only</span>
       <span><span class="check">&#10003;</span> Same questions every time</span>
@@ -273,7 +275,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
   <div class="features-grid">
     <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">Presence in the answer</div><div class="feature-desc">When someone asks ChatGPT, Claude, or Perplexity for a recommendation, the score shows whether your company is named.</div></div>
     <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">Proof from a live check</div><div class="feature-desc">The result is a live reading of the assistants this site queries. You get a score out of 100 and whether each assistant knows you.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">About 10 seconds</div><div class="feature-desc">Enter your company and category. The same buyer questions go out together, and the score comes back in about 10 seconds.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Usually under a minute</div><div class="feature-desc">Enter your company and category. The same buyer questions go out together, and the score usually comes back in under a minute.</div></div>
   </div>
 </section>
 
@@ -289,7 +291,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 <section class="how" id="methodology">
   <div class="how-header"><h2>How the score is calculated</h2><p>A live check, not a ranking typed in ahead of time.</p></div>
   <div class="method-copy">
-    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, and Claude uses its web search tool. Assistants without a key are skipped. The score comes back in about 10 seconds.</p>
+    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, and Claude uses its web search tool. Assistants without a key are skipped. The score usually comes back in under a minute.</p>
     <p>In the same round we ask what the assistant already knows about this business in this category and city. That question does not include the website, and it does not use web search. An assistant counts as knowing you when the answer names this business and places it in the category and city you entered, with a detail beyond those words. A singular, a plural, or a common wording counts, so a deli counts for Delis and a plumbing company counts for Plumbers. Manhattan or NYC counts for New York, and a state name counts the same as its abbreviation. A different business with the same name does not count. A description taken from opening the website does not count. UNKNOWN, a disclaimer, or a sentence that only repeats the name does not count.</p>
     <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when the answer identifies your business with it. A sentence that only repeats the name or domain while saying you were not found does not count.</p>
     <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
@@ -598,6 +600,20 @@ function scoreBucket(score) {
   return 'low';
 }
 
+function shownNumericScore(data) {
+  if (!data || data.unavailable) return false;
+  var reason = data.reason || '';
+  if (
+    reason === 'all_failed' ||
+    reason === 'no_providers' ||
+    reason === 'rate_limited' ||
+    reason === 'validation' ||
+    reason === 'error' ||
+    reason === 'unavailable'
+  ) return false;
+  return typeof data.score === 'number' && isFinite(data.score);
+}
+
 function upsellHtml() {
   var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
   var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
@@ -810,7 +826,9 @@ async function runCheck(event) {
   content.style.display = 'block';
   if (unavailable) renderUnavailable(data, company);
   else renderScore(data);
-  trackEvent('score_completed', { score_bucket: scoreBucket(data && data.score) });
+  if (shownNumericScore(data)) {
+    trackEvent('score_completed', { score_bucket: scoreBucket(data.score) });
+  }
   renderCta(cat, company, unavailable ? null : data.score, unavailable, city);
   btn.disabled = false;
   btn.textContent = 'Check Another Company';
