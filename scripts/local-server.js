@@ -3,11 +3,12 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { createHandler } = require('../lib/handler');
+const { createHandler, createScoreEmailHandler } = require('../lib/handler');
 const { createReportHandler, createPrivateReportHandler, createCronHandler } = require('../lib/report-service');
 
 const root = path.join(__dirname, '..');
 const handler = createHandler();
+const scoreEmailHandler = createScoreEmailHandler();
 const reportHandler = createReportHandler();
 const privateReportHandler = createPrivateReportHandler();
 const cronHandler = createCronHandler();
@@ -26,12 +27,13 @@ const types = {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${port}`);
-  if (req.method === 'POST' && (url.pathname === '/api/score' || url.pathname === '/api/report' || url.pathname === '/api/cron/reports')) {
+  if (req.method === 'POST' && (url.pathname === '/api/score' || url.pathname === '/api/score-email' || url.pathname === '/api/report' || url.pathname === '/api/cron/reports')) {
     const chunks = [];
     for await (const chunk of req) chunks.push(chunk);
     req.body = Buffer.concat(chunks).toString('utf8');
   }
   if (url.pathname === '/api/score') return handler(req, res);
+  if (url.pathname === '/api/score-email') return scoreEmailHandler(req, res);
   if (url.pathname === '/api/report') return reportHandler(req, res);
   if (url.pathname === '/api/cron/reports') return cronHandler(req, res);
   const privateReport = url.pathname.match(/^\/r\/([^/]+)$/);

@@ -462,12 +462,6 @@
 };
 
   var groups = [
-    { label: "Software", ids: ["crm", "pm", "cyber", "erp", "email", "hr", "accounting", "analytics"] },
-    { label: "AI Tools", ids: ["ai_chat", "ai_code", "ai_image", "ai_write"] },
-    { label: "Crypto & Web3", ids: ["crypto_ex", "defi", "wallets"] },
-    { label: "Casino & Gaming", ids: ["casino", "sports", "casino_sw"] },
-    { label: "Healthcare", ids: ["ehr", "telehealth", "medbilling", "clinical", "wellness", "pharma"] },
-    { label: "Financial Services", ids: ["banking", "wealth", "insurtech", "payments", "lending", "regtech"] },
     { label: 'Local services', sections: [
       { label: "Legal", ids: ["local_pi", "local_divorce", "local_family", "local_estate", "local_criminal", "local_business_law", "local_law_firms"] },
       { label: "Aesthetics", ids: ["local_aesthetics", "local_medspa", "local_plastic"] },
@@ -481,6 +475,12 @@
       { label: "Marketing", ids: ["local_marketing"] },
       { label: "Weddings", ids: ["local_weddings"] },
     ] },
+    { label: "Software", ids: ["crm", "pm", "cyber", "erp", "email", "hr", "accounting", "analytics"] },
+    { label: "AI Tools", ids: ["ai_chat", "ai_code", "ai_image", "ai_write"] },
+    { label: "Crypto & Web3", ids: ["crypto_ex", "defi", "wallets"] },
+    { label: "Casino & Gaming", ids: ["casino", "sports", "casino_sw"] },
+    { label: "Healthcare", ids: ["ehr", "telehealth", "medbilling", "clinical", "wellness", "pharma"] },
+    { label: "Financial Services", ids: ["banking", "wealth", "insurtech", "payments", "lending", "regtech"] },
     { label: 'Other Industries', ids: ['pr', 'other'] }
   ];
 
@@ -723,6 +723,92 @@
     return { href: cat.link, kind: 'category', metro: null };
   }
 
+  function collapseTyped(text) {
+    return String(text || '').replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function singularPhrase(text) {
+    var words = normalize(text).split(' ').filter(Boolean);
+    if (!words.length) return '';
+    var last = words[words.length - 1];
+    if (last.length > 4 && last.endsWith('ies')) last = last.slice(0, -3) + 'y';
+    else if (last.length > 4 && /(ches|shes|sses|xes|zes)$/.test(last)) last = last.slice(0, -2);
+    else if (last.length > 3 && last.endsWith('s') && !last.endsWith('ss')) last = last.slice(0, -1);
+    words[words.length - 1] = last;
+    return words.join(' ');
+  }
+
+  function keywordPhrases(cat) {
+    return String(cat.keywords || '').split(',').map(function (part) { return normalize(part); }).filter(Boolean);
+  }
+
+  function firstWord(text) {
+    var skip = { and: true, the: true, of: true, for: true };
+    var words = normalize(text).split(' ').filter(function (word) { return word && !skip[word]; });
+    return words[0] || '';
+  }
+
+  // Free text stays the wording used in the score questions when it is more
+  // specific than a list label ("permanent makeup"). A unique label, singular,
+  // or one-word alias becomes that category's name. Ambiguous text stays Other.
+  function resolveCategory(text) {
+    var typed = collapseTyped(text);
+    if (typed.length < 2 || typed.length > 80) return null;
+    var wanted = normalize(typed);
+    var singular = singularPhrase(typed);
+    var keys = Object.keys(categories);
+    var i;
+    for (i = 0; i < keys.length; i++) {
+      var cat = categories[keys[i]];
+      if (normalize(cat.label) === wanted || normalize(cat.name) === wanted) {
+        return {
+          key: keys[i],
+          label: cat.label,
+          name: cat.name,
+          prompt: keys[i] === 'other' ? 'Other' : cat.name,
+          match: 'exact'
+        };
+      }
+    }
+    var singularHits = [];
+    for (i = 0; i < keys.length; i++) {
+      if (keys[i] === 'other') continue;
+      var row = categories[keys[i]];
+      if (singularPhrase(row.label) === singular || singularPhrase(row.name) === singular) singularHits.push(keys[i]);
+    }
+    if (singularHits.length === 1) {
+      var chosen = categories[singularHits[0]];
+      return { key: singularHits[0], label: chosen.label, name: chosen.name, prompt: chosen.name, match: 'label' };
+    }
+    var keywordHits = [];
+    for (i = 0; i < keys.length; i++) {
+      if (keys[i] === 'other') continue;
+      if (keywordPhrases(categories[keys[i]]).indexOf(wanted) !== -1) keywordHits.push(keys[i]);
+    }
+    if (keywordHits.length === 1) {
+      var kw = categories[keywordHits[0]];
+      var words = wanted.split(' ');
+      var labelWords = normalize(kw.label + ' ' + kw.name).split(' ');
+      var alias = words.every(function (word) {
+        return labelWords.indexOf(word) !== -1 || labelWords.indexOf(singularPhrase(word)) !== -1;
+      });
+      return { key: keywordHits[0], label: kw.label, name: kw.name, prompt: alias ? kw.name : typed, match: 'keyword' };
+    }
+    if (wanted.indexOf(' ') === -1) {
+      var headHits = [];
+      for (i = 0; i < keys.length; i++) {
+        if (keys[i] === 'other') continue;
+        var head = firstWord(categories[keys[i]].label);
+        if (head && (head === wanted || singularPhrase(head) === singular)) headHits.push(keys[i]);
+      }
+      if (headHits.length === 1) {
+        var headCat = categories[headHits[0]];
+        return { key: headHits[0], label: headCat.label, name: headCat.name, prompt: headCat.name, match: 'label' };
+      }
+    }
+    return { key: 'other', label: categories.other.label, name: categories.other.name, prompt: typed, match: 'other' };
+  }
+
   function search(query) {
     var terms = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
     var results = [];
@@ -748,6 +834,7 @@
     groups: groups,
     category: category,
     findByName: findByName,
+    resolveCategory: resolveCategory,
     matchMetro: matchMetro,
     listDestination: listDestination,
     search: search

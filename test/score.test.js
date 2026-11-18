@@ -159,6 +159,7 @@ test('input limits reject oversized or empty fields and normalize the domain', (
     businessName: 'HubSpot',
     domain: 'hubspot.com',
     category: 'CRM Software',
+    categoryKey: 'crm',
     city: 'Austin',
   });
   assert.equal(validateInput({ businessName: 'Acme', category: 'Widgets' }).domain, '');

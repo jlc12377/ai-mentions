@@ -3,6 +3,9 @@
     "api/score.js": {
       "maxDuration": 45
     },
+    "api/score-email.js": {
+      "maxDuration": 20
+    },
     "api/report.js": {
       "maxDuration": 60
     },
