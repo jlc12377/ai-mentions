@@ -236,6 +236,30 @@ test('category search finds aesthetics aliases and estate planning for lawyer', 
   assert.equal(lawyer.includes('local_aesthetics'), false);
 });
 
+test('free text maps to the closest category, or Other, and still scores', () => {
+  const makeup = lists.resolveCategory('permanent makeup');
+  assert.equal(makeup.key, 'local_aesthetics');
+  assert.equal(makeup.prompt, 'permanent makeup');
+  assert.equal(lists.resolveCategory('Dentist').key, 'local_dentists');
+  assert.equal(lists.resolveCategory('dentist').prompt, 'Dentists');
+  assert.equal(lists.resolveCategory('med spa').key, 'local_medspa');
+  assert.equal(lists.resolveCategory('med spa').prompt, 'med spa');
+  assert.equal(lists.resolveCategory('law firm').key, 'local_law_firms');
+  assert.equal(lists.resolveCategory('law firm').prompt, 'Law Firms');
+  assert.equal(lists.resolveCategory('plumber').prompt, 'Plumbers');
+  assert.equal(lists.resolveCategory('hvac').key, 'local_hvac');
+  assert.equal(lists.resolveCategory('restaurant').key, 'other');
+  assert.equal(lists.resolveCategory('restaurant').prompt, 'restaurant');
+  assert.equal(lists.resolveCategory('lawyer').key, 'other');
+  assert.equal(lists.resolveCategory('CRM Software').key, 'crm');
+  assert.equal(lists.resolveCategory(''), null);
+  const input = validateInput({ businessName: 'Luna Brows', category: 'permanent makeup', city: 'Austin' });
+  assert.equal(input.category, 'permanent makeup');
+  assert.equal(input.categoryKey, 'local_aesthetics');
+  assert.match(buildPrompts(input.category, input.city, 1)[0], /permanent makeup/);
+  assert.equal(validateInput({ businessName: 'Corner Deli', category: 'restaurant' }).categoryKey, 'other');
+});
+
 test('local category names still go through the score prompts', () => {
   const input = validateInput({
     businessName: 'Natural Brows by Jenn',

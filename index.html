@@ -13,7 +13,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Mentions — Check Your AI Visibility Score | Free Tool</title>
-<meta name="description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. Free AI visibility checker for businesses.">
+<meta name="description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your business. Free AI visibility checker for a dentist, med spa, law firm, plumber, or restaurant.">
 <link rel="canonical" href="https://www.ai-mentions.com/">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -22,14 +22,14 @@
 <meta property="og:site_name" content="AI Mentions">
 <meta property="og:url" content="https://www.ai-mentions.com/">
 <meta property="og:title" content="AI Mentions — Check Your AI Visibility Score | Free Tool">
-<meta property="og:description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. Free AI visibility checker for businesses.">
+<meta property="og:description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your business. Free AI visibility checker for a dentist, med spa, law firm, plumber, or restaurant.">
 <meta property="og:image" content="https://www.ai-mentions.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="AI Mentions — free AI visibility score">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AI Mentions — Check Your AI Visibility Score | Free Tool">
-<meta name="twitter:description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. Free AI visibility checker for businesses.">
+<meta name="twitter:description" content="Find out if AI assistants like ChatGPT, Claude, and Perplexity recommend your business. Free AI visibility checker for a dentist, med spa, law firm, plumber, or restaurant.">
 <meta name="twitter:image" content="https://www.ai-mentions.com/og-image.png">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
 
@@ -71,6 +71,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--white);-webki
 .tool-card{background:var(--white);border-radius:var(--radius-xl);padding:36px 32px;color:var(--ink);box-shadow:0 0 80px rgba(124,58,237,.08),0 20px 60px rgba(0,0,0,.3)}
 .tool-card h2{font-family:var(--font-display);font-size:24px;font-weight:400;margin-bottom:4px;color:var(--ink)}
 .tool-card-sub{font-size:14px;color:var(--ink-3);margin-bottom:8px}
+.tool-scope{font-size:13px;color:var(--ink-2);line-height:1.5;margin:2px 0 16px}
 .trust-signals{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
 .trust-signals span{font-size:12px;color:#71717a;display:flex;align-items:center;gap:4px}
 .trust-signals .check{color:#22c55e}
@@ -92,6 +93,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 .combo-empty{padding:12px;font-size:13px;color:#71717a}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .email-note{font-size:11px;color:#a1a1aa;margin-top:4px;display:block}
+.city-note{margin:-8px 0 12px}
 .city-choices{margin-top:8px;font-size:13px;color:var(--ink-2);line-height:1.45}
 .city-choices[hidden]{display:none}
 .city-choice{margin:6px 6px 0 0;padding:6px 10px;border:1.5px solid #ddd6fe;background:#fff;color:var(--violet);border-radius:8px;font-family:var(--font-body);font-weight:600;font-size:13px;cursor:pointer}
@@ -146,6 +148,11 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 .score-ranges{margin:0 0 4px;padding-left:18px;color:var(--ink-2);font-size:13px;line-height:1.5}
 .score-ranges li{margin:2px 0}
 .email-status{font-size:13px;color:var(--ink-3);margin-top:8px}
+.score-email{margin-top:16px;padding-top:14px;border-top:1.5px solid var(--border)}
+.score-email-row{display:flex;gap:8px;align-items:stretch}
+.score-email-row .form-input{flex:1;min-width:0}
+.score-email-btn{flex:0 0 auto;padding:12px 14px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--violet),#5b21b6);color:#fff;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.score-email-btn:disabled{opacity:.6;cursor:not-allowed}
 .retry-btn{margin-top:12px;padding:10px 16px;border:0;border-radius:8px;background:var(--violet);color:#fff;font:inherit;font-weight:600;cursor:pointer}
 .cta-box-links{display:flex;flex-direction:column;gap:10px;align-items:stretch}
 .cta-box a.cta-main{display:block;padding:12px 16px;background:var(--violet);color:#fff;border-radius:var(--radius);text-decoration:none;font-weight:600;font-size:14px;line-height:1.45;text-align:center;transition:background .2s}
@@ -193,10 +200,30 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 .footer-col a{display:block;font-size:13px;color:var(--ink-4);text-decoration:none;margin-bottom:8px}.footer-col a:hover{color:var(--violet-soft)}
 .footer-bottom{max-width:var(--max-w);margin:32px auto 0;padding:16px 0 0;border-top:1px solid var(--border-dark);display:flex;justify-content:space-between;font-size:12px;color:var(--ink-4)}
 .footer-bottom a{color:var(--ink-4);text-decoration:none;margin-left:16px}
-@media(max-width:768px){.hero h1{font-size:34px}.features-grid,.how-grid{grid-template-columns:1fr}.footer-inner{grid-template-columns:1fr 1fr}.form-row{grid-template-columns:1fr}.tool-card{padding:28px 20px}.nav-links{display:none}}
+@media(max-width:768px){
+  .nav{padding:12px 16px}
+  .hero{padding:8px 16px 4px}
+  .hero-badge{margin-bottom:6px}
+  .hero h1{font-size:30px;margin-bottom:6px}
+  .hero-sub{font-size:15px;margin-bottom:8px}
+  .tool-container{padding:0 12px}
+  .tool-card{padding:16px 14px 14px}
+  .city-note{margin:-4px 0 10px}
+  .tool-card h2{font-size:22px}
+  .tool-scope{margin-bottom:10px}
+  .trust-signals{margin-bottom:12px;gap:8px 12px}
+  .form-group{margin-bottom:12px}
+  .features-grid,.how-grid{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .form-row{grid-template-columns:1fr 1fr}
+  .score-email-row{flex-direction:column}
+  .score-email-btn{width:100%}
+}
+@media(max-width:360px){.form-row{grid-template-columns:1fr}}
 </style>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"AI Mentions","url":"https://www.ai-mentions.com/","description":"Free AI visibility checker. Find out if AI assistants recommend your company.","publisher":{"@type":"Organization","name":"Listicle Liaison LLC","url":"https://listicleliaison.com"}},{"@type":"SoftwareApplication","name":"AI Mentions Visibility Checker","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Check whether AI assistants like ChatGPT, Claude, and Perplexity recommend your company when users ask about your industry."}]}
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"AI Mentions","url":"https://www.ai-mentions.com/","description":"Free AI visibility checker. Find out if AI assistants recommend your business.","publisher":{"@type":"Organization","name":"Listicle Liaison LLC","url":"https://listicleliaison.com"}},{"@type":"SoftwareApplication","name":"AI Mentions Visibility Checker","applicationCategory":"BusinessApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Check whether AI assistants like ChatGPT, Claude, and Perplexity recommend your business when people ask about what you do."}]}
 </script>
 </head>
 <body>
@@ -208,14 +235,15 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 
 <section class="hero">
   <div class="hero-badge"><span class="hero-badge-dot"></span> Free AI Visibility Tool</div>
-  <h1>Does AI know <em>your company?</em></h1>
-  <p class="hero-sub">When someone asks ChatGPT, Claude, or Perplexity who to buy from, does your company come up? Run a live check &#8212; free.</p>
+  <h1>Does AI know <em>your business?</em></h1>
+  <p class="hero-sub">For a dentist, a med spa, a law firm, a plumber, or a restaurant. See what ChatGPT, Claude, and Perplexity say &#8212; free.</p>
 </section>
 
 <div class="tool-container" id="tool">
   <div class="tool-card">
     <h2>Check your AI visibility</h2>
-    <p class="tool-card-sub">Enter your company and category. We ask a few buyer-style questions of the AI assistants this site is connected to, then score the real answers.</p>
+    <p class="tool-card-sub">Enter your business and what you do. We ask a few buyer-style questions, then score the real answers.</p>
+    <p class="tool-scope">This is for business owners checking whether ChatGPT, Claude, and Perplexity recommend their business. It is not a checker for AI-written text.</p>
     <div class="trust-signals">
       <span><span class="check">&#10003;</span> Live answers only</span>
       <span><span class="check">&#10003;</span> Same questions every time</span>
@@ -223,40 +251,36 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
     </div>
     <form id="checkForm" onsubmit="runCheck(event); return false;">
     <div class="form-group">
-      <label class="form-label" for="companyName">Company Name</label>
-      <input type="text" class="form-input" id="companyName" maxlength="80" placeholder="e.g. HubSpot, Rippling, Aave" autocomplete="organization">
+      <label class="form-label" for="companyName">Business name</label>
+      <input type="text" class="form-input" id="companyName" maxlength="80" placeholder="e.g. Bright Smile Dental" autocomplete="organization">
     </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label" for="website">Website</label>
-        <input type="text" class="form-input" id="website" maxlength="200" placeholder="e.g. hubspot.com" autocomplete="url">
+        <input type="text" class="form-input" id="website" maxlength="200" placeholder="e.g. yoursite.com" autocomplete="url">
       </div>
       <div class="form-group">
         <label class="form-label" for="city">City (optional)</label>
-        <input type="text" class="form-input" id="city" maxlength="80" placeholder="e.g. Austin">
-        <span class="email-note">For a local service, your city picks the metro list when we have one. Add a state if the town name is shared.</span>
+        <input type="text" class="form-input" id="city" maxlength="80" placeholder="e.g. your city">
         <div class="city-choices" id="cityChoices" hidden></div>
       </div>
     </div>
+    <span class="email-note city-note">Optional. Add a state if the town name is shared.</span>
     <div class="form-group">
-      <label class="form-label" for="categorySearch">Industry / Category</label>
+      <label class="form-label" for="categorySearch">What you do</label>
       <div class="combo" id="categoryCombo">
-        <input type="text" class="form-input combo-input" id="categorySearch" role="combobox" aria-expanded="false" aria-controls="categoryList" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Search categories…">
+        <input type="text" class="form-input combo-input" id="categorySearch" role="combobox" aria-expanded="false" aria-controls="categoryList" aria-autocomplete="list" autocomplete="off" spellcheck="false" enterkeyhint="go" placeholder="e.g. dentist, med spa, plumber">
         <input type="hidden" id="category" value="">
         <div class="combo-panel" id="categoryList" role="listbox" hidden></div>
       </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label" for="userEmail">Your Email (required)</label>
-      <input type="email" class="form-input" id="userEmail" maxlength="120" placeholder="We&#8217;ll email this score to you" autocomplete="email" required>
-      <span class="email-note">We&#8217;ll email this score. The full report is a separate purchase.</span>
+      <span class="email-note">Type your own words, like permanent makeup, or pick a suggestion.</span>
     </div>
     <div class="form-group" id="otherCategoryWrap" style="display:none">
-      <label class="form-label" for="categoryOther">Your industry</label>
-      <input type="text" class="form-input" id="categoryOther" maxlength="80" placeholder="e.g. Commercial landscaping">
+      <label class="form-label" for="categoryOther">Your own words</label>
+      <input type="text" class="form-input" id="categoryOther" maxlength="80" placeholder="e.g. permanent makeup">
     </div>
     <button class="check-btn" id="checkBtn" type="submit">Get My Free Visibility Score &rarr;</button>
-    <p class="tool-note">Live answers only. If the check can&#8217;t run, you&#8217;ll see &#8220;score temporarily unavailable&#8221; &#8212; we never substitute a guessed number. Your email is still submitted.</p>
+    <p class="tool-note">Live answers only. If the check can&#8217;t run, you&#8217;ll see &#8220;score temporarily unavailable&#8221; &#8212; we never substitute a guessed number. Email is optional, after the score.</p>
     </form>
     <div class="results" id="results" aria-live="polite">
       <div class="results-loading" id="resultsLoading"><div class="spinner"></div><p id="loadingText">Asking the connected AI assistants…</p></div>
@@ -269,27 +293,27 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 </div>
 
 <section class="features">
-  <div class="features-header"><h2>Why AI visibility matters</h2><p>Buyers ask AI assistants who to hire and what to buy. This check shows whether your company is present in those answers.</p></div>
+  <div class="features-header"><h2>Why AI visibility matters</h2><p>People ask AI assistants who to hire and where to go. This check shows whether your business is present in those answers.</p></div>
   <div class="features-grid">
-    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">Presence in the answer</div><div class="feature-desc">When someone asks ChatGPT, Claude, or Perplexity for a recommendation, the score shows whether your company is named.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#128269;</div><div class="feature-name">Presence in the answer</div><div class="feature-desc">When someone asks ChatGPT, Claude, or Perplexity for a recommendation, the score shows whether your business is named.</div></div>
     <div class="feature-card"><div class="feature-icon">&#128200;</div><div class="feature-name">Proof from a live check</div><div class="feature-desc">The result is a live reading of the assistants this site queries. You get a score out of 100 and whether each assistant knows you.</div></div>
-    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">About 10 seconds</div><div class="feature-desc">Enter your company and category. The same buyer questions go out together, and the score comes back in about 10 seconds.</div></div>
+    <div class="feature-card"><div class="feature-icon">&#127919;</div><div class="feature-name">Usually under a minute</div><div class="feature-desc">Enter your business and what you do. The same buyer questions go out together, and the score usually comes back in under a minute.</div></div>
   </div>
 </section>
 
 <section class="how" id="how">
   <div class="how-header"><h2>How it works</h2><p>Three steps to understanding your AI visibility.</p></div>
   <div class="how-grid">
-    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your company</div><div class="how-desc">Tell us your company name, website, and category. The website is how a citation of your domain is distinguished from a mention of your name.</div></div>
-    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, and Claude. Your company name is not in those questions. We also ask each assistant what it knows about your business.</div></div>
-    <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">The free result is a score out of 100, whether each assistant knows you, whether it recommends you, and a few businesses they named. If a live check can&#8217;t run, we say so and still take your email.</div></div>
+    <div class="how-card"><div class="how-num">1</div><div class="how-label">Enter your business</div><div class="how-desc">Tell us your business name, website, and what you do. The website is how a citation of your domain is distinguished from a mention of your name.</div></div>
+    <div class="how-card"><div class="how-num">2</div><div class="how-label">We ask buyer questions</div><div class="how-desc">The same short prompts go to each connected assistant: ChatGPT, Perplexity, and Claude. Your business name is not in those questions. We also ask each assistant what it knows about your business.</div></div>
+    <div class="how-card"><div class="how-num">3</div><div class="how-label">You get a real score</div><div class="how-desc">The free result is a score out of 100, whether each assistant knows you, whether it recommends you, and a few businesses they named. If a live check can&#8217;t run, we say so. You can email yourself the score afterward.</div></div>
   </div>
 </section>
 
 <section class="how" id="methodology">
   <div class="how-header"><h2>How the score is calculated</h2><p>A live check, not a ranking typed in ahead of time.</p></div>
   <div class="method-copy">
-    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, and Claude uses its web search tool. Assistants without a key are skipped. The score comes back in about 10 seconds.</p>
+    <p>We send the same 3&#8211;5 buyer questions to each AI assistant that has an API key configured on this site. Examples: &#8220;What are the best {category} in {city}?&#8221; and &#8220;Which {category} companies would you recommend?&#8221; The business name is not part of those questions. ChatGPT uses the OpenAI web search tool, Perplexity uses Sonar with web search, and Claude uses its web search tool. Assistants without a key are skipped. The score usually comes back in under a minute.</p>
     <p>In the same round we ask what the assistant already knows about this business in this category and city. That question does not include the website, and it does not use web search. An assistant counts as knowing you when the answer names this business and places it in the category and city you entered, with a detail beyond those words. A singular, a plural, or a common wording counts, so a deli counts for Delis and a plumbing company counts for Plumbers. Manhattan or NYC counts for New York, and a state name counts the same as its abbreviation. A different business with the same name does not count. A description taken from opening the website does not count. UNKNOWN, a disclaimer, or a sentence that only repeats the name does not count.</p>
     <p><strong>Mention (70%).</strong> 100 points if your business is first in a list, minus 12 points for each step down (floor 20). 50 points if you are named but not in a list. 0 if you are not named. Matching ignores capitalization and suffixes such as Inc, LLC, and Ltd. Your domain counts as a mention when the answer identifies your business with it. A sentence that only repeats the name or domain while saying you were not found does not count.</p>
     <p><strong>Citation (30%).</strong> 100 points if that assistant cites your domain as a source, otherwise 0. This needs the website field. A source on a subdomain counts. A different site that merely contains your domain text does not.</p>
@@ -305,7 +329,7 @@ select.form-input,.combo-input{appearance:none;background-image:url("data:image/
 
 <footer class="footer">
   <div class="footer-inner">
-    <div><div class="footer-brand">AI <span>Mentions</span></div><p class="footer-desc">Free tool to check if AI assistants like ChatGPT, Claude, and Perplexity recommend your company. By Listicle Liaison, part of a network of review sites.</p></div>
+    <div><div class="footer-brand">AI <span>Mentions</span></div><p class="footer-desc">Free tool to check if AI assistants like ChatGPT, Claude, and Perplexity recommend your business. By Listicle Liaison, part of a network of review sites.</p></div>
     <div class="footer-col"><div class="footer-col-title">Review sites</div><a href="https://softwareindustryreviews.com">Software Industry Reviews</a><a href="https://aiindustryreviews.com">AI Industry Reviews</a><a href="https://healthcareindustryreviews.com">Healthcare Industry Reviews</a><a href="https://financialindustryreviews.com">Financial Industry Reviews</a><a href="https://cryptoindustryreviews.com">Crypto Industry Reviews</a><a href="https://casinoindustryreviews.com">Casino Industry Reviews</a><a href="https://miningindustryreviews.com">Mining Industry Reviews</a><a href="https://localsmallbusinessreviews.com">Local Small Business Reviews</a></div>
     <div class="footer-col"><div class="footer-col-title">Media</div><a href="https://smbnewsroom.com">SMB Newsroom</a><a href="https://listicleliaison.com">Listicle Liaison</a><a href="https://listicleliaison.com/pages/pricing.html">Get Featured</a><a href="https://listicleliaison.com/pages/partners.html">Affiliate Program</a><a href="mailto:partnerships@listicleliaison.com">Contact Us</a></div>
     <div class="footer-col"><div class="footer-col-title">Company</div><a href="https://listicleliaison.com/pages/about.html">About Us</a><a href="https://listicleliaison.com/pages/disclosure.html">Disclosure</a><a href="mailto:partnerships@listicleliaison.com">Email Us</a></div>
@@ -367,14 +391,35 @@ function formatWhen(iso) {
 }
 
 function selectedCategory() {
-  var key = document.getElementById('category').value;
-  var cat = window.AiLists ? AiLists.category(key) : null;
-  if (!cat) return null;
-  if (key === 'other') {
-    var custom = document.getElementById('categoryOther').value.trim();
-    return { key: key, name: custom, pricing: cat.pricing, custom: true };
+  var typed = categoryInput.value.trim();
+  var key = categoryValue.value;
+  var picked = key && window.AiLists ? AiLists.category(key) : null;
+  if (picked && typed.toLowerCase() === picked.label.toLowerCase()) {
+    if (key === 'other') {
+      var custom = document.getElementById('categoryOther').value.trim();
+      if (custom.length >= 2 && AiLists.resolveCategory) {
+        var customResolved = AiLists.resolveCategory(custom);
+        var customCat = customResolved ? AiLists.category(customResolved.key) : null;
+        return {
+          key: customResolved ? customResolved.key : 'other',
+          name: customResolved ? customResolved.prompt : custom,
+          pricing: customCat ? customCat.pricing : picked.pricing,
+          custom: false
+        };
+      }
+      return { key: 'other', name: 'Other', pricing: picked.pricing, custom: false };
+    }
+    return { key: key, name: picked.name, pricing: picked.pricing, custom: false };
   }
-  return { key: key, name: cat.name, pricing: cat.pricing, custom: false };
+  if (typed.length >= 2 && window.AiLists && AiLists.resolveCategory) {
+    var resolved = AiLists.resolveCategory(typed);
+    if (resolved) {
+      var cat = AiLists.category(resolved.key);
+      return { key: resolved.key, name: resolved.prompt, pricing: cat ? cat.pricing : '', custom: false };
+    }
+  }
+  if (typed.length >= 2) return { key: 'other', name: typed, pricing: '', custom: false };
+  return null;
 }
 
 var categoryInput = document.getElementById('categorySearch');
@@ -407,7 +452,7 @@ function renderCategoryPanel(query) {
     });
     if (groupHtml) html += '<div class="combo-group" role="presentation"><div class="combo-label">' + esc(group.label) + '</div>' + groupHtml + '</div>';
   });
-  categoryPanel.innerHTML = count ? html : '<div class="combo-empty">No matching category</div>';
+  categoryPanel.innerHTML = count ? html : '<div class="combo-empty">No matching category. You can still use what you typed.</div>';
 }
 
 function setCategoryOpen(open) {
@@ -446,12 +491,9 @@ function commitCategoryInput() {
     document.getElementById('otherCategoryWrap').style.display = found.key === 'other' ? 'block' : 'none';
     return;
   }
-  if (categoryInput.getAttribute('data-filtering') === '1' || !typed) {
-    categoryValue.value = '';
-    document.getElementById('otherCategoryWrap').style.display = 'none';
-  } else if (current) {
-    categoryInput.value = current.label;
-  }
+  categoryValue.value = '';
+  categoryInput.setAttribute('data-filtering', typed ? '1' : '0');
+  document.getElementById('otherCategoryWrap').style.display = 'none';
 }
 
 categoryInput.addEventListener('focus', function () {
@@ -463,6 +505,9 @@ categoryInput.addEventListener('focus', function () {
 
 categoryInput.addEventListener('input', function () {
   categoryInput.setAttribute('data-filtering', '1');
+  categoryInput.removeAttribute('data-kbd');
+  categoryValue.value = '';
+  document.getElementById('otherCategoryWrap').style.display = 'none';
   openCategoryPanel();
 });
 
@@ -483,21 +528,22 @@ categoryInput.addEventListener('keydown', function (event) {
     var next = event.key === 'ArrowDown' ? index + 1 : index - 1;
     if (next < 0) next = options.length - 1;
     if (next >= options.length) next = 0;
+    categoryInput.setAttribute('data-kbd', '1');
     Array.prototype.forEach.call(options, function (option) { option.classList.remove('active'); });
     options[next].classList.add('active');
     if (options[next].scrollIntoView) options[next].scrollIntoView({ block: 'nearest' });
     return;
   }
-  if (event.key === 'Enter' && !categoryPanel.hidden) {
+  if (event.key === 'Enter' && !categoryPanel.hidden && categoryInput.getAttribute('data-kbd') === '1') {
     options = categoryPanel.querySelectorAll('.combo-option');
     active = categoryPanel.querySelector('.combo-option.active');
-    var pick = active || (options.length === 1 ? options[0] : null);
-    if (pick) {
+    if (active) {
       event.preventDefault();
-      applyCategory(pick.getAttribute('data-key'));
+      applyCategory(active.getAttribute('data-key'));
     }
     return;
   }
+  if (event.key === 'Enter') closeCategoryPanel();
   if (event.key === 'Escape') {
     closeCategoryPanel();
     commitCategoryInput();
@@ -598,6 +644,20 @@ function scoreBucket(score) {
   return 'low';
 }
 
+function shownNumericScore(data) {
+  if (!data || data.unavailable) return false;
+  var reason = data.reason || '';
+  if (
+    reason === 'all_failed' ||
+    reason === 'no_providers' ||
+    reason === 'rate_limited' ||
+    reason === 'validation' ||
+    reason === 'error' ||
+    reason === 'unavailable'
+  ) return false;
+  return typeof data.score === 'number' && isFinite(data.score);
+}
+
 function upsellHtml() {
   var reportUrl = 'https://buy.stripe.com/cNieVeclZ8MrbkX15ld7q0u';
   var trackingUrl = 'https://buy.stripe.com/9B63cw71Fe6LfBd4hxd7q0v';
@@ -625,7 +685,7 @@ function renderUnavailable(data, company) {
   document.getElementById('resultsContent').innerHTML =
     '<div class="results-header"><div class="results-company">' + esc(company) + '</div>' +
     '<div class="score-badge score-low">' + esc(message) + '</div></div>' +
-    '<div class="unavailable-note">' + esc(detail) + ' Your email was still submitted.</div>' +
+    '<div class="unavailable-note">' + esc(detail) + '</div>' +
     upsellHtml() +
     '<button type="button" class="retry-btn" onclick="runCheck()">Try again</button>';
 }
@@ -656,9 +716,7 @@ function renderScore(data) {
   var when = data.cached
     ? 'Reused from an identical check in the last 24 hours. Checked ' + formatWhen(data.timestamp) + '.'
     : 'Checked ' + formatWhen(data.timestamp) + '.';
-  var mail = '';
-  if (data.emailSent) mail = '<p class="email-status">We emailed this score to you.</p>';
-  else if (data.emailSent === false) mail = '<p class="email-status">We could not email this score. It is on this page.</p>';
+  var mail = scoreEmailBox();
   document.getElementById('resultsContent').innerHTML =
     '<div class="results-header"><div><div class="results-company">' + esc(data.businessName) + '</div>' +
     '<p class="results-meta">' + esc(when) + '</p></div>' +
@@ -669,6 +727,29 @@ function renderScore(data) {
     '<div class="report-section"><h3>By assistant</h3>' + providers + '</div>' +
     '<p class="how-score">How we score: three quarters of the score is whether you were recommended, and one quarter is whether assistants already know this business in this category and city. A failed check cannot raise the score. <a href="#methodology">How we score</a></p>' +
     mail;
+  var emailInput = document.getElementById('scoreEmail');
+  var emailButton = document.getElementById('scoreEmailBtn');
+  if (emailInput) {
+    emailInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendScoreEmail(event);
+      }
+    });
+  }
+  if (emailButton) emailButton.addEventListener('click', sendScoreEmail);
+}
+
+function scoreEmailBox() {
+  return '<div class="score-email" id="scoreEmailBox">' +
+    '<label class="form-label" for="scoreEmail">Email me this score</label>' +
+    '<div class="score-email-row">' +
+    '<input type="email" class="form-input" id="scoreEmail" maxlength="120" placeholder="you@yourbusiness.com" autocomplete="email" inputmode="email">' +
+    '<button type="button" class="score-email-btn" id="scoreEmailBtn">Email me this score</button>' +
+    '</div>' +
+    '<span class="email-note">Optional. We&#8217;ll email this score to you, and it stays on this page either way.</span>' +
+    '<p class="email-status" id="scoreEmailStatus"></p>' +
+    '</div>';
 }
 
 function listStepHtml(dest, city) {
@@ -701,21 +782,21 @@ function renderCta(cat, company, score, unavailable, city) {
   document.getElementById('ctaBox').classList.add('visible');
 }
 
+var lastCheck = null;
+
 async function runCheck(event) {
   if (event && event.preventDefault) event.preventDefault();
   var company = document.getElementById('companyName').value.trim();
-  var email = document.getElementById('userEmail').value.trim();
   var website = document.getElementById('website').value.trim();
   var city = document.getElementById('city').value.trim();
   commitCategoryInput();
+  closeCategoryPanel();
   var cat = selectedCategory();
-  if (!company) { alert('Please enter a company name'); return; }
-  if (!cat) { alert('Please select a category'); return; }
-  if (cat.custom && cat.name.length < 2) { alert('Please enter your industry'); return; }
-  if (!email || email.indexOf('@') === -1) { alert('Please enter your email so we can send this score'); return; }
+  if (!company) { alert('Please enter your business name'); return; }
+  if (!cat) { alert('Tell us what you do. A few words is enough.'); return; }
   if (website && website.indexOf('.') === -1) { alert('Enter a website like example.com, or leave it blank.'); return; }
   clearCityChoices();
-  if (!cat.custom && window.AiLists) {
+  if (window.AiLists) {
     var earlyDest = AiLists.listDestination(cat.key, city);
     if (earlyDest && earlyDest.kind === 'choose') {
       renderCityChoices(city, earlyDest.choices);
@@ -735,9 +816,9 @@ async function runCheck(event) {
   content.style.display = 'none';
   ctaBox.classList.remove('visible');
   document.getElementById('loadingText').textContent = 'Asking the connected AI assistants…';
+  lastCheck = null;
 
   trackEvent('score_started');
-  trackEvent('generate_lead');
   if (typeof gtag !== 'undefined') {
     gtag('event', 'visibility_check', {
       company: company,
@@ -748,7 +829,6 @@ async function runCheck(event) {
   }
   if (typeof window.uetq !== 'undefined') {
     window.uetq = window.uetq || [];
-    window.uetq.push('set', { pid: { em: email } });
     window.uetq.push('event', 'visibility_check', {
       event_category: 'form_submission',
       event_label: company + ' - ' + cat.key,
@@ -768,7 +848,6 @@ async function runCheck(event) {
         domain: website,
         category: cat.name,
         city: city,
-        email: email,
         utm_source: attribution.utm_source,
         utm_campaign: attribution.utm_campaign,
         gclid: attribution.gclid
@@ -788,32 +867,109 @@ async function runCheck(event) {
   }
 
   var unavailable = !data || data.unavailable || data.score == null;
-  captureLead({
-    _subject: unavailable
-      ? 'AI Visibility Check: ' + company + ' — unavailable'
-      : 'AI Visibility Check: ' + company + ' — ' + data.score,
-    company: company,
-    category: cat.name,
-    category_key: cat.key,
-    website: website,
-    city: city,
-    email: email,
-    source: 'ai-mentions.com',
-    score: unavailable ? 'unavailable' : String(data.score),
-    score_status: (data && data.reason) ? data.reason : (unavailable ? 'unavailable' : 'ok'),
-    utm_source: attribution.utm_source,
-    utm_campaign: attribution.utm_campaign,
-    gclid: attribution.gclid
-  });
-
+  if (data && data.categoryKey && window.AiLists && AiLists.category(data.categoryKey)) {
+    var matched = AiLists.category(data.categoryKey);
+    cat = { key: matched.key, name: data.category || cat.name, pricing: matched.pricing, custom: false };
+  }
   loading.style.display = 'none';
   content.style.display = 'block';
   if (unavailable) renderUnavailable(data, company);
   else renderScore(data);
-  trackEvent('score_completed', { score_bucket: scoreBucket(data && data.score) });
+  if (shownNumericScore(data)) {
+    lastCheck = {
+      businessName: data.businessName || company,
+      domain: typeof data.domain === 'string' ? data.domain : website,
+      category: data.category || cat.name,
+      categoryKey: cat.key,
+      city: typeof data.city === 'string' ? data.city : city,
+      score: data.score,
+      providers: data.providers || [],
+      timestamp: data.timestamp || '',
+      unavailable: false,
+      leadTracked: false
+    };
+    trackEvent('score_completed', { score_bucket: scoreBucket(data.score) });
+  }
   renderCta(cat, company, unavailable ? null : data.score, unavailable, city);
   btn.disabled = false;
   btn.textContent = 'Check Another Company';
+}
+
+async function sendScoreEmail(event) {
+  if (event && event.preventDefault) event.preventDefault();
+  if (!lastCheck || !shownNumericScore(lastCheck)) return;
+  var input = document.getElementById('scoreEmail');
+  var status = document.getElementById('scoreEmailStatus');
+  var button = document.getElementById('scoreEmailBtn');
+  if (!input || !status || !button) return;
+  var email = input.value.trim();
+  if (!email || email.indexOf('@') < 1 || email.indexOf('.', email.indexOf('@')) === -1) {
+    status.textContent = 'Enter an email address, or skip this. The score is on this page.';
+    return;
+  }
+  if (!lastCheck.leadTracked) {
+    lastCheck.leadTracked = true;
+    trackEvent('generate_lead');
+    if (typeof window.uetq !== 'undefined') {
+      window.uetq = window.uetq || [];
+      window.uetq.push('set', { pid: { em: email } });
+      window.uetq.push('event', 'score_email', {
+        event_category: 'form_submission',
+        event_label: lastCheck.categoryKey,
+        event_value: 1
+      });
+    }
+    captureLead({
+      _subject: 'AI Visibility Check: ' + lastCheck.businessName + ' — ' + lastCheck.score,
+      company: lastCheck.businessName,
+      category: lastCheck.category,
+      category_key: lastCheck.categoryKey,
+      website: lastCheck.domain,
+      city: lastCheck.city,
+      email: email,
+      source: 'ai-mentions.com',
+      score: String(lastCheck.score),
+      score_status: 'ok',
+      utm_source: attribution.utm_source,
+      utm_campaign: attribution.utm_campaign,
+      gclid: attribution.gclid
+    });
+  }
+  button.disabled = true;
+  var previous = button.textContent;
+  button.textContent = 'Sending…';
+  var mailed = null;
+  try {
+    var response = await fetch('/api/score-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        businessName: lastCheck.businessName,
+        domain: lastCheck.domain,
+        category: lastCheck.category,
+        city: lastCheck.city,
+        score: lastCheck.score,
+        providers: lastCheck.providers,
+        timestamp: lastCheck.timestamp,
+        utm_source: attribution.utm_source,
+        utm_campaign: attribution.utm_campaign,
+        gclid: attribution.gclid
+      })
+    });
+    mailed = await response.json();
+  } catch (error) {
+    mailed = { emailSent: false };
+  }
+  if (mailed && mailed.emailSent) {
+    status.textContent = 'We emailed this score to you.';
+    input.disabled = true;
+    button.textContent = 'Sent';
+    return;
+  }
+  status.textContent = 'We could not email this score. It is on this page.';
+  button.disabled = false;
+  button.textContent = previous;
 }
 </script>
 

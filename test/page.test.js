@@ -41,7 +41,7 @@ test('the page no longer ships the fake checker', () => {
   assert.match(page, /G-P8P36G6MZV/);
   assert.match(page, /score_started/);
   assert.match(page, /generate_lead/);
-  assert.match(page, /score_completed',\s*\{\s*score_bucket:/);
+  assert.match(page, /if \(shownNumericScore\(data\)\) \{[\s\S]*?trackEvent\('score_completed', \{ score_bucket: scoreBucket\(data\.score\) \}\);\s*\}/);
   assert.match(page, /upsell_click/);
   assert.match(page, /data-plan="report_150"/);
   assert.match(page, /data-plan="tracking_65"/);
@@ -92,7 +92,12 @@ test('the page no longer ships the fake checker', () => {
   assert.equal(/first-mover/i.test(page), false);
   assert.equal(page.includes('Millions of people'), false);
   assert.equal(/capturing demand/i.test(page), false);
-  assert.match(page, /about 10 seconds/i);
+  assert.equal(/about 10 seconds|10 seconds/i.test(page), false);
+  assert.match(page, /Usually under a minute/);
+  assert.match(page, /usually comes back in under a minute/);
+  assert.match(page, /class="tool-scope"/);
+  assert.match(page, /business owners checking whether ChatGPT, Claude, and Perplexity recommend their business/);
+  assert.match(page, /not a checker for AI-written text/);
   assert.match(page, /id="tool"/);
   assert.match(page, /id="how"/);
   assert.match(page, /Which state\?/);
@@ -148,4 +153,73 @@ test('deploy notes name the provider env vars and the formula', () => {
   assert.match(reportPage, /3-month minimum/);
   assert.match(reportPage, /6oU5kEclZgeT1Kng0fd7q0w/);
   assert.equal(/credited toward/i.test(reportPage), false);
+});
+
+function extractFunction(source, name) {
+  const marker = `function ${name}(`;
+  const start = source.indexOf(marker);
+  assert.notEqual(start, -1, name);
+  const brace = source.indexOf('{', start);
+  let depth = 0;
+  for (let i = brace; i < source.length; i++) {
+    if (source[i] === '{') depth += 1;
+    else if (source[i] === '}') {
+      depth -= 1;
+      if (depth === 0) return new Function(`return (${source.slice(start, i + 1)})`)();
+    }
+  }
+  throw new Error(`unclosed function ${name}`);
+}
+
+test('score_completed fires only when a real numeric score is shown', () => {
+  const shownNumericScore = extractFunction(page, 'shownNumericScore');
+  const scoreBucket = extractFunction(page, 'scoreBucket');
+  const failures = ['all_failed', 'no_providers', 'rate_limited', 'validation', 'error', 'unavailable'];
+  for (const reason of failures) {
+    assert.equal(shownNumericScore({ score: null, unavailable: true, reason }), false, reason);
+    assert.equal(shownNumericScore({ score: 42, unavailable: true, reason }), false, reason);
+    assert.equal(shownNumericScore({ score: 42, reason }), false, reason);
+  }
+  assert.equal(shownNumericScore(null), false);
+  assert.equal(shownNumericScore(undefined), false);
+  assert.equal(shownNumericScore({ unavailable: true, score: null, message: 'Score temporarily unavailable' }), false);
+  assert.equal(shownNumericScore({ score: null }), false);
+  assert.equal(shownNumericScore({ score: '25' }), false);
+  assert.equal(shownNumericScore({ score: NaN }), false);
+  assert.equal(shownNumericScore({ score: Infinity }), false);
+  for (const score of [0, 8, 17, 25, 39, 40, 69, 70, 100]) {
+    assert.equal(shownNumericScore({ ok: true, unavailable: false, score }), true, String(score));
+  }
+  assert.equal(scoreBucket(0), 'low');
+  assert.equal(scoreBucket(39), 'low');
+  assert.equal(scoreBucket(40), 'moderate');
+  assert.equal(scoreBucket(69), 'moderate');
+  assert.equal(scoreBucket(70), 'strong');
+  assert.equal(scoreBucket(100), 'strong');
+  assert.equal(page.split("trackEvent('score_completed'").length, 2);
+  assert.equal(/HubSpot|Rippling|\bAave\b|hubspot\.com/.test(page), false);
+  assert.match(page, /Bright Smile Dental/);
+  assert.match(page, /a dentist, a med spa, a law firm, a plumber, or a restaurant/);
+  assert.match(page, /permanent makeup/);
+  assert.match(page, /id="scoreEmail"/);
+  assert.match(page, /\/api\/score-email/);
+  assert.match(page, /Email me this score/);
+  assert.match(page, /We emailed this score to you\./);
+  assert.match(page, /We could not email this score\. It is on this page\./);
+  assert.equal(page.includes('id="userEmail"'), false);
+  assert.equal(page.includes('Please select a category'), false);
+  assert.equal(page.includes('Your email was still submitted'), false);
+  const runStart = page.indexOf('async function runCheck');
+  const sendStart = page.indexOf('async function sendScoreEmail');
+  assert.ok(runStart !== -1 && sendStart > runStart);
+  const runBody = page.slice(runStart, sendStart);
+  assert.match(runBody, /trackEvent\('score_started'\)/);
+  assert.equal(runBody.includes("trackEvent('generate_lead')"), false);
+  assert.match(page.slice(sendStart), /trackEvent\('generate_lead'\)/);
+  assert.equal(page.split("trackEvent('generate_lead')").length, 2);
+  assert.match(readme, /only when a real numeric score is shown/);
+  assert.match(readme, /does not fire `score_completed`/);
+  const formAt = page.indexOf('id="checkForm"');
+  const scopeAt = page.indexOf('class="tool-scope"');
+  assert.ok(scopeAt !== -1 && formAt !== -1 && scopeAt < formAt);
 });

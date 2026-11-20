@@ -2,7 +2,7 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createHandler } = require('../lib/handler');
+const { createHandler, createScoreEmailHandler } = require('../lib/handler');
 const { createMemoryCache, createMemoryLimiter, cacheKey } = require('../lib/store');
 const { parseOpenAI, parsePerplexity, parseGemini, parseAnthropic, readConfig, runProviders } = require('../lib/providers');
 const { buildPrompts } = require('../lib/score');
@@ -1089,4 +1089,70 @@ test('an emailed free score is stored as a lead and a failed insert still return
   assert.equal(rejected.email, 'buyer@example.com');
   assert.equal(rejected.score, null);
   assert.equal(rejected.email_sent, false);
+});
+
+test('the optional score email sends the score already on the page and does not call providers', async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(String(url));
+    if (String(url).includes('supabase.co')) return jsonResponse(201, []);
+    if (String(url).includes('api.resend.com')) return jsonResponse(200, { id: 'email_after_score' });
+    throw new Error(`unexpected ${url}`);
+  };
+  const env = {
+    RESEND_API_KEY: 're_test',
+    REPORT_FROM_EMAIL: 'AI Mentions <reports@ai-mentions.com>',
+    SUPABASE_URL: 'https://aaa.supabase.co',
+    SUPABASE_SERVICE_ROLE_KEY: 'sb_secret_test',
+  };
+  const handler = createScoreEmailHandler({
+    env,
+    fetch: fetchImpl,
+    limiter: createMemoryLimiter(),
+  });
+  const score = {
+    email: 'owner@brightsmile.example',
+    businessName: 'Bright Smile Dental',
+    domain: 'brightsmiledental.com',
+    category: 'permanent makeup',
+    city: 'Austin',
+    score: 17,
+    timestamp: '2026-11-18T22:00:00.000Z',
+    utm_source: 'google',
+    utm_campaign: 'local',
+    gclid: 'CjwKtestGclid123',
+    providers: [{
+      id: 'openai',
+      label: 'ChatGPT',
+      answered: true,
+      known: true,
+      mentioned: false,
+      recommends: ['Other Studio'],
+    }],
+  };
+  const res = await invoke(handler, { body: score });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.emailSent, true);
+  assert.equal(res.body.emailId, 'email_after_score');
+  assert.equal(calls.some((url) => url.includes('api.openai.com')), false);
+  assert.equal(calls.some((url) => url.includes('api.anthropic.com')), false);
+  assert.equal(calls.some((url) => url.includes('api.perplexity.ai')), false);
+  const insert = calls.find((url) => url.includes('/rest/v1/free_scores'));
+  assert.ok(insert);
+  const emailCall = calls.find((url) => url.includes('api.resend.com'));
+  assert.ok(emailCall);
+
+  const missing = createScoreEmailHandler({
+    env: {},
+    fetch: fetchImpl,
+    limiter: createMemoryLimiter(),
+  });
+  const failed = await invoke(missing, { body: score });
+  assert.equal(failed.statusCode, 200);
+  assert.equal(failed.body.emailSent, false);
+  assert.equal(failed.body.emailReason, 'not_configured');
+
+  const bad = await invoke(handler, { body: { email: 'not-an-email', score: 10, businessName: 'Bright Smile Dental', category: 'Dentists' } });
+  assert.equal(bad.statusCode, 400);
+  assert.equal(bad.body.emailReason, 'invalid_email');
 });
